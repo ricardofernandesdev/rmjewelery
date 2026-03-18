@@ -29,6 +29,7 @@ export default defineConfig({
     testTimeout: 30_000,
     hookTimeout: 30_000,
     fileParallelism: false,
+    setupFiles: ['./tests/setup.ts'],
     env: {
       ...loadDotEnv(),
       // Override DATABASE_URI for test environment if TEST_DATABASE_URI is set
