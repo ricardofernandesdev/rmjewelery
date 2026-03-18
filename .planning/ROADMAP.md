@@ -48,12 +48,12 @@ Plans:
   3. Visitor can open a product detail page showing name, description, and multiple photo angles
   4. Visitor can tap "Estou interessado" button on any product and be redirected to Instagram DMs (working on iOS, Android, desktop)
   5. Site is fully responsive with clean navigation containing max 5-6 top-level items
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Install Tailwind CSS 4, create (frontend) layout with responsive header/footer/nav, and query helpers
+- [ ] 02-02-PLAN.md — Build catalog grid, category pages, product detail with gallery, Instagram CTA, and revalidation
+- [ ] 02-03-PLAN.md — Automated tests for all requirements and human visual verification
 
 ### Phase 3: Collections & Homepage
 **Goal**: Homepage showcases the brand identity with banners, featured products, and thematic collections
