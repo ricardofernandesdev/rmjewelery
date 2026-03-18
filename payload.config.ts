@@ -25,4 +25,8 @@ export default buildConfig({
   typescript: {
     outputFile: 'payload-types.ts',
   },
+  onInit: async (payload) => {
+    const { seed } = await import('./src/seed')
+    await seed(payload)
+  },
 })
