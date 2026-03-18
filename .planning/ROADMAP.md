@@ -12,7 +12,7 @@ Transform RM Jewelry's Instagram-first brand into a polished digital portfolio. 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Data Model** - Payload CMS setup with product/category schemas, admin auth, image pipeline, and API
+- [x] **Phase 1: Foundation & Data Model** - Payload CMS setup with product/category schemas, admin auth, image pipeline, and API
 - [ ] **Phase 2: Product Catalog** - Public product browsing by category with detail pages, Instagram CTA, and mobile-first layout
 - [ ] **Phase 3: Collections & Homepage** - Thematic collections, hero banners, featured products, and homepage composition
 - [ ] **Phase 4: Dynamic Pages & Navigation** - Admin-created rich text pages with configurable menu placement
@@ -34,9 +34,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold Payload CMS project with Media collection and image processing pipeline
-- [ ] 01-02-PLAN.md — Create Categories and Products collections with access control and admin seed
-- [ ] 01-03-PLAN.md — Integration test suite and human verification of admin workflow
+- [x] 01-01-PLAN.md — Scaffold Payload CMS project with Media collection and image processing pipeline
+- [x] 01-02-PLAN.md — Create Categories and Products collections with access control and admin seed
+- [x] 01-03-PLAN.md — Integration test suite and human verification of admin workflow
 
 ### Phase 2: Product Catalog
 **Goal**: Visitors can browse the full jewelry collection on any device and express interest via Instagram
@@ -126,7 +126,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Model | 0/3 | Planning complete | - |
+| 1. Foundation & Data Model | 3/3 | Complete | 2026-03-18 |
 | 2. Product Catalog | 0/3 | Not started | - |
 | 3. Collections & Homepage | 0/3 | Not started | - |
 | 4. Dynamic Pages & Navigation | 0/2 | Not started | - |
