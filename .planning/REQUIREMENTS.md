@@ -71,8 +71,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INF-01**: Images are automatically processed on upload (resize, WebP, multiple sizes, blur placeholder)
-- [ ] **INF-02**: Admin panel is protected by authentication (single admin user)
+- [x] **INF-01**: Images are automatically processed on upload (resize, WebP, multiple sizes, blur placeholder)
+- [x] **INF-02**: Admin panel is protected by authentication (single admin user)
 - [ ] **INF-03**: API serves all data for public frontend consumption
 
 ## v2 Requirements
@@ -145,8 +145,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADM-12 | Phase 6 | Pending |
 | ADM-13 | Phase 6 | Pending |
 | ADM-14 | Phase 6 | Pending |
-| INF-01 | Phase 1 | Pending |
-| INF-02 | Phase 1 | Pending |
+| INF-01 | Phase 1 | Complete |
+| INF-02 | Phase 1 | Complete |
 | INF-03 | Phase 1 | Pending |
 
 **Coverage:**
