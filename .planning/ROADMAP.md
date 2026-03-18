@@ -31,12 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Admin can reorder photos on a product and see the new order reflected
   4. Admin can create, edit, and delete categories
   5. Uploaded images are automatically resized to multiple sizes with WebP conversion and blur placeholders generated
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Scaffold Payload CMS project with Media collection and image processing pipeline
+- [ ] 01-02-PLAN.md — Create Categories and Products collections with access control and admin seed
+- [ ] 01-03-PLAN.md — Integration test suite and human verification of admin workflow
 
 ### Phase 2: Product Catalog
 **Goal**: Visitors can browse the full jewelry collection on any device and express interest via Instagram
@@ -126,7 +126,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Model | 0/3 | Not started | - |
+| 1. Foundation & Data Model | 0/3 | Planning complete | - |
 | 2. Product Catalog | 0/3 | Not started | - |
 | 3. Collections & Homepage | 0/3 | Not started | - |
 | 4. Dynamic Pages & Navigation | 0/2 | Not started | - |
