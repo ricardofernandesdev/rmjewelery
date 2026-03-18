@@ -79,7 +79,7 @@ describe('Products collection (ADM-01, ADM-02, ADM-05)', () => {
       collection: 'products',
       data: {
         name: `Gold Ring ${uid}`,
-        description: { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: 'A beautiful gold ring' }] }] } },
+        description: { root: { type: 'root', version: 1, direction: null, format: '' as const, indent: 0, children: [{ type: 'paragraph', version: 1, children: [{ type: 'text', version: 1, text: 'A beautiful gold ring' }] }] } },
         images: [testMediaId1],
         category: testCategoryId,
       },

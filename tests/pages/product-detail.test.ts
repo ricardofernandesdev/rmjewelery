@@ -42,7 +42,7 @@ describe('Product detail page queries (CAT-02)', () => {
       collection: 'products',
       data: {
         name: `Detail Product ${uid}`,
-        description: 'A beautiful test piece',
+        description: { root: { type: 'root', version: 1, direction: null, format: '' as const, indent: 0, children: [{ type: 'paragraph', version: 1, children: [{ type: 'text', version: 1, text: 'A beautiful test piece' }] }] } },
         images: [media.id],
         category: category.id,
       },
