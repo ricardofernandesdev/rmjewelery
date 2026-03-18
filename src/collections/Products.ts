@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { revalidatePath } from 'next/cache'
 import { formatSlug } from '@/lib/slugFormat'
 import { isAdmin } from '@/lib/access'
 
@@ -25,7 +26,12 @@ export const Products: CollectionConfig = {
     ],
     afterChange: [
       ({ doc }) => {
-        // TODO Phase 2: revalidatePath('/products/' + doc.slug)
+        revalidatePath(`/products/${doc.slug}`)
+        revalidatePath('/products')
+        revalidatePath('/')
+        if (typeof doc.category === 'object' && doc.category?.slug) {
+          revalidatePath(`/categories/${doc.category.slug}`)
+        }
         return doc
       },
     ],
