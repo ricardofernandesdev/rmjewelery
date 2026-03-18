@@ -110,13 +110,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | Pending |
+| CAT-01 | Phase 2 | Pending |
+| CAT-02 | Phase 2 | Pending |
+| CAT-03 | Phase 2 | Pending |
+| CAT-04 | Phase 3 | Pending |
+| CAT-05 | Phase 6 | Pending |
+| CAT-06 | Phase 6 | Pending |
+| CAT-07 | Phase 5 | Pending |
+| CONT-01 | Phase 2 | Pending |
+| CONT-02 | Phase 2 | Pending |
+| HOME-01 | Phase 3 | Pending |
+| HOME-02 | Phase 3 | Pending |
+| HOME-03 | Phase 2 | Pending |
+| HOME-04 | Phase 2 | Pending |
+| HOME-05 | Phase 6 | Pending |
+| HOME-06 | Phase 6 | Pending |
+| PAGE-01 | Phase 4 | Pending |
+| PAGE-02 | Phase 4 | Pending |
+| PAGE-03 | Phase 4 | Pending |
+| SEO-01 | Phase 5 | Pending |
+| SEO-02 | Phase 5 | Pending |
+| SEO-03 | Phase 5 | Pending |
+| ADM-01 | Phase 1 | Pending |
+| ADM-02 | Phase 1 | Pending |
+| ADM-03 | Phase 3 | Pending |
+| ADM-04 | Phase 3 | Pending |
+| ADM-05 | Phase 1 | Pending |
+| ADM-06 | Phase 1 | Pending |
+| ADM-07 | Phase 3 | Pending |
+| ADM-08 | Phase 3 | Pending |
+| ADM-09 | Phase 4 | Pending |
+| ADM-10 | Phase 4 | Pending |
+| ADM-11 | Phase 4 | Pending |
+| ADM-12 | Phase 6 | Pending |
+| ADM-13 | Phase 6 | Pending |
+| ADM-14 | Phase 6 | Pending |
+| INF-01 | Phase 1 | Pending |
+| INF-02 | Phase 1 | Pending |
+| INF-03 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31 ⚠️
+- v1 requirements: 38 total
+- Mapped to phases: 38
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-18*
-*Last updated: 2026-03-18 after initial definition*
+*Last updated: 2026-03-18 after roadmap creation*
