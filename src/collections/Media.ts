@@ -24,6 +24,7 @@ const generateBlurDataURL: CollectionAfterChangeHook = async ({ doc, req }) => {
       collection: 'media',
       id: doc.id,
       data: { blurDataURL },
+      req,
     })
   } catch (error) {
     console.error('Failed to generate blur placeholder:', error)
