@@ -45,15 +45,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin — Products
 
-- [ ] **ADM-01**: Admin can create, edit, and delete products with name, description, and category
-- [ ] **ADM-02**: Admin can upload multiple photos per product with drag-and-drop
+- [x] **ADM-01**: Admin can create, edit, and delete products with name, description, and category
+- [x] **ADM-02**: Admin can upload multiple photos per product with drag-and-drop
 - [ ] **ADM-03**: Admin can assign products to one or more collections
 - [ ] **ADM-04**: Admin can mark products as featured for homepage display
-- [ ] **ADM-05**: Admin can reorder product photos
+- [x] **ADM-05**: Admin can reorder product photos
 
 ### Admin — Organization
 
-- [ ] **ADM-06**: Admin can create, edit, and delete categories
+- [x] **ADM-06**: Admin can create, edit, and delete categories
 - [ ] **ADM-07**: Admin can create, edit, and delete thematic collections
 - [ ] **ADM-08**: Admin can create, edit, and delete homepage banners with images and links
 
@@ -73,7 +73,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **INF-01**: Images are automatically processed on upload (resize, WebP, multiple sizes, blur placeholder)
 - [x] **INF-02**: Admin panel is protected by authentication (single admin user)
-- [ ] **INF-03**: API serves all data for public frontend consumption
+- [x] **INF-03**: API serves all data for public frontend consumption
 
 ## v2 Requirements
 
@@ -131,12 +131,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-01 | Phase 5 | Pending |
 | SEO-02 | Phase 5 | Pending |
 | SEO-03 | Phase 5 | Pending |
-| ADM-01 | Phase 1 | Pending |
-| ADM-02 | Phase 1 | Pending |
+| ADM-01 | Phase 1 | Complete |
+| ADM-02 | Phase 1 | Complete |
 | ADM-03 | Phase 3 | Pending |
 | ADM-04 | Phase 3 | Pending |
-| ADM-05 | Phase 1 | Pending |
-| ADM-06 | Phase 1 | Pending |
+| ADM-05 | Phase 1 | Complete |
+| ADM-06 | Phase 1 | Complete |
 | ADM-07 | Phase 3 | Pending |
 | ADM-08 | Phase 3 | Pending |
 | ADM-09 | Phase 4 | Pending |
@@ -147,7 +147,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADM-14 | Phase 6 | Pending |
 | INF-01 | Phase 1 | Complete |
 | INF-02 | Phase 1 | Complete |
-| INF-03 | Phase 1 | Pending |
+| INF-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 38 total
