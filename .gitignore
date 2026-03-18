@@ -31,5 +31,8 @@ yarn-error.log*
 # Payload CMS
 media/
 
+# Payload generated
+payload-types.ts
+
 # Misc
 *.tsbuildinfo
