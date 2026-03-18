@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-18T12:12:31.479Z"
-last_activity: 2026-03-18 — Completed 02-01 (Frontend Shell & Tailwind)
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-18T12:25:06Z"
+last_activity: 2026-03-18 — Completed 02-02 (Catalog Grid & Product Detail Pages)
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
-  percent: 33
+  completed_plans: 5
+  percent: 42
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Visitors browse the jewelry collection visually, feel the brand identity, and contact via Instagram.
-**Current focus:** Phase 2 - Product Catalog (Plan 02 next)
+**Current focus:** Phase 2 - Product Catalog (Plan 03 next)
 
 ## Current Position
 
 Phase: 2 of 6 (Product Catalog)
-Plan: 1 of 3 — COMPLETE
-Next: Plan 02 (Catalog Grid & Product Detail Pages)
+Plan: 2 of 3 — COMPLETE
+Next: Plan 03 (Integration Tests)
 Status: Executing Phase 2
-Last activity: 2026-03-18 — Completed 02-01 (Frontend Shell & Tailwind)
+Last activity: 2026-03-18 — Completed 02-02 (Catalog Grid & Product Detail Pages)
 
-Progress: [███-------] 33% (Phase 2)
+Progress: [████------] 42% (Phase 2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 9.25min
-- Total execution time: 37 min
+- Total plans completed: 5
+- Average duration: 9.6min
+- Total execution time: 48 min
 
 **By Phase:**
 
@@ -48,9 +48,10 @@ Progress: [███-------] 33% (Phase 2)
 | Phase 01 P02 | 2min | 2 tasks | 5 files |
 | Phase 01 P03 | 12min | 2 tasks | 10 files |
 | Phase 02 P01 | 16min | 2 tasks | 11 files |
+| Phase 02 P02 | 11min | 2 tasks | 9 files |
 
 **Recent Trend:**
-- Last 5 plans: 7min, 2min, 12min, 16min
+- Last 5 plans: 7min, 2min, 12min, 16min, 11min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - MobileNav is sole client component in layout — all others are Server Components
 - Header uses position: sticky (not fixed) for Instagram in-app browser compatibility
 - Category nav capped at 4 items from DB (6 total with Inicio + Catalogo)
+- ProductGallery is the only new client component -- all catalog pages are Server Components
+- Category filter pills use Link components (not client state) for full SSR and browser navigation
+- revalidatePath covers product detail, catalog, home, and category pages on product/category changes
 
 ### Pending Todos
 
@@ -88,7 +92,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T12:12:31.476Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-18T12:25:06Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
-Next action: /gsd:execute-phase 02-product-catalog (Plan 02)
+Next action: /gsd:execute-phase 02-product-catalog (Plan 03)

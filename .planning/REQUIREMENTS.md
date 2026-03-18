@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Catalog
 
-- [ ] **CAT-01**: User can browse products in a photo-forward grid layout
-- [ ] **CAT-02**: User can view product detail page with name, description, and multiple photo angles
-- [ ] **CAT-03**: User can browse products by category (Anéis, Colares, Pulseiras, Brincos, etc.)
+- [x] **CAT-01**: User can browse products in a photo-forward grid layout
+- [x] **CAT-02**: User can view product detail page with name, description, and multiple photo angles
+- [x] **CAT-03**: User can browse products by category (Anéis, Colares, Pulseiras, Brincos, etc.)
 - [ ] **CAT-04**: User can browse products by thematic collection (e.g., "Verão 2026")
 - [ ] **CAT-05**: User can zoom into product images (pinch-to-zoom on mobile, hover-zoom on desktop)
 - [ ] **CAT-06**: User can see a "Novidades" section with recently added products
@@ -19,8 +19,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Contact
 
-- [ ] **CONT-01**: User can tap "Estou interessado" button with Instagram icon on any product to open Instagram DMs
-- [ ] **CONT-02**: Instagram DM redirect works on iOS, Android, and desktop browsers
+- [x] **CONT-01**: User can tap "Estou interessado" button with Instagram icon on any product to open Instagram DMs
+- [x] **CONT-02**: Instagram DM redirect works on iOS, Android, and desktop browsers
 
 ### Homepage & Branding
 
@@ -110,15 +110,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAT-01 | Phase 2 | Pending |
-| CAT-02 | Phase 2 | Pending |
-| CAT-03 | Phase 2 | Pending |
+| CAT-01 | Phase 2 | Complete |
+| CAT-02 | Phase 2 | Complete |
+| CAT-03 | Phase 2 | Complete |
 | CAT-04 | Phase 3 | Pending |
 | CAT-05 | Phase 6 | Pending |
 | CAT-06 | Phase 6 | Pending |
 | CAT-07 | Phase 5 | Pending |
-| CONT-01 | Phase 2 | Pending |
-| CONT-02 | Phase 2 | Pending |
+| CONT-01 | Phase 2 | Complete |
+| CONT-02 | Phase 2 | Complete |
 | HOME-01 | Phase 3 | Pending |
 | HOME-02 | Phase 3 | Pending |
 | HOME-03 | Phase 2 | Complete |
