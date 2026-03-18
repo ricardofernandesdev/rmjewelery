@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase-complete
-stopped_at: Completed Phase 1
-last_updated: "2026-03-18T12:00:00Z"
-last_activity: 2026-03-18 — Completed Phase 1 (Foundation & Data Model)
+status: executing
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-18T12:12:31.479Z"
+last_activity: 2026-03-18 — Completed 02-01 (Frontend Shell & Tailwind)
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_plans: 6
+  completed_plans: 4
+  percent: 33
 ---
 
 # Project State
@@ -21,23 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-18)
 
 **Core value:** Visitors browse the jewelry collection visually, feel the brand identity, and contact via Instagram.
-**Current focus:** Phase 2 - Product Catalog (next)
+**Current focus:** Phase 2 - Product Catalog (Plan 02 next)
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation & Data Model) — COMPLETE
-Next: Phase 2 (Product Catalog)
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-03-18 — Completed Phase 1
+Phase: 2 of 6 (Product Catalog)
+Plan: 1 of 3 — COMPLETE
+Next: Plan 02 (Catalog Grid & Product Detail Pages)
+Status: Executing Phase 2
+Last activity: 2026-03-18 — Completed 02-01 (Frontend Shell & Tailwind)
 
-Progress: [██████████] 100% (Phase 1)
+Progress: [███-------] 33% (Phase 2)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 4.5min
-- Total execution time: 9 min
+- Total plans completed: 4
+- Average duration: 9.25min
+- Total execution time: 37 min
 
 **By Phase:**
 
@@ -46,10 +47,11 @@ Progress: [██████████] 100% (Phase 1)
 | Phase 01 P01 | 7min | 2 tasks | 18 files |
 | Phase 01 P02 | 2min | 2 tasks | 5 files |
 | Phase 01 P03 | 12min | 2 tasks | 10 files |
+| Phase 02 P01 | 16min | 2 tasks | 11 files |
 
 **Recent Trend:**
-- Last 5 plans: 7min, 2min
-- Trend: improving
+- Last 5 plans: 7min, 2min, 12min, 16min
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -69,6 +71,10 @@ Recent decisions affecting current work:
 - Seed: Dynamic import in onInit, checks for existing users before creating
 - CSS fix: Payload admin requires explicit `import '@payloadcms/ui/scss/app.scss'` in (payload)/layout.tsx
 - Root layout: Must keep html/body wrapper (Next.js requirement), hydration warning with Payload is cosmetic
+- Tailwind CSS isolation: globals.css imported only in (frontend)/layout.tsx, not root layout
+- MobileNav is sole client component in layout — all others are Server Components
+- Header uses position: sticky (not fixed) for Instagram in-app browser compatibility
+- Category nav capped at 4 items from DB (6 total with Inicio + Catalogo)
 
 ### Pending Todos
 
@@ -82,7 +88,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T12:00:00Z
-Stopped at: Completed Phase 1 — all 3 plans done, human-verified
+Last session: 2026-03-18T12:12:31.476Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
-Next action: /gsd:plan-phase 2
+Next action: /gsd:execute-phase 02-product-catalog (Plan 02)

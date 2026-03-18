@@ -26,8 +26,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **HOME-01**: User sees hero banners on homepage showcasing brand/collections
 - [ ] **HOME-02**: User sees featured/highlighted products on homepage
-- [ ] **HOME-03**: User experiences clean, minimal navigation with max 5-6 top-level items
-- [ ] **HOME-04**: Site is fully responsive and mobile-first (optimized for Instagram traffic)
+- [x] **HOME-03**: User experiences clean, minimal navigation with max 5-6 top-level items
+- [x] **HOME-04**: Site is fully responsive and mobile-first (optimized for Instagram traffic)
 - [ ] **HOME-05**: Images load with blur-up placeholder effect (not blank spaces)
 - [ ] **HOME-06**: Pages have smooth transitions and subtle micro-animations
 
@@ -121,8 +121,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONT-02 | Phase 2 | Pending |
 | HOME-01 | Phase 3 | Pending |
 | HOME-02 | Phase 3 | Pending |
-| HOME-03 | Phase 2 | Pending |
-| HOME-04 | Phase 2 | Pending |
+| HOME-03 | Phase 2 | Complete |
+| HOME-04 | Phase 2 | Complete |
 | HOME-05 | Phase 6 | Pending |
 | HOME-06 | Phase 6 | Pending |
 | PAGE-01 | Phase 4 | Pending |
