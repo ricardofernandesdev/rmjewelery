@@ -44,7 +44,7 @@ created: 2026-03-18
 | 01-01-04 | 01 | 1 | ADM-06 | integration | `npx vitest run tests/collections/categories.test.ts` | ❌ W0 | ⬜ pending |
 | 01-02-01 | 02 | 1 | INF-01 | integration | `npx vitest run tests/collections/media.test.ts -t "image sizes"` | ❌ W0 | ⬜ pending |
 | 01-02-02 | 02 | 1 | INF-02 | integration | `npx vitest run tests/access-control.test.ts` | ❌ W0 | ⬜ pending |
-| 01-02-03 | 02 | 1 | INF-03 | integration | `npx vitest run tests/api.test.ts -t "public read"` | ❌ W0 | ⬜ pending |
+| 01-02-03 | 03 | 3 | INF-03 | integration | `npx vitest run tests/api.test.ts -t "public read"` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
