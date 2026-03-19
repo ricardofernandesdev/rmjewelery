@@ -5,9 +5,20 @@ import { isAdmin } from '@/lib/access'
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  labels: {
+    singular: 'Produto',
+    plural: 'Produtos',
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'category', 'createdAt'],
+    components: {
+      views: {
+        list: {
+          Component: './src/components/admin/CollectionList#ProductsList',
+        },
+      },
+    },
   },
   access: {
     read: () => true,

@@ -35,6 +35,25 @@ const generateBlurDataURL: CollectionAfterChangeHook = async ({ doc, req }) => {
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  labels: {
+    singular: 'Media',
+    plural: 'Media',
+  },
+  admin: {
+    useAsTitle: 'alt',
+    components: {
+      views: {
+        list: {
+          Component: './src/components/admin/MediaList#MediaList',
+        },
+        edit: {
+          default: {
+            Component: './src/components/admin/MediaCreate#MediaCreate',
+          },
+        },
+      },
+    },
+  },
   access: {
     read: () => true,
     create: isAdmin,

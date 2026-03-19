@@ -5,8 +5,19 @@ import { isAdmin } from '@/lib/access'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
+  labels: {
+    singular: 'Categoria',
+    plural: 'Categorias',
+  },
   admin: {
     useAsTitle: 'name',
+    components: {
+      views: {
+        list: {
+          Component: './src/components/admin/CollectionList#CategoriesList',
+        },
+      },
+    },
   },
   access: {
     read: () => true,

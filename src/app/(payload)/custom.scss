@@ -1,1 +1,199 @@
-/* Add any custom Payload admin styles here */
+/* ── Header / Navbar ── */
+.app-header {
+  border-bottom: 1px solid var(--theme-elevation-100);
+}
+
+.app-header__content {
+  padding: 0 40px !important;
+}
+
+/* Hide step-nav breadcrumbs from the header (except the brand icon) */
+.step-nav__home {
+  width: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.step-nav span {
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+}
+
+/* Hide all breadcrumb items after the brand */
+.step-nav > .step-nav__home ~ * {
+  display: none !important;
+}
+
+/* Also hide any links/spans inside step-nav that aren't the home */
+.step-nav > *:not(.step-nav__home) {
+  display: none !important;
+}
+
+/* ── Sidebar Customization ── */
+
+/* Hide the "Collections" group header and its arrow */
+.nav-group__toggle {
+  display: none !important;
+}
+
+/* Nav links — uppercase, bold, spaced */
+.nav__link {
+  font-size: 13px !important;
+  line-height: 20px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+  padding-block: 12px !important;
+  position: relative;
+  border-right: 3px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* Active nav item — always visible */
+.nav__link--active {
+  background: var(--theme-elevation-50) !important;
+  border-right-color: var(--theme-text) !important;
+}
+
+.nav__link:hover {
+  background: var(--theme-elevation-50) !important;
+}
+
+/* Nav link labels — add space for icon */
+.nav__link-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Icons via CSS mask (supports theme colors) */
+.nav__link-label::before {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  background-color: var(--theme-text);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+/* Media — filled image/landscape icon */
+#nav-media .nav__link-label::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 3H3C1.9 3 1 3.9 1 5v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 15.5c0 .28-.22.5-.5.5h-17c-.28 0-.5-.22-.5-.5V5.5c0-.28.22-.5.5-.5h17c.28 0 .5.22.5.5v13zM5 17l3.5-4.5 2.5 3.01L14.5 11l4.5 6H5z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 3H3C1.9 3 1 3.9 1 5v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 15.5c0 .28-.22.5-.5.5h-17c-.28 0-.5-.22-.5-.5V5.5c0-.28.22-.5.5-.5h17c.28 0 .5.22.5.5v13zM5 17l3.5-4.5 2.5 3.01L14.5 11l4.5 6H5z'/%3E%3C/svg%3E");
+}
+
+/* Categories — filled mountain/triangle with dot icon */
+#nav-categories .nav__link-label::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 19h20L12 2z'/%3E%3Ccircle cx='12' cy='9' r='1.5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 19h20L12 2z'/%3E%3Ccircle cx='12' cy='9' r='1.5'/%3E%3C/svg%3E");
+}
+
+/* Products — filled briefcase/box icon */
+#nav-products .nav__link-label::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z'/%3E%3C/svg%3E");
+}
+
+/* Users — filled two-people icon */
+#nav-users .nav__link-label::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E");
+}
+
+/* Hide default Payload doc header only on Media custom views */
+.media-create ~ .doc-header,
+.media-list ~ .doc-header,
+.media-create + .doc-header,
+.media-list + .doc-header {
+  display: none !important;
+}
+
+/* When MediaCreate is rendered, hide sibling doc-header */
+:has(> .media-create) > .doc-header,
+:has(> .media-list) > .doc-header {
+  display: none !important;
+}
+
+/* ── Upload / Create page styling ── */
+
+/* Dropzone — taller, centered, with dashed border */
+.file-field .dropzone {
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center;
+  padding: 60px 40px !important;
+  border: 2px dashed var(--theme-elevation-200) !important;
+  border-radius: 8px !important;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.file-field__dropzoneContent {
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.file-field__dragAndDropText {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  color: var(--theme-text) !important;
+}
+
+.file-field__dropzoneButtons {
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.file-field__dropzoneButtons .btn {
+  border: 1px solid var(--theme-text) !important;
+  border-radius: 4px !important;
+  padding: 10px 28px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+}
+
+/* Document edit view — fields styling */
+.collection-edit,
+.document-fields {
+  max-width: 100% !important;
+}
+
+/* Field labels — uppercase style */
+.field-type .field-label,
+.field-type label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase;
+  color: var(--theme-elevation-500) !important;
+}
+
+/* Text inputs — clean border style */
+.field-type input[type='text'],
+.field-type input[type='email'],
+.field-type input[type='password'],
+.field-type input[type='number'],
+.field-type textarea {
+  border: 1px solid var(--theme-elevation-150) !important;
+  border-radius: 4px !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+}
+
+.field-type textarea {
+  min-height: 100px;
+}
