@@ -1,36 +1,25 @@
-import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
-import path from 'path'
+import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload'
 import sharp from 'sharp'
 
 const isAdmin = ({ req }: { req: any }) => Boolean(req.user)
 
-const generateBlurDataURL: CollectionAfterChangeHook = async ({ doc, req }) => {
-  // Skip if not an image
-  if (!doc.filename || !doc.mimeType?.startsWith('image/')) return doc
-
-  // Guard against infinite recursion: skip if blurDataURL is already populated
-  if (doc.blurDataURL) return doc
+const generateBlurDataURL: CollectionBeforeChangeHook = async ({ data, req }) => {
+  // Only run on create when a file is being uploaded
+  if (!req.file || !req.file.mimetype?.startsWith('image/')) return data
 
   try {
-    const filePath = path.resolve(process.cwd(), 'media', doc.filename)
-    const buffer = await sharp(filePath)
+    // Use the in-memory buffer from the upload — works on both local and S3
+    const buffer = await sharp(req.file.data)
       .resize(20, 20, { fit: 'inside' })
       .toFormat('webp', { quality: 20 })
       .toBuffer()
 
-    const blurDataURL = `data:image/webp;base64,${buffer.toString('base64')}`
-
-    await req.payload.update({
-      collection: 'media',
-      id: doc.id,
-      data: { blurDataURL },
-      req,
-    })
+    data.blurDataURL = `data:image/webp;base64,${buffer.toString('base64')}`
   } catch (error) {
     console.error('Failed to generate blur placeholder:', error)
   }
 
-  return doc
+  return data
 }
 
 export const Media: CollectionConfig = {
@@ -92,7 +81,7 @@ export const Media: CollectionConfig = {
     ],
   },
   hooks: {
-    afterChange: [generateBlurDataURL],
+    beforeChange: [generateBlurDataURL],
   },
   fields: [
     {

@@ -1,24 +1,47 @@
 import React from 'react'
 import Link from 'next/link'
-import { Container } from '@/components/ui/Container'
+import Image from 'next/image'
+import { getSiteSettings } from '@/lib/queries'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const settings = await getSiteSettings().catch(() => null)
+  const hero =
+    settings?.heroImage && typeof settings.heroImage === 'object'
+      ? (settings.heroImage as any)
+      : null
+  const heroUrl = hero?.url || null
+  const heroAlt = hero?.alt || 'RM Jewelry'
+  const heroTitle = (settings as any)?.heroTitle || 'Explore os nossos produtos'
+  const heroButtonLabel = (settings as any)?.heroButtonLabel || 'VER CATÁLOGO COMPLETO'
+
   return (
-    <Container className="py-20 sm:py-32">
-      <div className="flex flex-col items-center text-center gap-6">
-        <h1 className="font-heading text-4xl sm:text-5xl font-semibold tracking-tight text-brand-dark">
-          RM Jewelry
+    <section className="relative w-full h-[400px] md:h-[500px] bg-brand-dark overflow-hidden">
+      {heroUrl && (
+        <Image
+          src={heroUrl}
+          alt={heroAlt}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+      )}
+
+      {/* Subtle dark overlay for text legibility */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Centered content */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+        <h1 className="font-heading text-white text-3xl md:text-5xl lg:text-6xl font-light tracking-wide mb-10 drop-shadow-md">
+          {heroTitle}
         </h1>
-        <p className="text-lg text-brand-gray max-w-md">
-          Explore nossa colecao de joias exclusivas, feitas com dedicacao e carinho.
-        </p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 bg-brand-dark text-white px-8 py-3 text-sm tracking-wide hover:bg-brand-gold transition-colors"
+          className="inline-flex items-center justify-center border border-white/80 text-white text-xs md:text-sm tracking-[0.2em] uppercase px-8 md:px-10 py-3 md:py-4 hover:bg-white hover:text-brand-dark transition-colors"
         >
-          Ver Catalogo
+          {heroButtonLabel}
         </Link>
       </div>
-    </Container>
+    </section>
   )
 }

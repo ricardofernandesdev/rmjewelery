@@ -2,11 +2,15 @@ import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { pt } from '@payloadcms/translations/languages/pt'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { Media } from './src/collections/Media'
 import { Categories } from './src/collections/Categories'
 import { Products } from './src/collections/Products'
 import { Users } from './src/collections/Users'
+import { SiteSettings } from './src/globals/SiteSettings'
 import sharp from 'sharp'
+
+const useS3 = Boolean(process.env.S3_BUCKET && process.env.S3_ENDPOINT)
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
@@ -15,6 +19,7 @@ export default buildConfig({
   }),
   editor: lexicalEditor(),
   collections: [Media, Categories, Products, Users],
+  globals: [SiteSettings],
   sharp,
   i18n: {
     supportedLanguages: { pt },
@@ -50,8 +55,31 @@ export default buildConfig({
   typescript: {
     outputFile: 'payload-types.ts',
   },
+  plugins: [
+    ...(useS3
+      ? [
+          s3Storage({
+            collections: {
+              media: { prefix: 'media' },
+            },
+            bucket: process.env.S3_BUCKET!,
+            config: {
+              endpoint: process.env.S3_ENDPOINT!,
+              region: process.env.S3_REGION || 'auto',
+              credentials: {
+                accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+              },
+              forcePathStyle: true,
+            },
+          }),
+        ]
+      : []),
+  ],
   onInit: async (payload) => {
-    const { seed } = await import('./src/seed')
-    await seed(payload)
+    if (process.env.NODE_ENV !== 'production') {
+      const { seed } = await import('./src/seed')
+      await seed(payload)
+    }
   },
 })

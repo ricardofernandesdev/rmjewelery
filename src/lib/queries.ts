@@ -1,5 +1,10 @@
 import { getPayload } from '@/lib/payload'
 
+export async function getSiteSettings() {
+  const payload = await getPayload()
+  return payload.findGlobal({ slug: 'site-settings' })
+}
+
 export async function getAllProducts(limit = 50) {
   const payload = await getPayload()
   return payload.find({
@@ -30,6 +35,22 @@ export async function getProductsByCategory(categorySlug: string, limit = 50) {
     where: { category: { equals: category.id } },
     limit,
     sort: 'sortOrder',
+    depth: 1,
+  })
+}
+
+export async function searchProducts(term: string, limit = 50) {
+  const payload = await getPayload()
+  const trimmed = term.trim()
+  if (!trimmed) {
+    return { docs: [], totalDocs: 0 }
+  }
+  return payload.find({
+    collection: 'products',
+    where: {
+      name: { like: trimmed },
+    },
+    limit,
     depth: 1,
   })
 }

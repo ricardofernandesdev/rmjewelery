@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react'
+import { useListDrawerContext } from '@payloadcms/ui'
 import { ConfirmModal } from './ConfirmModal'
 import './ConfirmModal.scss'
 
@@ -29,6 +30,17 @@ export const MediaListClient: React.FC<Props> = ({ docs, totalDocs, totalPages, 
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [modal, setModal] = useState<ModalState>(null)
+
+  // Detect if rendered inside an upload/relationship picker drawer
+  const drawerContext = useListDrawerContext()
+  const isInDrawer = Boolean(drawerContext?.isInDrawer)
+  const onSelect = drawerContext?.onSelect
+
+  const handlePick = (doc: MediaDoc) => {
+    if (isInDrawer && onSelect) {
+      onSelect({ collectionSlug: 'media' as any, doc: doc as any, docID: String(doc.id) })
+    }
+  }
 
   const filtered = search
     ? docs.filter(
@@ -148,12 +160,18 @@ export const MediaListClient: React.FC<Props> = ({ docs, totalDocs, totalPages, 
           </thead>
           <tbody>
             {filtered.map((doc) => (
-              <tr key={doc.id} className={selected.has(doc.id) ? 'media-list__row--selected' : ''}>
+              <tr
+                key={doc.id}
+                className={`${selected.has(doc.id) ? 'media-list__row--selected' : ''} ${isInDrawer ? 'media-list__row--selectable' : ''}`}
+                onClick={isInDrawer ? () => handlePick(doc) : undefined}
+                style={isInDrawer ? { cursor: 'pointer' } : undefined}
+              >
                 <td className="media-list__td-check">
                   <input
                     type="checkbox"
                     checked={selected.has(doc.id)}
                     onChange={() => toggleOne(doc.id)}
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </td>
                 <td>
@@ -166,28 +184,47 @@ export const MediaListClient: React.FC<Props> = ({ docs, totalDocs, totalPages, 
                   </div>
                 </td>
                 <td>
-                  <a href={`/admin/collections/media/${doc.id}`} className="media-list__filename">
-                    {doc.filename}
-                  </a>
+                  {isInDrawer ? (
+                    <span className="media-list__filename">{doc.filename}</span>
+                  ) : (
+                    <a href={`/admin/collections/media/${doc.id}`} className="media-list__filename">
+                      {doc.filename}
+                    </a>
+                  )}
                 </td>
                 <td className="media-list__alt">{doc.alt ? `"${doc.alt}"` : '—'}</td>
                 <td>
-                  <div className="media-list__row-actions">
-                    <a href={`/admin/collections/media/${doc.id}`} className="media-list__action-btn" title="Editar">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 000-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                      </svg>
-                    </a>
-                    <button
-                      type="button"
-                      className="media-list__action-btn media-list__action-btn--delete"
-                      title="Apagar"
-                      onClick={() => confirmDeleteOne(doc)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                      </svg>
-                    </button>
+                  <div className="media-list__row-actions" onClick={(e) => e.stopPropagation()}>
+                    {isInDrawer ? (
+                      <button
+                        type="button"
+                        className="media-list__action-btn"
+                        title="Selecionar"
+                        onClick={() => handlePick(doc)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                        </svg>
+                      </button>
+                    ) : (
+                      <a href={`/admin/collections/media/${doc.id}`} className="media-list__action-btn" title="Editar">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                          <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 000-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                        </svg>
+                      </a>
+                    )}
+                    {!isInDrawer && (
+                      <button
+                        type="button"
+                        className="media-list__action-btn media-list__action-btn--delete"
+                        title="Apagar"
+                        onClick={() => confirmDeleteOne(doc)}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
