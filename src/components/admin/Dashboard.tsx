@@ -25,6 +25,12 @@ const globalMeta: Array<{ slug: string; label: string; href: string; icon: React
   },
 ]
 
+const pagesIcon = (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM9 13h6v2H9v-2zm0-3h6v2H9v-2zm0 6h4v2H9v-2z" />
+  </svg>
+)
+
 const collectionMeta: Record<string, { label: string; icon: React.ReactNode }> = {
   media: {
     label: 'MEDIA',
@@ -50,6 +56,10 @@ const collectionMeta: Record<string, { label: string; icon: React.ReactNode }> =
         <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z" />
       </svg>
     ),
+  },
+  pages: {
+    label: 'PÁGINAS',
+    icon: pagesIcon,
   },
   users: {
     label: 'UTILIZADORES',

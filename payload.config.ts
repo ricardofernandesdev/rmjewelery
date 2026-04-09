@@ -7,6 +7,7 @@ import { Media } from './src/collections/Media'
 import { Categories } from './src/collections/Categories'
 import { Products } from './src/collections/Products'
 import { Users } from './src/collections/Users'
+import { Pages } from './src/collections/Pages'
 import { SiteSettings } from './src/globals/SiteSettings'
 import { HomeSettings } from './src/globals/HomeSettings'
 import { FooterSettings } from './src/globals/FooterSettings'
@@ -20,7 +21,7 @@ export default buildConfig({
     pool: { connectionString: process.env.DATABASE_URI || '' },
   }),
   editor: lexicalEditor(),
-  collections: [Media, Categories, Products, Users],
+  collections: [Media, Categories, Products, Users, Pages],
   globals: [SiteSettings, HomeSettings, FooterSettings],
   sharp,
   i18n: {

@@ -65,6 +65,30 @@ export async function searchProducts(term: string, limit = 50) {
   })
 }
 
+export async function getPageBySlug(slug: string) {
+  const payload = await getPayload()
+  const { docs } = await payload.find({
+    collection: 'pages',
+    where: {
+      slug: { equals: slug },
+      published: { equals: true },
+    },
+    limit: 1,
+    depth: 0,
+  })
+  return docs[0] || null
+}
+
+export async function getAllPages() {
+  const payload = await getPayload()
+  return payload.find({
+    collection: 'pages',
+    where: { published: { equals: true } },
+    sort: 'title',
+    depth: 0,
+  })
+}
+
 export async function getAllCategories() {
   const payload = await getPayload()
   return payload.find({
