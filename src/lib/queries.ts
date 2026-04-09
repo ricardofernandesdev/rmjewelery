@@ -2,7 +2,17 @@ import { getPayload } from '@/lib/payload'
 
 export async function getSiteSettings() {
   const payload = await getPayload()
-  return payload.findGlobal({ slug: 'site-settings' })
+  return payload.findGlobal({ slug: 'site-settings', depth: 2 })
+}
+
+export async function getFooterSettings() {
+  const payload = await getPayload()
+  return payload.findGlobal({ slug: 'footer-settings', depth: 0 })
+}
+
+export async function getHomeSettings() {
+  const payload = await getPayload()
+  return payload.findGlobal({ slug: 'home-settings', depth: 2 })
 }
 
 export async function getAllProducts(limit = 50) {

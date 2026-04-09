@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { RichText } from '@payloadcms/richtext-lexical/react'
-import { getAllProducts, getProductBySlug } from '@/lib/queries'
+import { getAllProducts, getProductBySlug, getProductsByCategory, getSiteSettings } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 import { ProductGallery } from '@/components/product/ProductGallery'
 import { InstagramCTA } from '@/components/product/InstagramCTA'
+import { ProductPageExtras } from '@/components/product/ProductPageExtras'
 import type { Media, Category } from '../../../../../payload-types'
 
 type PageProps = {
@@ -42,9 +43,14 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const product = await getProductBySlug(slug)
+  const [product, siteSettings] = await Promise.all([
+    getProductBySlug(slug),
+    getSiteSettings().catch(() => null),
+  ])
 
   if (!product) notFound()
+
+  const instagramUrl = (siteSettings as any)?.instagramUrl || 'https://ig.me/m/rmjewelry.collection'
 
   // Extract populated images (filter out non-object entries)
   const images = Array.isArray(product.images)
@@ -57,6 +63,40 @@ export default async function ProductDetailPage({ params }: PageProps) {
     typeof product.category === 'object'
       ? (product.category as Category)
       : null
+
+  // Fetch similar products (same category, excluding current)
+  const categorySlug = category?.slug
+  let similarProducts: any[] = []
+  if (categorySlug) {
+    const { docs } = await getProductsByCategory(categorySlug, 20)
+    similarProducts = docs
+      .filter((p) => p.id !== product.id)
+      .slice(0, 12)
+      .map((p) => {
+        const img = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object'
+          ? (p.images[0] as Media)
+          : null
+        return {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          price: (p as any).price,
+          imageUrl: img?.sizes?.card?.url || img?.url || null,
+          imageAlt: img?.alt || p.name,
+        }
+      })
+  }
+
+  // Current product serialized for client tracking
+  const firstImg = images[0] || null
+  const currentProductData = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    price: (product as any).price,
+    imageUrl: firstImg?.sizes?.card?.url || firstImg?.url || null,
+    imageAlt: firstImg?.alt || product.name,
+  }
 
   return (
     <Container className="py-8">
@@ -80,6 +120,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
             )}
           </div>
 
+          {(product as any).price > 0 && (
+            <p className="text-xl font-semibold text-brand-dark">
+              {((product as any).price as number).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
+            </p>
+          )}
+
           {product.description && (
             <div className="prose prose-sm text-brand-gray max-w-none">
               <RichText data={product.description} />
@@ -87,10 +133,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
           )}
 
           <div className="mt-4">
-            <InstagramCTA />
+            <InstagramCTA instagramUrl={instagramUrl} />
           </div>
         </div>
       </div>
+
+      {/* Similar + Recently Viewed */}
+      <ProductPageExtras
+        currentProduct={currentProductData}
+        similarProducts={similarProducts}
+      />
     </Container>
   )
 }

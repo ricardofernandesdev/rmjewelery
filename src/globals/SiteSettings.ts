@@ -29,25 +29,22 @@ export const SiteSettings: GlobalConfig = {
       },
     },
     {
-      name: 'heroImage',
-      label: 'Imagem do Hero (Homepage)',
-      type: 'upload',
-      relationTo: 'media',
+      name: 'instagramUrl',
+      label: 'Link do Instagram (Direct)',
+      type: 'text',
+      defaultValue: 'https://ig.me/m/rmjewelry.collection',
       admin: {
-        description: 'Imagem de fundo do banner principal da homepage.',
+        description: 'Para abrir diretamente o Direct do Instagram usa: https://ig.me/m/NOME_DO_PERFIL (sem a barra final). Exemplo: https://ig.me/m/rmjewelry.collection. Usado no botão "Estou interessado" nos produtos.',
       },
     },
     {
-      name: 'heroTitle',
-      label: 'Título do Hero',
+      name: 'instagramPageUrl',
+      label: 'Página do Instagram',
       type: 'text',
-      defaultValue: 'Explore os nossos produtos',
-    },
-    {
-      name: 'heroButtonLabel',
-      label: 'Texto do Botão do Hero',
-      type: 'text',
-      defaultValue: 'VER CATÁLOGO COMPLETO',
+      defaultValue: 'https://www.instagram.com/rmjewelry.collection/',
+      admin: {
+        description: 'URL do perfil do Instagram. Formato: https://www.instagram.com/NOME_DO_PERFIL/. Usado no footer.',
+      },
     },
     {
       name: 'maintenanceMode',
@@ -55,7 +52,8 @@ export const SiteSettings: GlobalConfig = {
       type: 'checkbox',
       defaultValue: false,
       admin: {
-        description: 'Ativa o modo manutenção. O site público fica indisponível e mostra a página de manutenção.',
+        description:
+          'Ativa o modo manutenção. O site público fica indisponível para visitantes não autenticados.',
       },
     },
     {

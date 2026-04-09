@@ -8,6 +8,8 @@ import { Categories } from './src/collections/Categories'
 import { Products } from './src/collections/Products'
 import { Users } from './src/collections/Users'
 import { SiteSettings } from './src/globals/SiteSettings'
+import { HomeSettings } from './src/globals/HomeSettings'
+import { FooterSettings } from './src/globals/FooterSettings'
 import sharp from 'sharp'
 
 const useS3 = Boolean(process.env.S3_BUCKET && process.env.S3_ENDPOINT)
@@ -19,7 +21,7 @@ export default buildConfig({
   }),
   editor: lexicalEditor(),
   collections: [Media, Categories, Products, Users],
-  globals: [SiteSettings],
+  globals: [SiteSettings, HomeSettings, FooterSettings],
   sharp,
   i18n: {
     supportedLanguages: { pt },

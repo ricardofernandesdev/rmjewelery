@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Product, Media, Category } from '../../../payload-types'
+import type { Product, Media } from '../../../payload-types'
 
 type ProductCardProps = {
   product: Product
@@ -13,14 +13,17 @@ export function ProductCard({ product }: ProductCardProps) {
       : null
   const media =
     coverImage && typeof coverImage === 'object' ? (coverImage as Media) : null
-  const category =
-    typeof product.category === 'object'
-      ? (product.category as Category)
+
+  const price = (product as any).price
+  const formattedPrice =
+    typeof price === 'number'
+      ? price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })
       : null
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block">
-      <div className="relative aspect-square overflow-hidden rounded-sm bg-brand-cream">
+    <Link href={`/products/${product.slug}`} className="group block relative">
+      {/* Product image */}
+      <div className="relative aspect-square overflow-hidden bg-white border border-gray-100">
         {media ? (
           <Image
             src={media.sizes?.card?.url || media.url || ''}
@@ -29,20 +32,25 @@ export function ProductCard({ product }: ProductCardProps) {
             height={media.sizes?.card?.height || 800}
             placeholder={media.blurDataURL ? 'blur' : 'empty'}
             blurDataURL={media.blurDataURL || undefined}
-            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+            className="object-contain w-full h-full p-4 transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-brand-cream" />
+          <div className="w-full h-full bg-white" />
         )}
       </div>
-      <div className="mt-2 px-1">
-        <h3 className="text-sm font-medium text-brand-dark truncate">
-          {product.name}
-        </h3>
-        {category && (
-          <p className="text-xs text-brand-gray">{category.name}</p>
-        )}
+
+      {/* Brand badge */}
+      <div className="flex items-center gap-2 mt-3 mb-1">
+        <span className="text-[10px] font-bold tracking-wider text-brand-dark">RM</span>
       </div>
+
+      {/* Product info */}
+      <h3 className="text-sm text-brand-dark leading-snug mb-1">
+        {product.name}
+      </h3>
+      {formattedPrice && (
+        <p className="text-sm font-medium text-brand-dark">{formattedPrice}</p>
+      )}
     </Link>
   )
 }

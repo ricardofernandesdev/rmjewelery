@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import {
   getCategoryBySlug,
@@ -7,7 +7,7 @@ import {
   getAllCategories,
 } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
-import { ProductGrid } from '@/components/product/ProductGrid'
+import { CategoryPageClient } from '@/components/product/CategoryPageClient'
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -29,48 +29,49 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params
-  const [category, { docs: products }, { docs: categories }] =
-    await Promise.all([
-      getCategoryBySlug(slug),
-      getProductsByCategory(slug),
-      getAllCategories(),
-    ])
+  const [category, { docs: products }] = await Promise.all([
+    getCategoryBySlug(slug),
+    getProductsByCategory(slug, 200),
+  ])
 
   if (!category) notFound()
 
+  const catImage =
+    category.image && typeof category.image === 'object' ? (category.image as any) : null
+  const catImageUrl = catImage?.url || null
+
   return (
-    <Container className="py-8">
-      <h1 className="font-heading text-2xl font-semibold text-brand-dark mb-6">
-        {category.name}
-      </h1>
+    <>
+      {/* ── Hero banner ── */}
+      <section className="relative w-full h-[300px] md:h-[400px] bg-brand-dark overflow-hidden -mt-[110px]">
+        {catImageUrl && (
+          <Image
+            src={catImageUrl}
+            alt={catImage?.alt || category.name}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        )}
+        <div className="absolute inset-0 bg-black/40" />
 
-      {/* Category filter pills */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-6 -mx-1 px-1 scrollbar-hide">
-        <Link
-          href="/products"
-          className="shrink-0 px-4 py-2 rounded-full text-sm bg-brand-cream text-brand-dark hover:bg-brand-dark hover:text-white transition-colors"
-        >
-          Todos
-        </Link>
-        {categories.map((cat) => (
-          <Link
-            key={cat.id}
-            href={`/categories/${cat.slug}`}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm transition-colors ${
-              cat.slug === slug
-                ? 'bg-brand-dark text-white'
-                : 'bg-brand-cream text-brand-dark hover:bg-brand-dark hover:text-white'
-            }`}
-          >
-            {cat.name}
-          </Link>
-        ))}
-      </div>
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+          <h1 className="font-heading text-white text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-wider mb-4">
+            {category.name}
+          </h1>
+          {category.description && (
+            <p className="text-white/80 text-sm md:text-base italic max-w-2xl leading-relaxed">
+              {category.description}
+            </p>
+          )}
+        </div>
+      </section>
 
-      <ProductGrid
-        products={products}
-        emptyMessage={`Nenhum produto encontrado em ${category.name}.`}
-      />
-    </Container>
+      {/* ── Filters + Products ── */}
+      <Container className="py-6">
+        <CategoryPageClient products={products} categoryName={category.name} />
+      </Container>
+    </>
   )
 }

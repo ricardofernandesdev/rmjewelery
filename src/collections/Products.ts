@@ -76,6 +76,29 @@ export const Products: CollectionConfig = {
       },
     },
     {
+      name: 'price',
+      type: 'number',
+      required: true,
+      min: 0,
+      admin: {
+        step: 0.01,
+        description: 'Preço em euros (€)',
+      },
+    },
+    {
+      name: 'availability',
+      label: 'Disponibilidade',
+      type: 'select',
+      defaultValue: 'in_stock',
+      options: [
+        { label: 'Em stock', value: 'in_stock' },
+        { label: 'Esgotado', value: 'out_of_stock' },
+      ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
