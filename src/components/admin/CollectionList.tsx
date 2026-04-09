@@ -88,23 +88,45 @@ async function renderList(props: ListViewServerProps, slug: string) {
   // Get current user ID to protect from self-deletion
   const currentUserId = slug === 'users' ? (props as any)?.user?.id : undefined
 
-  const serializedDocs = docs.map((doc: any) => {
-    const row: any = { id: doc.id }
-    for (const col of config.columns) {
-      if (col.key === 'image') {
-        row._imageUrl =
-          typeof doc.image === 'object' && doc.image
-            ? doc.image.sizes?.thumbnail?.url || doc.image.url || ''
-            : ''
-      } else if (col.key === 'category') {
-        row.category =
-          typeof doc.category === 'object' && doc.category ? doc.category.name : doc.category || ''
-      } else {
-        row[col.key] = doc[col.key] || ''
+  const serializedDocs = await Promise.all(
+    docs.map(async (doc: any) => {
+      const row: any = { id: doc.id }
+      for (const col of config.columns) {
+        if (col.key === 'image') {
+          if (typeof doc.image === 'object' && doc.image) {
+            row._imageUrl = doc.image.sizes?.thumbnail?.url || doc.image.url || ''
+          } else if (doc.image) {
+            // image is just an ID — resolve the URL
+            row._imageUrl = `/api/media/file/${doc.image}` // fallback
+            try {
+              const { initPageResult } = props as any
+              if (initPageResult?.req?.payload) {
+                const media = await initPageResult.req.payload.findByID({
+                  collection: 'media',
+                  id: doc.image,
+                  depth: 0,
+                  req: initPageResult.req,
+                })
+                if (media) {
+                  row._imageUrl = media.sizes?.thumbnail?.url || media.url || ''
+                }
+              }
+            } catch {
+              // ignore
+            }
+          } else {
+            row._imageUrl = ''
+          }
+        } else if (col.key === 'category') {
+          row.category =
+            typeof doc.category === 'object' && doc.category ? doc.category.name : doc.category || ''
+        } else {
+          row[col.key] = doc[col.key] || ''
+        }
       }
-    }
-    return row
-  })
+      return row
+    }),
+  )
 
   return (
     <CollectionListClient
