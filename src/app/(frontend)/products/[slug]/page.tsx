@@ -25,6 +25,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
+  try {
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return {}
@@ -42,6 +43,9 @@ export async function generateMetadata({
     title: `${product.name} | RM Jewelry`,
     description: `${product.name} - RM Jewelry`,
     openGraph: ogImage ? { images: [{ url: ogImage }] } : undefined,
+  }
+  } catch {
+    return {}
   }
 }
 

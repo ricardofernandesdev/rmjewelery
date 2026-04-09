@@ -23,20 +23,25 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
-  const category = await getCategoryBySlug(slug)
-  if (!category) return {}
-  return {
-    title: `${category.name} | RM Jewelry`,
+  try {
+    const { slug } = await params
+    const category = await getCategoryBySlug(slug)
+    if (!category) return {}
+    return {
+      title: `${category.name} | RM Jewelry`,
+    }
+  } catch {
+    return {}
   }
 }
 
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params
-  const [category, { docs: products }] = await Promise.all([
-    getCategoryBySlug(slug),
-    getProductsByCategory(slug, 200),
+  const [category, productsResult] = await Promise.all([
+    getCategoryBySlug(slug).catch(() => null),
+    getProductsByCategory(slug, 200).catch(() => ({ docs: [] as any[] })),
   ])
+  const products = productsResult.docs
 
   if (!category) notFound()
 
