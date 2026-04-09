@@ -4,6 +4,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { getPageBySlug, getAllPages } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 import { RingSizeIllustration } from '@/components/ui/RingSizeIllustration'
+import { RingSizeTable } from '@/components/ui/RingSizeTable'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +46,12 @@ export default async function DynamicPage({ params }: PageProps) {
 
       <hr className="border-gray-200 mb-12" />
 
-      {slug === 'ring-size-guide' && <RingSizeIllustration />}
+      {slug === 'ring-size-guide' && (
+        <>
+          <RingSizeIllustration />
+          <RingSizeTable />
+        </>
+      )}
 
       <div className="prose prose-sm md:prose-base prose-headings:text-brand-dark prose-headings:font-semibold prose-p:text-brand-gray prose-p:leading-relaxed prose-li:text-brand-gray prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-3 prose-ol:list-decimal prose-ol:pl-6 prose-a:text-brand-dark prose-a:underline max-w-none">
         {page.content && <RichText data={page.content} />}
