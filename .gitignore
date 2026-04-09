@@ -33,7 +33,7 @@ yarn-error.log*
 media/
 
 # Payload generated
-payload-types.ts
+# payload-types.ts needs to be committed for Vercel builds
 
 # Misc
 *.tsbuildinfo
