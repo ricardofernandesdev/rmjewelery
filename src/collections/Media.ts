@@ -35,11 +35,6 @@ export const Media: CollectionConfig = {
         list: {
           Component: './src/components/admin/MediaList#MediaList',
         },
-        edit: {
-          default: {
-            Component: './src/components/admin/MediaCreate#MediaCreate',
-          },
-        },
       },
     },
   },
