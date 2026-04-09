@@ -2,7 +2,7 @@ import { buildConfig } from 'payload'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { pt } from '@payloadcms/translations/languages/pt'
-import { s3Storage } from '@payloadcms/storage-s3'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { Media } from './src/collections/Media'
 import { Categories } from './src/collections/Categories'
 import { Products } from './src/collections/Products'
@@ -12,7 +12,7 @@ import { HomeSettings } from './src/globals/HomeSettings'
 import { FooterSettings } from './src/globals/FooterSettings'
 import sharp from 'sharp'
 
-const useS3 = Boolean(process.env.S3_BUCKET && process.env.S3_ENDPOINT)
+const useVercelBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN)
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
@@ -58,22 +58,13 @@ export default buildConfig({
     outputFile: 'payload-types.ts',
   },
   plugins: [
-    ...(useS3
+    ...(useVercelBlob
       ? [
-          s3Storage({
+          vercelBlobStorage({
             collections: {
-              media: { prefix: 'media' },
+              media: true,
             },
-            bucket: process.env.S3_BUCKET!,
-            config: {
-              endpoint: process.env.S3_ENDPOINT!,
-              region: process.env.S3_REGION || 'auto',
-              credentials: {
-                accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-              },
-              forcePathStyle: true,
-            },
+            token: process.env.BLOB_READ_WRITE_TOKEN!,
           }),
         ]
       : []),
