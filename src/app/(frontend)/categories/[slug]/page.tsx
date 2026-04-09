@@ -14,8 +14,12 @@ type PageProps = {
 }
 
 export async function generateStaticParams() {
-  const { docs } = await getAllCategories()
-  return docs.map((cat) => ({ slug: cat.slug }))
+  try {
+    const { docs } = await getAllCategories()
+    return docs.map((cat) => ({ slug: cat.slug }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

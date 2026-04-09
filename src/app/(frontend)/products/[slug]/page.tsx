@@ -14,8 +14,12 @@ type PageProps = {
 }
 
 export async function generateStaticParams() {
-  const { docs } = await getAllProducts(1000)
-  return docs.map((product) => ({ slug: product.slug }))
+  try {
+    const { docs } = await getAllProducts(1000)
+    return docs.map((product) => ({ slug: product.slug || '' }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({
