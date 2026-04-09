@@ -16,7 +16,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center justify-center p-2 min-w-[44px] min-h-[44px] text-brand-dark md:hidden"
+        className="inline-flex items-center justify-center p-2 min-w-[44px] min-h-[44px] text-current md:hidden"
         aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
         aria-expanded={isOpen}
       >

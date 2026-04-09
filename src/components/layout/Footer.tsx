@@ -30,10 +30,7 @@ export async function Footer() {
     <footer className="bg-black text-white py-16">
       <Container>
         {columns.length > 0 ? (
-          <div
-            className="grid gap-12 mb-12"
-            style={{ gridTemplateColumns: `repeat(${Math.min(columns.length, 4)}, 1fr)` }}
-          >
+          <div className={`grid gap-8 md:gap-12 mb-12 grid-cols-1 sm:grid-cols-2 ${columns.length >= 3 ? 'md:grid-cols-3' : ''} ${columns.length >= 4 ? 'lg:grid-cols-4' : ''}`}>
             {columns.map((col, i) => (
               <div key={i}>
                 <h3 className="text-sm font-bold tracking-[0.15em] uppercase mb-6">
@@ -67,7 +64,7 @@ export async function Footer() {
           </div>
         ) : (
           /* Fallback if no columns configured */
-          <div className="grid grid-cols-3 gap-12 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 mb-12">
             <div>
               <h3 className="text-sm font-bold tracking-[0.15em] uppercase mb-6">R&M JEWELRY</h3>
               <ul className="space-y-3">
@@ -101,7 +98,7 @@ export async function Footer() {
           </div>
         )}
 
-        <div className="border-t border-white/10 pt-8 flex items-center justify-between">
+        <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-white/50">{copyright}</p>
           <a
             href={instagramPageUrl}
