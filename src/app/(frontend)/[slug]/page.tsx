@@ -44,7 +44,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
       <hr className="border-gray-200 mb-12" />
 
-      <div className="prose prose-sm md:prose-base text-brand-gray max-w-none">
+      <div className="prose prose-sm md:prose-base prose-headings:text-brand-dark prose-headings:font-semibold prose-p:text-brand-gray prose-p:leading-relaxed prose-li:text-brand-gray prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-3 prose-ol:list-decimal prose-ol:pl-6 prose-a:text-brand-dark prose-a:underline max-w-none">
         {page.content && <RichText data={page.content} />}
       </div>
     </Container>
