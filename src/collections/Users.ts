@@ -1,11 +1,28 @@
 import type { CollectionConfig } from 'payload'
 
+const isAdmin = ({ req }: { req: any }) => Boolean(req.user)
+const isSelfOrAdmin = ({ req, id }: { req: any; id?: string | number }) => {
+  if (!req.user) return false
+  if (String(req.user.id) === String(id)) return true
+  return true // all authenticated users are admins for now
+}
+
 export const Users: CollectionConfig = {
   slug: 'users',
-  auth: true,
+  auth: {
+    maxLoginAttempts: 5,
+    lockTime: 15 * 60 * 1000, // 15 min lockout after 5 failed attempts
+  },
   labels: {
     singular: 'Utilizador',
     plural: 'Utilizadores',
+  },
+  access: {
+    read: isAdmin,
+    create: isAdmin,
+    update: isSelfOrAdmin,
+    delete: isAdmin,
+    admin: isAdmin,
   },
   admin: {
     useAsTitle: 'email',
