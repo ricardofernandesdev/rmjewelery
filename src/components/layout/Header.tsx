@@ -9,30 +9,15 @@ export async function Header() {
   ])
   const categories = categoriesResult.docs
 
-  // Resolve logo — handles both populated object and raw ID
+  // Resolve logo URL — make relative URLs absolute
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
   let logoUrl: string | null = null
   let logoAlt = 'RM Jewelry'
   const rawLogo = (settings as any)?.logo
-  if (rawLogo) {
-    if (typeof rawLogo === 'object' && rawLogo.url) {
-      logoUrl = rawLogo.url
-      logoAlt = rawLogo.alt || logoAlt
-    } else {
-      const id = typeof rawLogo === 'object' ? rawLogo.id : rawLogo
-      if (id) {
-        try {
-          const { getPayload } = await import('@/lib/payload')
-          const payload = await getPayload()
-          const media = await payload.findByID({ collection: 'media', id, depth: 0 })
-          if (media?.url) {
-            logoUrl = media.url
-            logoAlt = media.alt || logoAlt
-          }
-        } catch {
-          // ignore
-        }
-      }
-    }
+  if (rawLogo && typeof rawLogo === 'object' && rawLogo.url) {
+    const url = rawLogo.url as string
+    logoUrl = url.startsWith('/') ? `${siteUrl}${url}` : url
+    logoAlt = rawLogo.alt || logoAlt
   }
 
   const navItems = (categories || []).map((cat: any) => ({
