@@ -4,6 +4,8 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { getPageBySlug, getAllPages } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }
