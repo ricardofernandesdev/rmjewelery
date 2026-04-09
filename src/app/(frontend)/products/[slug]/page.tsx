@@ -79,7 +79,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         return {
           id: p.id,
           name: p.name,
-          slug: p.slug,
+          slug: p.slug || '',
           price: (p as any).price,
           imageUrl: img?.sizes?.card?.url || img?.url || null,
           imageAlt: img?.alt || p.name,
@@ -92,7 +92,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const currentProductData = {
     id: product.id,
     name: product.name,
-    slug: product.slug,
+    slug: product.slug || '',
     price: (product as any).price,
     imageUrl: firstImg?.sizes?.card?.url || firstImg?.url || null,
     imageAlt: firstImg?.alt || product.name,
