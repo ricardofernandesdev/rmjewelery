@@ -3,10 +3,11 @@ import { getAllCategories, getSiteSettings } from '@/lib/queries'
 import { HeaderClient } from '@/components/layout/HeaderClient'
 
 export async function Header() {
-  const [{ docs: categories }, settings] = await Promise.all([
-    getAllCategories(),
+  const [categoriesResult, settings] = await Promise.all([
+    getAllCategories().catch(() => ({ docs: [] as any[] })),
     getSiteSettings().catch(() => null),
   ])
+  const categories = categoriesResult.docs
 
   // Resolve logo — handles both populated object and raw ID
   let logoUrl: string | null = null
@@ -34,7 +35,7 @@ export async function Header() {
     }
   }
 
-  const navItems = categories.map((cat) => ({
+  const navItems = (categories || []).map((cat: any) => ({
     label: cat.name,
     href: `/categories/${cat.slug}`,
   }))

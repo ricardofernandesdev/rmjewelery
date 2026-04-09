@@ -9,10 +9,12 @@ export const metadata: Metadata = {
 }
 
 export default async function CatalogPage() {
-  const [{ docs: products }, { docs: categories }] = await Promise.all([
-    getAllProducts(),
-    getAllCategories(),
+  const [productsResult, categoriesResult] = await Promise.all([
+    getAllProducts().catch(() => ({ docs: [] as any[] })),
+    getAllCategories().catch(() => ({ docs: [] as any[] })),
   ])
+  const products = productsResult.docs
+  const categories = categoriesResult.docs
 
   return (
     <Container className="py-8">

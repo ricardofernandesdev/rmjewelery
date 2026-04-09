@@ -14,10 +14,11 @@ const getMediaUrl = (field: any): { url: string | null; alt: string } => {
 }
 
 export default async function HomePage() {
-  const [settings, { docs: categories }] = await Promise.all([
+  const [settings, categoriesResult] = await Promise.all([
     getHomeSettings().catch(() => null),
-    getAllCategories(),
+    getAllCategories().catch(() => ({ docs: [] as any[] })),
   ])
+  const categories = categoriesResult.docs
 
   const sections: any[] = (settings as any)?.sections || []
 
