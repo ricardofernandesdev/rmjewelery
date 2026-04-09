@@ -127,6 +127,9 @@ export const MediaListClient: React.FC<Props> = ({ docs, totalDocs, totalPages, 
               APAGAR ({selected.size})
             </button>
           )}
+          <a href="/admin/bulk-upload" className="media-list__btn media-list__btn--outline">
+            UPLOAD MÚLTIPLO
+          </a>
           <a href="/admin/collections/media/create" className="media-list__btn media-list__btn--filled">
             CARREGAR NOVO
           </a>

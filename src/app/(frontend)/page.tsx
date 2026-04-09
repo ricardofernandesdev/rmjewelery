@@ -3,6 +3,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getHomeSettings, getAllCategories } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
+
+export const revalidate = 60 // revalidate every 60 seconds
 import { HeroSection } from '@/components/home/HeroSection'
 import { FeaturedProductsGallery } from '@/components/home/FeaturedProductsGallery'
 

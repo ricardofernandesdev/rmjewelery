@@ -13,6 +13,7 @@ const btnStyle: React.CSSProperties = {
 
 export const HeaderActions: React.FC = () => {
   const [dark, setDark] = useState(false)
+  const [clearing, setClearing] = useState(false)
 
   useEffect(() => {
     const current = document.documentElement.getAttribute('data-theme')
@@ -26,8 +27,46 @@ export const HeaderActions: React.FC = () => {
     setDark(!dark)
   }
 
+  const clearCache = async () => {
+    setClearing(true)
+    try {
+      const res = await fetch('/api/revalidate', { method: 'POST', credentials: 'include' })
+      if (res.ok) {
+        // Brief visual feedback
+        setTimeout(() => setClearing(false), 1000)
+      } else {
+        setClearing(false)
+      }
+    } catch {
+      setClearing(false)
+    }
+  }
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      {/* Clear cache */}
+      <button
+        type="button"
+        onClick={clearCache}
+        style={{
+          ...btnStyle,
+          opacity: clearing ? 0.5 : 1,
+          transition: 'opacity 0.2s',
+        }}
+        title={clearing ? 'Cache limpa!' : 'Limpar cache do frontend'}
+        disabled={clearing}
+      >
+        {clearing ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+          </svg>
+        )}
+      </button>
+
       {/* Open frontend in new tab */}
       <a
         href="/"

@@ -51,6 +51,10 @@ export default buildConfig({
         account: {
           Component: './src/components/admin/AccountView#AccountView',
         },
+        'bulk-upload': {
+          Component: './src/components/admin/MediaBulkUpload#MediaBulkUpload',
+          path: '/bulk-upload',
+        },
       },
     },
   },

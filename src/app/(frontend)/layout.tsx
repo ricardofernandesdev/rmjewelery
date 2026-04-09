@@ -8,6 +8,8 @@ import { SiteStatusGate } from '@/components/layout/SiteStatusGate'
 import { getSiteSettings } from '@/lib/queries'
 import { getPayload } from '@/lib/payload'
 
+export const revalidate = 60
+
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings().catch(() => null)
 
