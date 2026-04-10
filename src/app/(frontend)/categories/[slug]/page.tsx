@@ -48,6 +48,8 @@ export default async function CategoryPage({ params }: PageProps) {
   const catImage =
     category.image && typeof category.image === 'object' ? (category.image as any) : null
   const catImageUrl = catImage?.url || null
+  const posX = (category as any).bannerPositionX || 'center'
+  const posY = (category as any).bannerPositionY || 'center'
 
   return (
     <>
@@ -60,7 +62,8 @@ export default async function CategoryPage({ params }: PageProps) {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-[center_40%]"
+            className="object-cover"
+            style={{ objectPosition: `${posX} ${posY}` }}
           />
         )}
         <div className="absolute inset-0 bg-black/40" />

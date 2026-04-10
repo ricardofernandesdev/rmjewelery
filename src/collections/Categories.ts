@@ -67,6 +67,36 @@ export const Categories: CollectionConfig = {
       relationTo: 'media',
     },
     {
+      name: 'bannerPositionX',
+      label: 'Posição horizontal do banner',
+      type: 'select',
+      defaultValue: 'center',
+      options: [
+        { label: 'Esquerda', value: 'left' },
+        { label: 'Centro', value: 'center' },
+        { label: 'Direita', value: 'right' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Ajusta o foco horizontal da imagem no banner.',
+      },
+    },
+    {
+      name: 'bannerPositionY',
+      label: 'Posição vertical do banner',
+      type: 'select',
+      defaultValue: 'center',
+      options: [
+        { label: 'Topo', value: 'top' },
+        { label: 'Centro', value: 'center' },
+        { label: 'Baixo', value: 'bottom' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Ajusta o foco vertical da imagem no banner.',
+      },
+    },
+    {
       name: 'sortOrder',
       type: 'number',
       defaultValue: 0,

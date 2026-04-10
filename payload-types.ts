@@ -195,6 +195,14 @@ export interface Category {
   slug?: string | null;
   description?: string | null;
   image?: (number | null) | Media;
+  /**
+   * Ajusta o foco horizontal da imagem no banner.
+   */
+  bannerPositionX?: ('left' | 'center' | 'right') | null;
+  /**
+   * Ajusta o foco vertical da imagem no banner.
+   */
+  bannerPositionY?: ('top' | 'center' | 'bottom') | null;
   sortOrder?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -448,6 +456,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   slug?: T;
   description?: T;
   image?: T;
+  bannerPositionX?: T;
+  bannerPositionY?: T;
   sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
