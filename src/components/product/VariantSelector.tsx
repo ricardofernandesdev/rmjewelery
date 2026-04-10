@@ -68,11 +68,9 @@ export const VariantSelector: React.FC<Props> = ({
     return !v || v.availability !== 'out_of_stock'
   }
 
-  // Get images: variant > color term > main
-  const getImages = (color?: string, variant?: Variant): any[] | undefined => {
+  // Get images from variant
+  const getImages = (_color?: string, variant?: Variant): any[] | undefined => {
     if (variant?.images && variant.images.length > 0) return variant.images
-    const colorTerm = colorTerms.find((c) => c.name === color)
-    if (colorTerm?.images && colorTerm.images.length > 0) return colorTerm.images
     return undefined
   }
 

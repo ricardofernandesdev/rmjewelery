@@ -4,7 +4,7 @@ import { ProductGallery } from './ProductGallery'
 import { VariantSelector } from './VariantSelector'
 import type { Media } from '../../../payload-types'
 
-type ColorTerm = { name: string; hex: string; images?: any[] }
+type ColorTerm = { name: string; hex: string }
 type SizeTerm = { value: string }
 type Variant = { color?: string; size?: string; price?: number | null; availability?: string; images?: any[] }
 

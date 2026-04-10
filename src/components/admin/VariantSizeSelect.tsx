@@ -1,28 +1,23 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { useField } from '@payloadcms/ui'
+import React from 'react'
+import { useField, useAllFormFields } from '@payloadcms/ui'
 
 export const VariantSizeSelect: React.FC<{ path: string }> = ({ path }) => {
   const { value, setValue } = useField<string>({ path })
-  const [options, setOptions] = useState<string[]>([])
+  const [fields] = useAllFormFields()
 
-  useEffect(() => {
-    const productId = window.location.pathname.match(/\/products\/(\d+)/)?.[1]
-    if (productId) {
-      fetch(`/api/products/${productId}?depth=0`, { credentials: 'include' })
-        .then(r => r.json())
-        .then(data => {
-          if (data?.sizeTerms && Array.isArray(data.sizeTerms)) {
-            setOptions(
-              data.sizeTerms
-                .map((t: any) => t.value as string)
-                .filter(Boolean)
-            )
-          }
-        })
-        .catch(() => {})
+  // Extract size terms from form state (works without saving first)
+  const options: string[] = []
+  if (fields) {
+    let i = 0
+    while (true) {
+      const valField = fields[`sizeTerms.${i}.value`]
+      if (!valField) break
+      const val = valField.value as string
+      if (val) options.push(val)
+      i++
     }
-  }, [])
+  }
 
   if (options.length === 0) {
     return (
@@ -30,20 +25,9 @@ export const VariantSizeSelect: React.FC<{ path: string }> = ({ path }) => {
         <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--theme-elevation-500)' }}>
           Tamanho
         </label>
-        <input
-          type="text"
-          value={value || ''}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Guarda o produto primeiro com os termos de tamanho"
-          style={{
-            padding: '8px 12px',
-            fontSize: '13px',
-            border: '1px solid var(--theme-elevation-200)',
-            borderRadius: '4px',
-            background: 'var(--theme-elevation-0)',
-            color: 'var(--theme-text)',
-          }}
-        />
+        <p style={{ fontSize: '13px', color: 'var(--theme-elevation-400)' }}>
+          Adiciona termos de tamanho no Passo 2 acima.
+        </p>
       </div>
     )
   }

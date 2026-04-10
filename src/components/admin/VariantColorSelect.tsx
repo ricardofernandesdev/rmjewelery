@@ -1,68 +1,25 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { useField } from '@payloadcms/ui'
+import React from 'react'
+import { useField, useAllFormFields } from '@payloadcms/ui'
 
 export const VariantColorSelect: React.FC<{ path: string }> = ({ path }) => {
   const { value, setValue } = useField<string>({ path })
-  const [options, setOptions] = useState<Array<{ name: string; hex: string }>>([])
+  const [fields] = useAllFormFields()
 
-  useEffect(() => {
-    // Read colorTerms from the DOM form data
-    const interval = setInterval(() => {
-      try {
-        const formEl = document.querySelector('form.collection-edit, form.global-edit, [class*="Form"]')
-        if (!formEl) return
-
-        // Find all colorTerms name inputs
-        const nameInputs = document.querySelectorAll('[id*="colorTerms"][id*="name"] input, [name*="colorTerms"][name*="name"]')
-        const hexInputs = document.querySelectorAll('[id*="colorTerms"][id*="hex"] input, [name*="colorTerms"][name*="hex"]')
-
-        if (nameInputs.length === 0) {
-          // Try alternative: look at the Payload form state via window
-          const stateEl = document.querySelectorAll('[data-path*="colorTerms"]')
-          if (stateEl.length > 0) return
-        }
-
-        // Fallback: read from the API
-        const productId = window.location.pathname.match(/\/products\/(\d+)/)?.[1]
-        if (productId && options.length === 0) {
-          fetch(`/api/products/${productId}?depth=0`, { credentials: 'include' })
-            .then(r => r.json())
-            .then(data => {
-              if (data?.colorTerms && Array.isArray(data.colorTerms)) {
-                setOptions(data.colorTerms.map((t: any) => ({
-                  name: t.name || '',
-                  hex: t.hex || '#ccc',
-                })).filter((t: any) => t.name))
-              }
-            })
-            .catch(() => {})
-        }
-      } catch {
-        // ignore
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  // Also try fetching on mount
-  useEffect(() => {
-    const productId = window.location.pathname.match(/\/products\/(\d+)/)?.[1]
-    if (productId) {
-      fetch(`/api/products/${productId}?depth=0`, { credentials: 'include' })
-        .then(r => r.json())
-        .then(data => {
-          if (data?.colorTerms && Array.isArray(data.colorTerms)) {
-            setOptions(data.colorTerms.map((t: any) => ({
-              name: t.name || '',
-              hex: t.hex || '#ccc',
-            })).filter((t: any) => t.name))
-          }
-        })
-        .catch(() => {})
+  // Extract color terms from form state (works without saving first)
+  const options: Array<{ name: string; hex: string }> = []
+  if (fields) {
+    let i = 0
+    while (true) {
+      const nameField = fields[`colorTerms.${i}.name`]
+      const hexField = fields[`colorTerms.${i}.hex`]
+      if (!nameField) break
+      const name = nameField.value as string
+      const hex = (hexField?.value as string) || '#ccc'
+      if (name) options.push({ name, hex })
+      i++
     }
-  }, [])
+  }
 
   if (options.length === 0) {
     return (
@@ -70,20 +27,9 @@ export const VariantColorSelect: React.FC<{ path: string }> = ({ path }) => {
         <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--theme-elevation-500)' }}>
           Cor
         </label>
-        <input
-          type="text"
-          value={value || ''}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Guarda o produto primeiro com os termos de cor"
-          style={{
-            padding: '8px 12px',
-            fontSize: '13px',
-            border: '1px solid var(--theme-elevation-200)',
-            borderRadius: '4px',
-            background: 'var(--theme-elevation-0)',
-            color: 'var(--theme-text)',
-          }}
-        />
+        <p style={{ fontSize: '13px', color: 'var(--theme-elevation-400)' }}>
+          Adiciona termos de cor no Passo 2 acima.
+        </p>
       </div>
     )
   }
