@@ -66,7 +66,7 @@ export const MediaBulkUpload: React.FC = () => {
       try {
         const formData = new FormData()
         formData.append('file', item.file)
-        formData.append('alt', item.alt || item.file.name)
+        formData.append('_payload', JSON.stringify({ alt: item.alt || item.file.name }))
 
         const res = await fetch('/api/media', {
           method: 'POST',
