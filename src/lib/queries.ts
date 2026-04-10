@@ -25,6 +25,46 @@ export async function getAllProducts(limit = 50) {
   })
 }
 
+export async function getProductsPaginated({
+  page = 1,
+  limit = 24,
+  categorySlug,
+}: {
+  page?: number
+  limit?: number
+  categorySlug?: string
+} = {}) {
+  const payload = await getPayload()
+
+  let categoryId: number | string | null = null
+  if (categorySlug) {
+    const category = await getCategoryBySlug(categorySlug)
+    if (!category) {
+      return {
+        docs: [],
+        totalDocs: 0,
+        totalPages: 0,
+        page: 1,
+        limit,
+        hasPrevPage: false,
+        hasNextPage: false,
+        prevPage: null,
+        nextPage: null,
+      }
+    }
+    categoryId = category.id
+  }
+
+  return payload.find({
+    collection: 'products',
+    where: categoryId ? { category: { equals: categoryId } } : undefined,
+    limit,
+    page,
+    sort: 'sortOrder',
+    depth: 1,
+  })
+}
+
 export async function getProductBySlug(slug: string) {
   const payload = await getPayload()
   const { docs } = await payload.find({
