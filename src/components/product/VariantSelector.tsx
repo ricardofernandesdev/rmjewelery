@@ -107,7 +107,7 @@ export const VariantSelector: React.FC<Props> = ({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       {/* Color swatches */}
       {hasColors && (
         <div className="flex items-center gap-3">

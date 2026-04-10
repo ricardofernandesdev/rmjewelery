@@ -53,7 +53,7 @@ export const ProductDetailClient: React.FC<Props> = ({
         {children}
 
         {hasOptions && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-gray-100">
             <VariantSelector
               colorTerms={colorTerms}
               sizeTerms={sizeTerms}
