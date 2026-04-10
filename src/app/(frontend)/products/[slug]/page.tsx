@@ -185,16 +185,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
               TENHO INTERESSE
             </a>
           </div>
-        </ProductDetailClient>
 
-        {/* Divider + Description */}
-        {product.description && (
-          <div className="mt-10 pt-8 border-t border-gray-100">
-            <div className="prose prose-sm md:prose-base prose-p:text-brand-gray prose-headings:text-brand-dark max-w-none">
-              <RichText data={product.description} />
+          {/* Divider + Description inside right column */}
+          {product.description && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="prose prose-sm prose-p:text-brand-gray prose-headings:text-brand-dark max-w-none">
+                <RichText data={product.description} />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </ProductDetailClient>
 
         {/* Divider before related products */}
         <div className="mt-10 border-t border-gray-100" />
