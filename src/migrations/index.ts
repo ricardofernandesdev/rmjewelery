@@ -4,6 +4,7 @@ import * as migration_20260410_090139_add_banner_position from './20260410_09013
 import * as migration_20260410_091859_add_product_variants from './20260410_091859_add_product_variants';
 import * as migration_20260410_120000_add_colors_sizes from './20260410_120000_add_colors_sizes';
 import * as migration_20260410_130000_woocommerce_variants from './20260410_130000_woocommerce_variants';
+import * as migration_20260410_183000_fix_array_ids from './20260410_183000_fix_array_ids';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260410_130000_woocommerce_variants.up,
     down: migration_20260410_130000_woocommerce_variants.down,
     name: '20260410_130000_woocommerce_variants',
+  },
+  {
+    up: migration_20260410_183000_fix_array_ids.up,
+    down: migration_20260410_183000_fix_array_ids.down,
+    name: '20260410_183000_fix_array_ids',
   },
 ];
