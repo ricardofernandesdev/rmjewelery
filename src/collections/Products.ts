@@ -110,14 +110,12 @@ export const Products: CollectionConfig = {
       label: 'Atributo: Cor',
       type: 'checkbox',
       defaultValue: false,
-      admin: { position: 'sidebar' },
     },
     {
       name: 'enableSizes',
       label: 'Atributo: Tamanho',
       type: 'checkbox',
       defaultValue: false,
-      admin: { position: 'sidebar' },
     },
     // ══════════════════════════════════════════
     // PASSO 2 — Termos (definir valores)
