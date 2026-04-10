@@ -9,10 +9,16 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   //
   // This only deletes the orphaned relationship records — no blocks
   // or other homepage configuration is touched.
-  await db.execute(sql`
-    DELETE FROM home_settings_rels
-    WHERE path LIKE 'sections.%.products';
-  `)
+  // Check if table exists first — Neon doesn't have home_settings_rels
+  // but local dev does. Use try/catch so migration doesn't fail on Neon.
+  try {
+    await db.execute(sql`
+      DELETE FROM home_settings_rels
+      WHERE path LIKE 'sections.%.products';
+    `)
+  } catch (e) {
+    // Table doesn't exist — nothing to clean up
+  }
 }
 
 export async function down({ db: _db }: MigrateDownArgs): Promise<void> {
