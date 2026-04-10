@@ -64,7 +64,6 @@ export const ProductDetailClient: React.FC<Props> = ({
                 onSelectionChange={handleSelectionChange}
               />
             </div>
-            <div className="border-t border-gray-100" />
           </>
         )}
 
