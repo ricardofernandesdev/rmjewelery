@@ -142,7 +142,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           basePrice={price}
           afterVariants={
             product.description ? (
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="pt-4">
                 <div className="prose prose-sm prose-p:text-brand-gray prose-headings:text-brand-dark max-w-none">
                   <RichText data={product.description} />
                 </div>

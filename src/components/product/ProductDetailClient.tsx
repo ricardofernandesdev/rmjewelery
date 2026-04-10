@@ -53,7 +53,8 @@ export const ProductDetailClient: React.FC<Props> = ({
         {children}
 
         {hasOptions && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="border-t border-gray-100" />
+          <div className="py-[20px]">
             <VariantSelector
               colorTerms={colorTerms}
               sizeTerms={sizeTerms}
@@ -62,6 +63,7 @@ export const ProductDetailClient: React.FC<Props> = ({
               onSelectionChange={handleSelectionChange}
             />
           </div>
+          <div className="border-t border-gray-100" />
         )}
 
         {afterVariants}
