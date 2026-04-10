@@ -62,76 +62,70 @@ const DiamondLoaderInner: React.FC = () => {
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none"
-      style={{ background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(2px)' }}
     >
       <div className="relative">
         <svg
-          width="72"
-          height="72"
+          width="120"
+          height="120"
           viewBox="0 0 100 100"
           className="diamond-loader-svg"
         >
-          <defs>
-            <linearGradient id="diamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#F5E6C8" />
-              <stop offset="30%" stopColor="#D4AF37" />
-              <stop offset="60%" stopColor="#C9A961" />
-              <stop offset="100%" stopColor="#8B6914" />
-            </linearGradient>
-            <linearGradient id="diamondGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.3" />
-            </linearGradient>
-          </defs>
-
-          {/* Main diamond shape */}
+          {/* Main diamond shape — solid black with facet lines */}
           <g className="diamond-rotate">
             {/* Top crown */}
             <polygon
               points="50,10 20,40 50,35 80,40"
-              fill="url(#diamondGrad)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#0a0a0a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
             {/* Left facet */}
             <polygon
               points="20,40 50,35 35,50"
-              fill="url(#diamondGradLight)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#1a1a1a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
             {/* Right facet */}
             <polygon
               points="80,40 50,35 65,50"
-              fill="url(#diamondGrad)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#0a0a0a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
             {/* Center facet */}
             <polygon
               points="35,50 50,35 65,50"
-              fill="url(#diamondGradLight)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#2a2a2a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
             {/* Pavilion (bottom) */}
             <polygon
               points="20,40 35,50 50,90"
-              fill="url(#diamondGrad)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#0a0a0a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
             <polygon
               points="35,50 65,50 50,90"
-              fill="url(#diamondGradLight)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#1a1a1a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
             <polygon
               points="65,50 80,40 50,90"
-              fill="url(#diamondGrad)"
-              stroke="#8B6914"
-              strokeWidth="0.5"
+              fill="#0a0a0a"
+              stroke="#0a0a0a"
+              strokeWidth="1"
+              strokeLinejoin="round"
             />
           </g>
         </svg>
@@ -144,7 +138,7 @@ const DiamondLoaderInner: React.FC = () => {
 
       <style jsx>{`
         .diamond-loader-svg {
-          filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
+          filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
           animation: diamond-pulse 1.4s ease-in-out infinite;
         }
         .diamond-rotate {
@@ -157,39 +151,39 @@ const DiamondLoaderInner: React.FC = () => {
         }
         @keyframes diamond-pulse {
           0%, 100% {
-            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
             transform: scale(1);
           }
           50% {
-            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.8));
+            filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
             transform: scale(1.05);
           }
         }
         .sparkle {
           position: absolute;
-          color: #D4AF37;
-          font-size: 12px;
+          color: #0a0a0a;
+          font-size: 14px;
           pointer-events: none;
           opacity: 0;
           animation: sparkle-fade 1.8s ease-in-out infinite;
-          text-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
+          text-shadow: none;
         }
         .sparkle-1 {
-          top: -8px;
-          left: -8px;
+          top: -12px;
+          left: -12px;
           animation-delay: 0s;
         }
         .sparkle-2 {
           top: 50%;
-          right: -12px;
+          right: -16px;
           animation-delay: 0.6s;
-          font-size: 10px;
+          font-size: 12px;
         }
         .sparkle-3 {
-          bottom: -8px;
+          bottom: -12px;
           left: 30%;
           animation-delay: 1.2s;
-          font-size: 14px;
+          font-size: 16px;
         }
         @keyframes sparkle-fade {
           0%, 100% { opacity: 0; transform: scale(0.5); }
