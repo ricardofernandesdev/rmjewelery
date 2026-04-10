@@ -1,4 +1,3 @@
-import { MediaList as MediaList_968817b8eed119e8141508db817f3f5b } from '../../../../src/components/admin/MediaList'
 import { CategoryPreviewButton as CategoryPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821 } from '../../../../src/components/admin/PreviewButton'
 import { CategoriesList as CategoriesList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -25,6 +24,8 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ColorPickerField as ColorPickerField_85d2ec7f8f1f8605bd8abc216b3dfa7e } from '../../../../src/components/admin/ColorPickerField'
+import { VariantColorSelect as VariantColorSelect_7f99f7fe2eb6f4270e155a92c06c87d8 } from '../../../../src/components/admin/VariantColorSelect'
+import { VariantSizeSelect as VariantSizeSelect_2a218e1a6205846e93016d0a32ac526d } from '../../../../src/components/admin/VariantSizeSelect'
 import { ProductPreviewButton as ProductPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821 } from '../../../../src/components/admin/PreviewButton'
 import { ProductsList as ProductsList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
 import { UserEdit as UserEdit_385d5fb107e188a8e8872cac737797dc } from '../../../../src/components/admin/UserEdit'
@@ -41,7 +42,6 @@ import { MediaBulkUpload as MediaBulkUpload_45bbb25cca5032fd0dfcc157cfb533d5 } f
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
-  "./src/components/admin/MediaList#MediaList": MediaList_968817b8eed119e8141508db817f3f5b,
   "./src/components/admin/PreviewButton#CategoryPreviewButton": CategoryPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821,
   "./src/components/admin/CollectionList#CategoriesList": CategoriesList_d146a93ced1c7ad8e789610d5785ad89,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -68,6 +68,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "./src/components/admin/ColorPickerField#ColorPickerField": ColorPickerField_85d2ec7f8f1f8605bd8abc216b3dfa7e,
+  "./src/components/admin/VariantColorSelect#VariantColorSelect": VariantColorSelect_7f99f7fe2eb6f4270e155a92c06c87d8,
+  "./src/components/admin/VariantSizeSelect#VariantSizeSelect": VariantSizeSelect_2a218e1a6205846e93016d0a32ac526d,
   "./src/components/admin/PreviewButton#ProductPreviewButton": ProductPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821,
   "./src/components/admin/CollectionList#ProductsList": ProductsList_d146a93ced1c7ad8e789610d5785ad89,
   "./src/components/admin/UserEdit#UserEdit": UserEdit_385d5fb107e188a8e8872cac737797dc,
