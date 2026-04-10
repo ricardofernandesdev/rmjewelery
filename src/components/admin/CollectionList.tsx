@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ListViewServerProps } from 'payload'
+import { getPayload as getPayloadClient } from '@/lib/payload'
 import { CollectionListClient } from './CollectionListClient'
 import './MediaList.scss'
 
@@ -96,23 +97,17 @@ async function renderList(props: ListViewServerProps, slug: string) {
           if (typeof doc.image === 'object' && doc.image) {
             row._imageUrl = doc.image.sizes?.thumbnail?.url || doc.image.url || ''
           } else if (doc.image) {
-            // image is just an ID — resolve the URL
-            row._imageUrl = `/api/media/file/${doc.image}` // fallback
+            // image is just an ID — resolve via Payload API
             try {
-              const { initPageResult } = props as any
-              if (initPageResult?.req?.payload) {
-                const media = await initPageResult.req.payload.findByID({
-                  collection: 'media',
-                  id: doc.image,
-                  depth: 0,
-                  req: initPageResult.req,
-                })
-                if (media) {
-                  row._imageUrl = media.sizes?.thumbnail?.url || media.url || ''
-                }
-              }
+              const payload = await getPayloadClient()
+              const media = await payload.findByID({
+                collection: 'media',
+                id: doc.image,
+                depth: 0,
+              })
+              row._imageUrl = media?.sizes?.thumbnail?.url || media?.url || ''
             } catch {
-              // ignore
+              row._imageUrl = ''
             }
           } else {
             row._imageUrl = ''
