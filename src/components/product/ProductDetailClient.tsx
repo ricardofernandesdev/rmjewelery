@@ -15,6 +15,7 @@ type Props = {
   variants: Variant[]
   basePrice: number
   children?: React.ReactNode
+  afterVariants?: React.ReactNode
 }
 
 export const ProductDetailClient: React.FC<Props> = ({
@@ -24,6 +25,7 @@ export const ProductDetailClient: React.FC<Props> = ({
   variants,
   basePrice,
   children,
+  afterVariants,
 }) => {
   const [activeImages, setActiveImages] = useState<Media[]>(mainImages)
   const hasOptions = colorTerms.length > 0 || sizeTerms.length > 0
@@ -59,6 +61,8 @@ export const ProductDetailClient: React.FC<Props> = ({
             onSelectionChange={handleSelectionChange}
           />
         )}
+
+        {afterVariants}
       </div>
     </div>
   )
