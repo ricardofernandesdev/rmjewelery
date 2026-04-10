@@ -77,12 +77,13 @@ export const Products: CollectionConfig = {
     },
     {
       name: 'price',
+      label: 'Preço base',
       type: 'number',
       required: true,
       min: 0,
       admin: {
         step: 0.01,
-        description: 'Preço em euros (€)',
+        description: 'Preço em euros (€). Se tiver variantes, este é o preço base mostrado na listagem.',
       },
     },
     {
@@ -97,6 +98,55 @@ export const Products: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
+    },
+    {
+      name: 'variants',
+      label: 'Variantes',
+      type: 'array',
+      admin: {
+        description: 'Adiciona variantes ao produto (ex: cores, tamanhos). Arrasta para reordenar.',
+      },
+      fields: [
+        {
+          name: 'name',
+          label: 'Nome da variante',
+          type: 'text',
+          required: true,
+          admin: {
+            description: 'Ex: Prata, Dourado, Rose Gold, Tamanho S, etc.',
+          },
+        },
+        {
+          name: 'price',
+          label: 'Preço',
+          type: 'number',
+          min: 0,
+          admin: {
+            step: 0.01,
+            description: 'Deixa vazio para usar o preço base.',
+          },
+        },
+        {
+          name: 'availability',
+          label: 'Disponibilidade',
+          type: 'select',
+          defaultValue: 'in_stock',
+          options: [
+            { label: 'Em stock', value: 'in_stock' },
+            { label: 'Esgotado', value: 'out_of_stock' },
+          ],
+        },
+        {
+          name: 'images',
+          label: 'Imagens da variante',
+          type: 'upload',
+          relationTo: 'media',
+          hasMany: true,
+          admin: {
+            description: 'Imagens específicas desta variante. Se vazio, usa as imagens principais.',
+          },
+        },
+      ],
     },
     {
       name: 'category',

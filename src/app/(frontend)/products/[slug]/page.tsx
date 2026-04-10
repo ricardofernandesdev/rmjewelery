@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { getAllProducts, getProductBySlug, getProductsByCategory, getSiteSettings } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
-import { ProductGallery } from '@/components/product/ProductGallery'
 import { InstagramCTA } from '@/components/product/InstagramCTA'
+import { ProductDetailClient } from '@/components/product/ProductDetailClient'
 import { ProductPageExtras } from '@/components/product/ProductPageExtras'
 import type { Media, Category } from '../../../../../payload-types'
 
@@ -106,45 +106,48 @@ export default async function ProductDetailPage({ params }: PageProps) {
     imageAlt: firstImg?.alt || product.name,
   }
 
+  // Extract variants
+  const variants = ((product as any).variants || []).map((v: any) => ({
+    name: v.name,
+    price: v.price ?? null,
+    availability: v.availability || 'in_stock',
+    images: Array.isArray(v.images)
+      ? v.images.filter((img: any) => typeof img === 'object' && img !== null)
+      : [],
+  }))
+
   return (
     <Container className="py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-        {/* Gallery (left on desktop) */}
-        <ProductGallery images={images} />
-
-        {/* Product info (right on desktop) */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="font-heading text-2xl md:text-3xl font-semibold text-brand-dark">
-              {product.name}
-            </h1>
-            {category && (
-              <Link
-                href={`/categories/${category.slug}`}
-                className="text-sm text-brand-gray hover:text-brand-dark transition-colors"
-              >
-                {category.name}
-              </Link>
-            )}
-          </div>
-
-          {(product as any).price > 0 && (
-            <p className="text-xl font-semibold text-brand-dark">
-              {((product as any).price as number).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
-            </p>
+      <ProductDetailClient
+        mainImages={images}
+        variants={variants}
+        basePrice={(product as any).price || 0}
+      >
+        {/* Static content passed as children */}
+        <div>
+          <h1 className="font-heading text-2xl md:text-3xl font-semibold text-brand-dark">
+            {product.name}
+          </h1>
+          {category && (
+            <Link
+              href={`/categories/${category.slug}`}
+              className="text-sm text-brand-gray hover:text-brand-dark transition-colors"
+            >
+              {category.name}
+            </Link>
           )}
-
-          {product.description && (
-            <div className="prose prose-sm text-brand-gray max-w-none">
-              <RichText data={product.description} />
-            </div>
-          )}
-
-          <div className="mt-4">
-            <InstagramCTA instagramUrl={instagramUrl} />
-          </div>
         </div>
-      </div>
+
+        {product.description && (
+          <div className="prose prose-sm text-brand-gray max-w-none">
+            <RichText data={product.description} />
+          </div>
+        )}
+
+        <div className="mt-4">
+          <InstagramCTA instagramUrl={instagramUrl} />
+        </div>
+      </ProductDetailClient>
 
       {/* Similar + Recently Viewed */}
       <ProductPageExtras

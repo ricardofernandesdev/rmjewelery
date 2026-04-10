@@ -232,10 +232,31 @@ export interface Product {
   } | null;
   images: (number | Media)[];
   /**
-   * Preço em euros (€)
+   * Preço em euros (€). Se tiver variantes, este é o preço base mostrado na listagem.
    */
   price: number;
   availability?: ('in_stock' | 'out_of_stock') | null;
+  /**
+   * Adiciona variantes ao produto (ex: cores, tamanhos). Arrasta para reordenar.
+   */
+  variants?:
+    | {
+        /**
+         * Ex: Prata, Dourado, Rose Gold, Tamanho S, etc.
+         */
+        name: string;
+        /**
+         * Deixa vazio para usar o preço base.
+         */
+        price?: number | null;
+        availability?: ('in_stock' | 'out_of_stock') | null;
+        /**
+         * Imagens específicas desta variante. Se vazio, usa as imagens principais.
+         */
+        images?: (number | Media)[] | null;
+        id?: string | null;
+      }[]
+    | null;
   category: number | Category;
   sortOrder?: number | null;
   updatedAt: string;
@@ -473,6 +494,15 @@ export interface ProductsSelect<T extends boolean = true> {
   images?: T;
   price?: T;
   availability?: T;
+  variants?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        availability?: T;
+        images?: T;
+        id?: T;
+      };
   category?: T;
   sortOrder?: T;
   updatedAt?: T;
