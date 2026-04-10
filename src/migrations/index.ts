@@ -6,6 +6,7 @@ import * as migration_20260410_120000_add_colors_sizes from './20260410_120000_a
 import * as migration_20260410_130000_woocommerce_variants from './20260410_130000_woocommerce_variants';
 import * as migration_20260410_183000_fix_array_ids from './20260410_183000_fix_array_ids';
 import * as migration_20260410_210000_cleanup_orphaned_rels from './20260410_210000_cleanup_orphaned_rels';
+import * as migration_20260410_220000_create_home_settings_blocks from './20260410_220000_create_home_settings_blocks';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260410_210000_cleanup_orphaned_rels.up,
     down: migration_20260410_210000_cleanup_orphaned_rels.down,
     name: '20260410_210000_cleanup_orphaned_rels',
+  },
+  {
+    up: migration_20260410_220000_create_home_settings_blocks.up,
+    down: migration_20260410_220000_create_home_settings_blocks.down,
+    name: '20260410_220000_create_home_settings_blocks',
   },
 ];
