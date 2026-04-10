@@ -29,7 +29,8 @@ export const Media: CollectionConfig = {
     plural: 'Media',
   },
   admin: {
-    useAsTitle: 'alt',
+    useAsTitle: 'filename',
+    defaultColumns: ['filename', 'alt', 'updatedAt'],
   },
   access: {
     read: () => true,
