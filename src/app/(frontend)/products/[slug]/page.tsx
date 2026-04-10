@@ -196,22 +196,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           )}
         </ProductDetailClient>
 
-        {/* All product images grid */}
-        {images.length > 1 && (
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-3">
-            {images.map((img) => (
-              <div key={img.id} className="relative aspect-square bg-brand-cream overflow-hidden">
-                <img
-                  src={img.sizes?.card?.url || img.url || ''}
-                  alt={img.alt || product.name}
-                  className="w-full h-full object-contain p-4"
-                />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Similar Products */}
+        {/* Similar Products + Recently Viewed */}
         <ProductPageExtras
           currentProduct={currentProductData}
           similarProducts={similarProducts}
