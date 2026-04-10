@@ -9,6 +9,8 @@ import {
 import { Container } from '@/components/ui/Container'
 import { CategoryPageClient } from '@/components/product/CategoryPageClient'
 
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }

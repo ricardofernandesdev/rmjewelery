@@ -9,6 +9,8 @@ import { ProductDetailClient } from '@/components/product/ProductDetailClient'
 import { ProductPageExtras } from '@/components/product/ProductPageExtras'
 import type { Media, Category } from '../../../../../payload-types'
 
+export const dynamic = 'force-dynamic'
+
 type PageProps = {
   params: Promise<{ slug: string }>
 }

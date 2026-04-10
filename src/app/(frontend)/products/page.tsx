@@ -4,6 +4,8 @@ import { getAllProducts, getAllCategories } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 import { ProductGrid } from '@/components/product/ProductGrid'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Catalogo | RM Jewelry',
 }
