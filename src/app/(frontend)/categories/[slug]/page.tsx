@@ -52,7 +52,7 @@ export default async function CategoryPage({ params }: PageProps) {
   return (
     <>
       {/* ── Hero banner ── */}
-      <section className="relative w-full h-[300px] md:h-[400px] bg-brand-dark overflow-hidden -mt-[110px]">
+      <section className="relative w-full h-[300px] md:h-[400px] bg-brand-dark overflow-hidden -mt-[140px] pt-[140px]">
         {catImageUrl && (
           <Image
             src={catImageUrl}
@@ -60,7 +60,7 @@ export default async function CategoryPage({ params }: PageProps) {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center"
+            className="object-cover object-[center_40%]"
           />
         )}
         <div className="absolute inset-0 bg-black/40" />
