@@ -71,62 +71,25 @@ const DiamondLoaderInner: React.FC = () => {
           viewBox="0 0 100 100"
           className="diamond-loader-svg"
         >
-          {/* Main diamond shape — solid black with facet lines */}
-          <g className="diamond-rotate">
-            {/* Top crown */}
-            <polygon
-              points="50,10 20,40 50,35 80,40"
-              fill="#0a0a0a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-            {/* Left facet */}
-            <polygon
-              points="20,40 50,35 35,50"
-              fill="#1a1a1a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-            {/* Right facet */}
-            <polygon
-              points="80,40 50,35 65,50"
-              fill="#0a0a0a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-            {/* Center facet */}
-            <polygon
-              points="35,50 50,35 65,50"
-              fill="#2a2a2a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-            {/* Pavilion (bottom) */}
-            <polygon
-              points="20,40 35,50 50,90"
-              fill="#0a0a0a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-            <polygon
-              points="35,50 65,50 50,90"
-              fill="#1a1a1a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
-            <polygon
-              points="65,50 80,40 50,90"
-              fill="#0a0a0a"
-              stroke="#0a0a0a"
-              strokeWidth="1"
-              strokeLinejoin="round"
-            />
+          {/* Flat line-art diamond */}
+          <g
+            className="diamond-rotate"
+            fill="none"
+            stroke="#0a0a0a"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          >
+            {/* Outer outline */}
+            <polygon points="50,10 20,40 50,90 80,40" />
+            {/* Girdle (horizontal crown line) */}
+            <line x1="20" y1="40" x2="80" y2="40" />
+            {/* Crown facets */}
+            <line x1="35" y1="25" x2="50" y2="40" />
+            <line x1="65" y1="25" x2="50" y2="40" />
+            {/* Pavilion facets */}
+            <line x1="35" y1="40" x2="50" y2="90" />
+            <line x1="65" y1="40" x2="50" y2="90" />
           </g>
         </svg>
 
