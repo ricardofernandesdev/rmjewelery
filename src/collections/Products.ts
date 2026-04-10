@@ -102,26 +102,113 @@ export const Products: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    // ── Cores ──
     {
-      name: 'variants',
-      label: 'Variantes',
+      name: 'enableColors',
+      label: 'Ativar cores',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'colors',
+      label: 'Cores disponíveis',
       type: 'array',
       admin: {
-        description: 'Adiciona variantes ao produto (ex: cores, tamanhos). Arrasta para reordenar.',
+        description: 'Define as cores do produto. Arrasta para reordenar.',
+        condition: (data) => Boolean(data?.enableColors),
       },
       fields: [
         {
           name: 'name',
-          label: 'Nome da variante',
+          label: 'Nome',
           type: 'text',
           required: true,
+          admin: { description: 'Ex: Prata, Dourado, Rose Gold' },
+        },
+        {
+          name: 'hex',
+          label: 'Cor',
+          type: 'text',
+          required: true,
+          defaultValue: '#C0C0C0',
           admin: {
-            description: 'Ex: Prata, Dourado, Rose Gold, Tamanho S, etc.',
+            components: {
+              Field: './src/components/admin/ColorPickerField#ColorPickerField',
+            },
+          },
+        },
+        {
+          name: 'images',
+          label: 'Imagens desta cor',
+          type: 'upload',
+          relationTo: 'media',
+          hasMany: true,
+          admin: {
+            description: 'Imagens específicas desta cor. Se vazio, usa as imagens principais.',
+          },
+        },
+      ],
+    },
+    // ── Tamanhos ──
+    {
+      name: 'enableSizes',
+      label: 'Ativar tamanhos',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'sizes',
+      label: 'Tamanhos disponíveis',
+      type: 'array',
+      admin: {
+        description: 'Define os tamanhos do produto.',
+        condition: (data) => Boolean(data?.enableSizes),
+      },
+      fields: [
+        {
+          name: 'value',
+          label: 'Tamanho',
+          type: 'text',
+          required: true,
+          admin: { description: 'Ex: 17, 18, 19, S, M, L' },
+        },
+      ],
+    },
+    // ── Variantes (combinações) ──
+    {
+      name: 'variants',
+      label: 'Variantes (combinações)',
+      type: 'array',
+      admin: {
+        description: 'Cria uma linha para cada combinação de cor/tamanho que queres vender. Só preenche se quiseres preço diferente ou marcar como esgotado.',
+        condition: (data) => Boolean(data?.enableColors || data?.enableSizes),
+      },
+      fields: [
+        {
+          name: 'color',
+          label: 'Cor',
+          type: 'text',
+          admin: {
+            description: 'Nome exacto da cor (ex: Prata). Deixa vazio se não tiver cores.',
+          },
+        },
+        {
+          name: 'size',
+          label: 'Tamanho',
+          type: 'text',
+          admin: {
+            description: 'Tamanho exacto (ex: 17). Deixa vazio se não tiver tamanhos.',
           },
         },
         {
           name: 'price',
-          label: 'Preço',
+          label: 'Preço (override)',
           type: 'number',
           min: 0,
           admin: {
@@ -138,16 +225,6 @@ export const Products: CollectionConfig = {
             { label: 'Em stock', value: 'in_stock' },
             { label: 'Esgotado', value: 'out_of_stock' },
           ],
-        },
-        {
-          name: 'images',
-          label: 'Imagens da variante',
-          type: 'upload',
-          relationTo: 'media',
-          hasMany: true,
-          admin: {
-            description: 'Imagens específicas desta variante. Se vazio, usa as imagens principais.',
-          },
         },
       ],
     },

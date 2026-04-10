@@ -236,24 +236,55 @@ export interface Product {
    */
   price: number;
   availability?: ('in_stock' | 'out_of_stock') | null;
+  enableColors?: boolean | null;
   /**
-   * Adiciona variantes ao produto (ex: cores, tamanhos). Arrasta para reordenar.
+   * Define as cores do produto. Arrasta para reordenar.
+   */
+  colors?:
+    | {
+        /**
+         * Ex: Prata, Dourado, Rose Gold
+         */
+        name: string;
+        hex: string;
+        /**
+         * Imagens específicas desta cor. Se vazio, usa as imagens principais.
+         */
+        images?: (number | Media)[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  enableSizes?: boolean | null;
+  /**
+   * Define os tamanhos do produto.
+   */
+  sizes?:
+    | {
+        /**
+         * Ex: 17, 18, 19, S, M, L
+         */
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Cria uma linha para cada combinação de cor/tamanho que queres vender. Só preenche se quiseres preço diferente ou marcar como esgotado.
    */
   variants?:
     | {
         /**
-         * Ex: Prata, Dourado, Rose Gold, Tamanho S, etc.
+         * Nome exacto da cor (ex: Prata). Deixa vazio se não tiver cores.
          */
-        name: string;
+        color?: string | null;
+        /**
+         * Tamanho exacto (ex: 17). Deixa vazio se não tiver tamanhos.
+         */
+        size?: string | null;
         /**
          * Deixa vazio para usar o preço base.
          */
         price?: number | null;
         availability?: ('in_stock' | 'out_of_stock') | null;
-        /**
-         * Imagens específicas desta variante. Se vazio, usa as imagens principais.
-         */
-        images?: (number | Media)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -494,13 +525,29 @@ export interface ProductsSelect<T extends boolean = true> {
   images?: T;
   price?: T;
   availability?: T;
-  variants?:
+  enableColors?: T;
+  colors?:
     | T
     | {
         name?: T;
+        hex?: T;
+        images?: T;
+        id?: T;
+      };
+  enableSizes?: T;
+  sizes?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  variants?:
+    | T
+    | {
+        color?: T;
+        size?: T;
         price?: T;
         availability?: T;
-        images?: T;
         id?: T;
       };
   category?: T;
