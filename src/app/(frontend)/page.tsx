@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getHomeSettings, getAllCategories } from '@/lib/queries'
+import { getHomeSettings, getAllCategories, getAllProducts } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 
 export const revalidate = 60 // revalidate every 60 seconds
@@ -209,13 +209,12 @@ export default async function HomePage() {
         }
 
         if (block.blockType === 'featuredProducts') {
-          const products = (block.products || []).filter((p: any) => typeof p === 'object')
           return (
             <FeaturedProductsGallery
               key={key}
               eyebrow={block.eyebrow}
               title={block.title}
-              products={products}
+              count={block.count || 10}
             />
           )
         }

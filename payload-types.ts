@@ -715,9 +715,9 @@ export interface HomeSetting {
             eyebrow?: string | null;
             title?: string | null;
             /**
-             * Seleciona os produtos a mostrar na galeria horizontal.
+             * Número de produtos aleatórios a mostrar.
              */
-            products?: (number | Product)[] | null;
+            count?: number | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'featuredProducts';
@@ -834,7 +834,7 @@ export interface HomeSettingsSelect<T extends boolean = true> {
           | {
               eyebrow?: T;
               title?: T;
-              products?: T;
+              count?: T;
               id?: T;
               blockName?: T;
             };
