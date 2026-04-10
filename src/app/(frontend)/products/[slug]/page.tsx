@@ -158,7 +158,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="font-heading text-2xl md:text-3xl font-semibold text-brand-dark">
               {product.name}
             </h1>
-            {price > 0 && variants.length === 0 && (
+            {price > 0 && colors.length === 0 && sizes.length === 0 && (
               <p className="text-lg text-brand-gray mt-1">
                 {price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
               </p>
