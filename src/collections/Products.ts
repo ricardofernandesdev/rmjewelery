@@ -148,16 +148,6 @@ export const Products: CollectionConfig = {
             },
           },
         },
-        {
-          name: 'images',
-          label: 'Imagens desta cor',
-          type: 'upload',
-          relationTo: 'media',
-          hasMany: true,
-          admin: {
-            description: 'Imagens específicas. Se vazio, usa as imagens principais.',
-          },
-        },
       ],
     },
     {
@@ -192,20 +182,24 @@ export const Products: CollectionConfig = {
       fields: [
         {
           name: 'color',
-          label: 'Cor (nome do termo)',
+          label: 'Cor',
           type: 'text',
           admin: {
-            description: 'Escreve o nome exacto da cor definida no Passo 2.',
             condition: (data) => Boolean(data?.enableColors),
+            components: {
+              Field: './src/components/admin/VariantColorSelect#VariantColorSelect',
+            },
           },
         },
         {
           name: 'size',
-          label: 'Tamanho (valor do termo)',
+          label: 'Tamanho',
           type: 'text',
           admin: {
-            description: 'Escreve o tamanho exacto definido no Passo 2.',
             condition: (data) => Boolean(data?.enableSizes),
+            components: {
+              Field: './src/components/admin/VariantSizeSelect#VariantSizeSelect',
+            },
           },
         },
         {

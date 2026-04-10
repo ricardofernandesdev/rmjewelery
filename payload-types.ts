@@ -248,10 +248,6 @@ export interface Product {
          */
         name: string;
         hex: string;
-        /**
-         * Imagens específicas. Se vazio, usa as imagens principais.
-         */
-        images?: (number | Media)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -272,13 +268,7 @@ export interface Product {
    */
   variants?:
     | {
-        /**
-         * Escreve o nome exacto da cor definida no Passo 2.
-         */
         color?: string | null;
-        /**
-         * Escreve o tamanho exacto definido no Passo 2.
-         */
         size?: string | null;
         /**
          * Deixa vazio para usar o preço base.
@@ -536,7 +526,6 @@ export interface ProductsSelect<T extends boolean = true> {
     | {
         name?: T;
         hex?: T;
-        images?: T;
         id?: T;
       };
   sizeTerms?:

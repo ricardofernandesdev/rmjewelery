@@ -30,13 +30,6 @@ export const Media: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'alt',
-    components: {
-      views: {
-        list: {
-          Component: './src/components/admin/MediaList#MediaList',
-        },
-      },
-    },
   },
   access: {
     read: () => true,

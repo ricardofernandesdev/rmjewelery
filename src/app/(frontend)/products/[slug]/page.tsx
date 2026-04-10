@@ -112,9 +112,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const colorTerms = ((product as any).colorTerms || []).map((c: any) => ({
     name: c.name || '',
     hex: c.hex || '#ccc',
-    images: Array.isArray(c.images)
-      ? c.images.filter((img: any) => typeof img === 'object' && img !== null)
-      : [],
   }))
   const sizeTerms = ((product as any).sizeTerms || []).map((s: any) => ({
     value: s.value || '',
