@@ -4,6 +4,7 @@ import '../globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { MainWrapper } from '@/components/layout/MainWrapper'
+import { TopProgressBar } from '@/components/layout/TopProgressBar'
 import { SiteStatusGate } from '@/components/layout/SiteStatusGate'
 import { getSiteSettings } from '@/lib/queries'
 import { getPayload } from '@/lib/payload'
@@ -46,6 +47,7 @@ export default async function FrontendLayout({ children }: { children: React.Rea
 
   return (
     <div className="font-body min-h-screen flex flex-col bg-white relative">
+      <TopProgressBar />
       <Header />
       <MainWrapper>{children}</MainWrapper>
       <Footer />
