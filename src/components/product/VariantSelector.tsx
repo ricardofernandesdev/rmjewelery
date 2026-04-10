@@ -1,106 +1,111 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 
-type SizeEntry = {
-  value: string
-  price?: number | null
-  availability?: string
-}
-
-type Color = {
+type ColorTerm = {
   name: string
   hex: string
+  images?: any[]
+}
+
+type SizeTerm = {
+  value: string
+}
+
+type Variant = {
+  color?: string
+  size?: string
   price?: number | null
   availability?: string
   images?: any[]
-  sizes?: SizeEntry[]
 }
 
 type Props = {
-  colors: Color[]
-  sizes: SizeEntry[]
+  colorTerms: ColorTerm[]
+  sizeTerms: SizeTerm[]
+  variants: Variant[]
   basePrice: number
-  onSelectionChange?: (selection: { color?: Color; size?: string; images?: any[] }) => void
+  onSelectionChange?: (selection: {
+    color?: ColorTerm
+    size?: string
+    price: number
+    images?: any[]
+  }) => void
 }
 
 export const VariantSelector: React.FC<Props> = ({
-  colors,
-  sizes,
+  colorTerms,
+  sizeTerms,
+  variants,
   basePrice,
   onSelectionChange,
 }) => {
-  const [selectedColor, setSelectedColor] = useState<string>(colors[0]?.name || '')
-  const [selectedSize, setSelectedSize] = useState<string>('')
+  const hasColors = colorTerms.length > 0
+  const hasSizes = sizeTerms.length > 0
 
-  const hasColors = colors.length > 0
-  const hasSizes = sizes.length > 0
+  const [selectedColor, setSelectedColor] = useState<string>(colorTerms[0]?.name || '')
+  const [selectedSize, setSelectedSize] = useState<string>(sizeTerms[0]?.value || '')
 
-  // Get the active color object
-  const activeColor = useMemo(
-    () => colors.find((c) => c.name === selectedColor),
-    [colors, selectedColor],
+  // Find variant for a given combination
+  const findVariant = (color?: string, size?: string): Variant | undefined => {
+    return variants.find((v) => {
+      const colorMatch = !hasColors || v.color === color
+      const sizeMatch = !hasSizes || v.size === size
+      return colorMatch && sizeMatch
+    })
+  }
+
+  const currentVariant = useMemo(
+    () => findVariant(selectedColor, selectedSize),
+    [selectedColor, selectedSize, variants],
   )
 
-  // Determine which sizes to show
-  const activeSizes = useMemo(() => {
-    // If colors have embedded sizes, use those
-    if (hasColors && activeColor?.sizes && activeColor.sizes.length > 0) {
-      return activeColor.sizes
-    }
-    // Otherwise use product-level sizes
-    return sizes
-  }, [hasColors, activeColor, sizes])
+  const currentPrice = currentVariant?.price ?? basePrice
+  const isOutOfStock = currentVariant?.availability === 'out_of_stock'
 
-  // Auto-select first size
-  useMemo(() => {
-    if (activeSizes.length > 0 && !selectedSize) {
-      const firstAvailable = activeSizes.find((s) => s.availability !== 'out_of_stock')
-      setSelectedSize(firstAvailable?.value || activeSizes[0].value)
-    }
-  }, [activeSizes])
+  // Check if a size is available for current color
+  const isSizeAvailable = (size: string) => {
+    const v = findVariant(selectedColor, size)
+    return !v || v.availability !== 'out_of_stock'
+  }
 
-  // Current price
-  const currentPrice = useMemo(() => {
-    if (activeSizes.length > 0) {
-      const sizeEntry = activeSizes.find((s) => s.value === selectedSize)
-      if (sizeEntry?.price != null) return sizeEntry.price
-    }
-    if (activeColor?.price != null) return activeColor.price
-    return basePrice
-  }, [activeSizes, selectedSize, activeColor, basePrice])
+  // Get images: variant > color term > main
+  const getImages = (color?: string, variant?: Variant): any[] | undefined => {
+    if (variant?.images && variant.images.length > 0) return variant.images
+    const colorTerm = colorTerms.find((c) => c.name === color)
+    if (colorTerm?.images && colorTerm.images.length > 0) return colorTerm.images
+    return undefined
+  }
 
-  // Current availability
-  const isOutOfStock = useMemo(() => {
-    if (activeSizes.length > 0) {
-      const sizeEntry = activeSizes.find((s) => s.value === selectedSize)
-      return sizeEntry?.availability === 'out_of_stock'
-    }
-    return activeColor?.availability === 'out_of_stock'
-  }, [activeSizes, selectedSize, activeColor])
+  const notify = (color: string, size: string) => {
+    const v = findVariant(color, size)
+    const colorTerm = colorTerms.find((c) => c.name === color)
+    onSelectionChange?.({
+      color: colorTerm,
+      size,
+      price: v?.price ?? basePrice,
+      images: getImages(color, v),
+    })
+  }
 
   const handleColorChange = (colorName: string) => {
     setSelectedColor(colorName)
-    const color = colors.find((c) => c.name === colorName)
-
-    // Reset size to first available for new color
-    const newSizes = color?.sizes && color.sizes.length > 0 ? color.sizes : sizes
-    const firstAvailable = newSizes.find((s) => s.availability !== 'out_of_stock')
-    setSelectedSize(firstAvailable?.value || newSizes[0]?.value || '')
-
-    onSelectionChange?.({
-      color,
-      size: firstAvailable?.value || '',
-      images: color?.images,
-    })
+    // Auto-select first available size for this color
+    if (hasSizes) {
+      const firstAvail = sizeTerms.find((s) => {
+        const v = findVariant(colorName, s.value)
+        return !v || v.availability !== 'out_of_stock'
+      })
+      const sz = firstAvail?.value || selectedSize
+      setSelectedSize(sz)
+      notify(colorName, sz)
+    } else {
+      notify(colorName, '')
+    }
   }
 
   const handleSizeChange = (size: string) => {
     setSelectedSize(size)
-    onSelectionChange?.({
-      color: activeColor,
-      size,
-      images: activeColor?.images,
-    })
+    notify(selectedColor, size)
   }
 
   return (
@@ -108,7 +113,7 @@ export const VariantSelector: React.FC<Props> = ({
       {/* Color swatches */}
       {hasColors && (
         <div className="flex items-center gap-3">
-          {colors.map((color) => (
+          {colorTerms.map((color) => (
             <button
               key={color.name}
               type="button"
@@ -126,17 +131,17 @@ export const VariantSelector: React.FC<Props> = ({
       )}
 
       {/* Size buttons */}
-      {activeSizes.length > 0 && (
+      {hasSizes && (
         <div className="flex flex-wrap gap-2">
-          {activeSizes.map((size) => {
-            const available = size.availability !== 'out_of_stock'
+          {sizeTerms.map(({ value }) => {
+            const available = isSizeAvailable(value)
             return (
               <button
-                key={size.value}
+                key={value}
                 type="button"
-                onClick={() => available && handleSizeChange(size.value)}
+                onClick={() => available && handleSizeChange(value)}
                 className={`min-w-[44px] px-3 py-2 text-sm border transition-colors ${
-                  size.value === selectedSize
+                  value === selectedSize
                     ? 'border-brand-dark bg-brand-dark text-white'
                     : !available
                       ? 'border-gray-200 text-brand-gray/40 line-through cursor-not-allowed'
@@ -144,7 +149,7 @@ export const VariantSelector: React.FC<Props> = ({
                 }`}
                 disabled={!available}
               >
-                {size.value}
+                {value}
               </button>
             )
           })}
@@ -156,7 +161,6 @@ export const VariantSelector: React.FC<Props> = ({
         {currentPrice.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
       </p>
 
-      {/* Out of stock */}
       {isOutOfStock && (
         <p className="text-sm text-red-500 font-medium">Esgotado</p>
       )}

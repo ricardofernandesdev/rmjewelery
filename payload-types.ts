@@ -237,10 +237,11 @@ export interface Product {
   price: number;
   availability?: ('in_stock' | 'out_of_stock') | null;
   enableColors?: boolean | null;
+  enableSizes?: boolean | null;
   /**
-   * Define as cores do produto. Arrasta para reordenar.
+   * Define as cores disponíveis. Arrasta para reordenar.
    */
-  colors?:
+  colorTerms?:
     | {
         /**
          * Ex: Prata, Dourado, Rose Gold
@@ -248,17 +249,16 @@ export interface Product {
         name: string;
         hex: string;
         /**
-         * Imagens específicas desta cor. Se vazio, usa as imagens principais.
+         * Imagens específicas. Se vazio, usa as imagens principais.
          */
         images?: (number | Media)[] | null;
         id?: string | null;
       }[]
     | null;
-  enableSizes?: boolean | null;
   /**
-   * Define os tamanhos do produto.
+   * Define os tamanhos disponíveis.
    */
-  sizes?:
+  sizeTerms?:
     | {
         /**
          * Ex: 17, 18, 19, S, M, L
@@ -268,16 +268,16 @@ export interface Product {
       }[]
     | null;
   /**
-   * Cria uma linha para cada combinação de cor/tamanho que queres vender. Só preenche se quiseres preço diferente ou marcar como esgotado.
+   * Cria uma variante para cada combinação. Usa os nomes exactos dos termos definidos acima.
    */
   variants?:
     | {
         /**
-         * Nome exacto da cor (ex: Prata). Deixa vazio se não tiver cores.
+         * Escreve o nome exacto da cor definida no Passo 2.
          */
         color?: string | null;
         /**
-         * Tamanho exacto (ex: 17). Deixa vazio se não tiver tamanhos.
+         * Escreve o tamanho exacto definido no Passo 2.
          */
         size?: string | null;
         /**
@@ -285,6 +285,10 @@ export interface Product {
          */
         price?: number | null;
         availability?: ('in_stock' | 'out_of_stock') | null;
+        /**
+         * Se vazio, usa as imagens da cor ou as principais.
+         */
+        images?: (number | Media)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -526,7 +530,8 @@ export interface ProductsSelect<T extends boolean = true> {
   price?: T;
   availability?: T;
   enableColors?: T;
-  colors?:
+  enableSizes?: T;
+  colorTerms?:
     | T
     | {
         name?: T;
@@ -534,8 +539,7 @@ export interface ProductsSelect<T extends boolean = true> {
         images?: T;
         id?: T;
       };
-  enableSizes?: T;
-  sizes?:
+  sizeTerms?:
     | T
     | {
         value?: T;
@@ -548,6 +552,7 @@ export interface ProductsSelect<T extends boolean = true> {
         size?: T;
         price?: T;
         availability?: T;
+        images?: T;
         id?: T;
       };
   category?: T;

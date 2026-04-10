@@ -108,26 +108,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
     imageAlt: firstImg?.alt || product.name,
   }
 
-  // Extract colors with nested sizes
-  const colors = ((product as any).colors || []).map((c: any) => ({
+  // Passo 2 — Termos
+  const colorTerms = ((product as any).colorTerms || []).map((c: any) => ({
     name: c.name || '',
     hex: c.hex || '#ccc',
-    price: c.price ?? null,
-    availability: c.availability || 'in_stock',
     images: Array.isArray(c.images)
       ? c.images.filter((img: any) => typeof img === 'object' && img !== null)
       : [],
-    sizes: ((c.sizes || []) as any[]).map((s: any) => ({
-      value: s.value || '',
-      price: s.price ?? null,
-      availability: s.availability || 'in_stock',
-    })),
   }))
-  // Product-level sizes (when no colors)
-  const sizes = ((product as any).sizes || []).map((s: any) => ({
+  const sizeTerms = ((product as any).sizeTerms || []).map((s: any) => ({
     value: s.value || '',
-    price: s.price ?? null,
-    availability: s.availability || 'in_stock',
+  }))
+  // Passo 3 — Variantes
+  const variants = ((product as any).variants || []).map((v: any) => ({
+    color: v.color || '',
+    size: v.size || '',
+    price: v.price ?? null,
+    availability: v.availability || 'in_stock',
+    images: Array.isArray(v.images)
+      ? v.images.filter((img: any) => typeof img === 'object' && img !== null)
+      : [],
   }))
 
   const price = (product as any).price || 0
@@ -139,8 +139,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
       <Container className="py-8">
         <ProductDetailClient
           mainImages={images}
-          colors={colors}
-          sizes={sizes}
+          colorTerms={colorTerms}
+          sizeTerms={sizeTerms}
+          variants={variants}
           basePrice={price}
         >
           {/* Category */}
@@ -158,7 +159,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="font-heading text-2xl md:text-3xl font-semibold text-brand-dark">
               {product.name}
             </h1>
-            {price > 0 && colors.length === 0 && sizes.length === 0 && (
+            {price > 0 && colorTerms.length === 0 && sizeTerms.length === 0 && variants.length === 0 && (
               <p className="text-lg text-brand-gray mt-1">
                 {price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
               </p>

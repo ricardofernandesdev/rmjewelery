@@ -102,22 +102,32 @@ export const Products: CollectionConfig = {
         position: 'sidebar',
       },
     },
-    // ── Cores ──
+    // ══════════════════════════════════════════
+    // PASSO 1 — Atributos (escolher quais)
+    // ══════════════════════════════════════════
     {
       name: 'enableColors',
-      label: 'Ativar cores',
+      label: 'Atributo: Cor',
       type: 'checkbox',
       defaultValue: false,
-      admin: {
-        position: 'sidebar',
-      },
+      admin: { position: 'sidebar' },
     },
     {
-      name: 'colors',
-      label: 'Cores disponíveis',
+      name: 'enableSizes',
+      label: 'Atributo: Tamanho',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: { position: 'sidebar' },
+    },
+    // ══════════════════════════════════════════
+    // PASSO 2 — Termos (definir valores)
+    // ══════════════════════════════════════════
+    {
+      name: 'colorTerms',
+      label: 'Passo 2 — Termos de Cor',
       type: 'array',
       admin: {
-        description: 'Define as cores do produto. Cada cor pode ter preço, disponibilidade e imagens próprias.',
+        description: 'Define as cores disponíveis. Arrasta para reordenar.',
         condition: (data) => Boolean(data?.enableColors),
       },
       fields: [
@@ -138,6 +148,66 @@ export const Products: CollectionConfig = {
             components: {
               Field: './src/components/admin/ColorPickerField#ColorPickerField',
             },
+          },
+        },
+        {
+          name: 'images',
+          label: 'Imagens desta cor',
+          type: 'upload',
+          relationTo: 'media',
+          hasMany: true,
+          admin: {
+            description: 'Imagens específicas. Se vazio, usa as imagens principais.',
+          },
+        },
+      ],
+    },
+    {
+      name: 'sizeTerms',
+      label: 'Passo 2 — Termos de Tamanho',
+      type: 'array',
+      admin: {
+        description: 'Define os tamanhos disponíveis.',
+        condition: (data) => Boolean(data?.enableSizes),
+      },
+      fields: [
+        {
+          name: 'value',
+          label: 'Tamanho',
+          type: 'text',
+          required: true,
+          admin: { description: 'Ex: 17, 18, 19, S, M, L' },
+        },
+      ],
+    },
+    // ══════════════════════════════════════════
+    // PASSO 3 — Variantes (combinações)
+    // ══════════════════════════════════════════
+    {
+      name: 'variants',
+      label: 'Passo 3 — Variantes',
+      type: 'array',
+      admin: {
+        description: 'Cria uma variante para cada combinação. Usa os nomes exactos dos termos definidos acima.',
+        condition: (data) => Boolean(data?.enableColors || data?.enableSizes),
+      },
+      fields: [
+        {
+          name: 'color',
+          label: 'Cor (nome do termo)',
+          type: 'text',
+          admin: {
+            description: 'Escreve o nome exacto da cor definida no Passo 2.',
+            condition: (data) => Boolean(data?.enableColors),
+          },
+        },
+        {
+          name: 'size',
+          label: 'Tamanho (valor do termo)',
+          type: 'text',
+          admin: {
+            description: 'Escreve o tamanho exacto definido no Passo 2.',
+            condition: (data) => Boolean(data?.enableSizes),
           },
         },
         {
@@ -162,103 +232,13 @@ export const Products: CollectionConfig = {
         },
         {
           name: 'images',
-          label: 'Imagens desta cor',
+          label: 'Imagens desta variante',
           type: 'upload',
           relationTo: 'media',
           hasMany: true,
           admin: {
-            description: 'Imagens específicas desta cor. Se vazio, usa as imagens principais.',
+            description: 'Se vazio, usa as imagens da cor ou as principais.',
           },
-        },
-        {
-          name: 'sizes',
-          label: 'Tamanhos desta cor',
-          type: 'array',
-          admin: {
-            description: 'Define tamanhos e disponibilidade para esta cor.',
-            condition: (_, siblingData) => {
-              // Access root data to check enableSizes
-              return true // Always show, visibility controlled by enableSizes at product level
-            },
-          },
-          fields: [
-            {
-              name: 'value',
-              label: 'Tamanho',
-              type: 'text',
-              required: true,
-              admin: { description: 'Ex: 17, 18, 19' },
-            },
-            {
-              name: 'price',
-              label: 'Preço',
-              type: 'number',
-              min: 0,
-              admin: {
-                step: 0.01,
-                description: 'Deixa vazio para usar o preço da cor ou base.',
-              },
-            },
-            {
-              name: 'availability',
-              label: 'Disponibilidade',
-              type: 'select',
-              defaultValue: 'in_stock',
-              options: [
-                { label: 'Em stock', value: 'in_stock' },
-                { label: 'Esgotado', value: 'out_of_stock' },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    // ── Tamanhos (sem cores) ──
-    {
-      name: 'enableSizes',
-      label: 'Ativar tamanhos',
-      type: 'checkbox',
-      defaultValue: false,
-      admin: {
-        position: 'sidebar',
-        description: 'Para tamanhos sem cores. Se tiver cores, define os tamanhos dentro de cada cor.',
-      },
-    },
-    {
-      name: 'sizes',
-      label: 'Tamanhos disponíveis',
-      type: 'array',
-      admin: {
-        description: 'Define os tamanhos quando não há cores. Se tiver cores, usa os tamanhos dentro de cada cor.',
-        condition: (data) => Boolean(data?.enableSizes && !data?.enableColors),
-      },
-      fields: [
-        {
-          name: 'value',
-          label: 'Tamanho',
-          type: 'text',
-          required: true,
-          admin: { description: 'Ex: 17, 18, 19, S, M, L' },
-        },
-        {
-          name: 'price',
-          label: 'Preço',
-          type: 'number',
-          min: 0,
-          admin: {
-            step: 0.01,
-            description: 'Deixa vazio para usar o preço base.',
-          },
-        },
-        {
-          name: 'availability',
-          label: 'Disponibilidade',
-          type: 'select',
-          defaultValue: 'in_stock',
-          options: [
-            { label: 'Em stock', value: 'in_stock' },
-            { label: 'Esgotado', value: 'out_of_stock' },
-          ],
         },
       ],
     },

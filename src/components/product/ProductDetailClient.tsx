@@ -4,40 +4,31 @@ import { ProductGallery } from './ProductGallery'
 import { VariantSelector } from './VariantSelector'
 import type { Media } from '../../../payload-types'
 
-type SizeEntry = {
-  value: string
-  price?: number | null
-  availability?: string
-}
-
-type Color = {
-  name: string
-  hex: string
-  price?: number | null
-  availability?: string
-  images?: any[]
-  sizes?: SizeEntry[]
-}
+type ColorTerm = { name: string; hex: string; images?: any[] }
+type SizeTerm = { value: string }
+type Variant = { color?: string; size?: string; price?: number | null; availability?: string; images?: any[] }
 
 type Props = {
   mainImages: Media[]
-  colors: Color[]
-  sizes: SizeEntry[]
+  colorTerms: ColorTerm[]
+  sizeTerms: SizeTerm[]
+  variants: Variant[]
   basePrice: number
   children?: React.ReactNode
 }
 
 export const ProductDetailClient: React.FC<Props> = ({
   mainImages,
-  colors,
-  sizes,
+  colorTerms,
+  sizeTerms,
+  variants,
   basePrice,
   children,
 }) => {
   const [activeImages, setActiveImages] = useState<Media[]>(mainImages)
-  const hasOptions = colors.length > 0 || sizes.length > 0
+  const hasOptions = colorTerms.length > 0 || sizeTerms.length > 0
 
-  const handleSelectionChange = (selection: { color?: Color; images?: any[] }) => {
+  const handleSelectionChange = (selection: { images?: any[] }) => {
     if (selection.images && selection.images.length > 0) {
       const variantMedia = selection.images.filter(
         (img: any): img is Media => typeof img === 'object' && img !== null,
@@ -61,8 +52,9 @@ export const ProductDetailClient: React.FC<Props> = ({
 
         {hasOptions && (
           <VariantSelector
-            colors={colors}
-            sizes={sizes}
+            colorTerms={colorTerms}
+            sizeTerms={sizeTerms}
+            variants={variants}
             basePrice={basePrice}
             onSelectionChange={handleSelectionChange}
           />
