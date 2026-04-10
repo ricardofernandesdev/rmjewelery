@@ -53,18 +53,15 @@ export const ProductDetailClient: React.FC<Props> = ({
         {children}
 
         {hasOptions && (
-          <>
-            <div className="border-t border-gray-100" />
-            <div className="py-[20px]">
-              <VariantSelector
-                colorTerms={colorTerms}
-                sizeTerms={sizeTerms}
-                variants={variants}
-                basePrice={basePrice}
-                onSelectionChange={handleSelectionChange}
-              />
-            </div>
-          </>
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <VariantSelector
+              colorTerms={colorTerms}
+              sizeTerms={sizeTerms}
+              variants={variants}
+              basePrice={basePrice}
+              onSelectionChange={handleSelectionChange}
+            />
+          </div>
         )}
 
         {afterVariants}
