@@ -12,6 +12,9 @@ export const Categories: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     components: {
+      edit: {
+        PreviewButton: './src/components/admin/PreviewButton#CategoryPreviewButton',
+      },
       views: {
         list: {
           Component: './src/components/admin/CollectionList#CategoriesList',

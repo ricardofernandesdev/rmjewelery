@@ -13,6 +13,9 @@ export const Products: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'category', 'createdAt'],
     components: {
+      edit: {
+        PreviewButton: './src/components/admin/PreviewButton#ProductPreviewButton',
+      },
       views: {
         list: {
           Component: './src/components/admin/CollectionList#ProductsList',

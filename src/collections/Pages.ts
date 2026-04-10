@@ -12,6 +12,11 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'published', 'updatedAt'],
+    components: {
+      edit: {
+        PreviewButton: './src/components/admin/PreviewButton#PagePreviewButton',
+      },
+    },
   },
   access: {
     read: () => true,
