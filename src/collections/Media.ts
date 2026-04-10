@@ -77,13 +77,22 @@ export const Media: CollectionConfig = {
     ],
   },
   hooks: {
-    beforeChange: [generateBlurDataURL],
+    beforeChange: [
+      generateBlurDataURL,
+      ({ data, req }) => {
+        // Auto-fill alt from filename if empty
+        if (!data?.alt && req?.file?.name) {
+          data = data || {}
+          data.alt = req.file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
+        }
+        return data
+      },
+    ],
   },
   fields: [
     {
       name: 'alt',
       type: 'text',
-      required: true,
     },
     {
       name: 'blurDataURL',
