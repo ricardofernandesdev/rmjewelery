@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MobileNav } from '@/components/layout/MobileNav'
 import { SearchModal } from '@/components/layout/SearchModal'
+import { WishlistIcon } from '@/components/layout/WishlistIcon'
 import { Container } from '@/components/ui/Container'
 
 type NavItem = {
@@ -63,6 +64,7 @@ export const HeaderClient: React.FC<Props> = ({ logoUrl, logoAlt, navItems }) =>
 
           <div className="flex items-center gap-5 shrink-0">
             <SearchModal triggerClassName="text-white/90 hover:text-white transition-colors" />
+            <WishlistIcon className="text-white/90 hover:text-white transition-colors" />
             <div className="md:hidden">
               <MobileNav items={navItems} />
             </div>

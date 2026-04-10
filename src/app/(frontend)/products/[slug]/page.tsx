@@ -5,6 +5,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { getAllProducts, getProductBySlug, getProductsByCategory, getSiteSettings } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 import { InstagramCTA } from '@/components/product/InstagramCTA'
+import { ShareWhatsApp } from '@/components/product/ShareWhatsApp'
 import { ProductDetailClient } from '@/components/product/ProductDetailClient'
 import { ProductPageExtras } from '@/components/product/ProductPageExtras'
 import type { Media, Category } from '../../../../../payload-types'
@@ -193,6 +194,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </svg>
               TENHO INTERESSE
             </a>
+          </div>
+
+          {/* Share on WhatsApp */}
+          <div className="mt-2">
+            <ShareWhatsApp productName={product.name} productSlug={product.slug || ''} />
           </div>
         </ProductDetailClient>
 

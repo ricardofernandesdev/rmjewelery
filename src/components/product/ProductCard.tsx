@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Product, Media } from '../../../payload-types'
+import { WishlistButton } from './WishlistButton'
 
 type ProductCardProps = {
   product: Product
@@ -20,8 +21,25 @@ export function ProductCard({ product }: ProductCardProps) {
       ? price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })
       : null
 
+  const wishlistItem = {
+    id: product.id,
+    name: product.name,
+    slug: product.slug || '',
+    price: typeof price === 'number' ? price : undefined,
+    imageUrl: media?.sizes?.card?.url || media?.url || null,
+  }
+
   return (
     <Link href={`/products/${product.slug}`} className="group block relative">
+      {/* Wishlist button */}
+      <div className="absolute top-2 right-2 z-10">
+        <WishlistButton
+          item={wishlistItem}
+          className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brand-dark hover:bg-white hover:text-red-500 shadow-sm"
+          size={16}
+        />
+      </div>
+
       {/* Product image */}
       <div className="relative aspect-square overflow-hidden bg-white border border-gray-100">
         {media ? (
