@@ -137,7 +137,7 @@ export interface UserAuthOperations {
  */
 export interface Media {
   id: number;
-  alt: string;
+  alt?: string | null;
   blurDataURL?: string | null;
   updatedAt: string;
   createdAt: string;

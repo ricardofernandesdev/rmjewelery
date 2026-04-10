@@ -64,9 +64,11 @@ export const MediaBulkUpload: React.FC = () => {
       )
 
       try {
+        const altText = item.alt || item.file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
         const formData = new FormData()
         formData.append('file', item.file)
-        formData.append('_payload', JSON.stringify({ alt: item.alt || item.file.name }))
+        formData.append('alt', altText)
+        formData.append('_payload', JSON.stringify({ alt: altText }))
 
         const res = await fetch('/api/media', {
           method: 'POST',
