@@ -1,27 +1,24 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 
-type Color = {
-  name: string
-  hex: string
-  images?: any[]
-}
-
-type Size = {
+type SizeEntry = {
   value: string
-}
-
-type VariantOverride = {
-  color?: string
-  size?: string
   price?: number | null
   availability?: string
 }
 
+type Color = {
+  name: string
+  hex: string
+  price?: number | null
+  availability?: string
+  images?: any[]
+  sizes?: SizeEntry[]
+}
+
 type Props = {
   colors: Color[]
-  sizes: Size[]
-  variants: VariantOverride[]
+  sizes: SizeEntry[]
   basePrice: number
   onSelectionChange?: (selection: { color?: Color; size?: string; images?: any[] }) => void
 }
@@ -29,55 +26,80 @@ type Props = {
 export const VariantSelector: React.FC<Props> = ({
   colors,
   sizes,
-  variants,
   basePrice,
   onSelectionChange,
 }) => {
   const [selectedColor, setSelectedColor] = useState<string>(colors[0]?.name || '')
-  const [selectedSize, setSelectedSize] = useState<string>(sizes[0]?.value || '')
+  const [selectedSize, setSelectedSize] = useState<string>('')
 
   const hasColors = colors.length > 0
   const hasSizes = sizes.length > 0
 
-  // Find override for current combination
-  const getOverride = (color?: string, size?: string): VariantOverride | undefined => {
-    return variants.find((v) => {
-      const colorMatch = !v.color || v.color === color
-      const sizeMatch = !v.size || v.size === size
-      return colorMatch && sizeMatch
-    })
-  }
+  // Get the active color object
+  const activeColor = useMemo(
+    () => colors.find((c) => c.name === selectedColor),
+    [colors, selectedColor],
+  )
 
-  const currentOverride = useMemo(() => {
-    return getOverride(selectedColor, selectedSize)
-  }, [selectedColor, selectedSize, variants])
+  // Determine which sizes to show
+  const activeSizes = useMemo(() => {
+    // If colors have embedded sizes, use those
+    if (hasColors && activeColor?.sizes && activeColor.sizes.length > 0) {
+      return activeColor.sizes
+    }
+    // Otherwise use product-level sizes
+    return sizes
+  }, [hasColors, activeColor, sizes])
 
-  const currentPrice = currentOverride?.price ?? basePrice
-  const isOutOfStock = currentOverride?.availability === 'out_of_stock'
+  // Auto-select first size
+  useMemo(() => {
+    if (activeSizes.length > 0 && !selectedSize) {
+      const firstAvailable = activeSizes.find((s) => s.availability !== 'out_of_stock')
+      setSelectedSize(firstAvailable?.value || activeSizes[0].value)
+    }
+  }, [activeSizes])
 
-  // Check if a size is out of stock for current color
-  const isSizeAvailable = (size: string) => {
-    const override = getOverride(selectedColor, size)
-    return override?.availability !== 'out_of_stock'
-  }
+  // Current price
+  const currentPrice = useMemo(() => {
+    if (activeSizes.length > 0) {
+      const sizeEntry = activeSizes.find((s) => s.value === selectedSize)
+      if (sizeEntry?.price != null) return sizeEntry.price
+    }
+    if (activeColor?.price != null) return activeColor.price
+    return basePrice
+  }, [activeSizes, selectedSize, activeColor, basePrice])
+
+  // Current availability
+  const isOutOfStock = useMemo(() => {
+    if (activeSizes.length > 0) {
+      const sizeEntry = activeSizes.find((s) => s.value === selectedSize)
+      return sizeEntry?.availability === 'out_of_stock'
+    }
+    return activeColor?.availability === 'out_of_stock'
+  }, [activeSizes, selectedSize, activeColor])
 
   const handleColorChange = (colorName: string) => {
     setSelectedColor(colorName)
     const color = colors.find((c) => c.name === colorName)
+
+    // Reset size to first available for new color
+    const newSizes = color?.sizes && color.sizes.length > 0 ? color.sizes : sizes
+    const firstAvailable = newSizes.find((s) => s.availability !== 'out_of_stock')
+    setSelectedSize(firstAvailable?.value || newSizes[0]?.value || '')
+
     onSelectionChange?.({
       color,
-      size: selectedSize,
+      size: firstAvailable?.value || '',
       images: color?.images,
     })
   }
 
   const handleSizeChange = (size: string) => {
     setSelectedSize(size)
-    const color = colors.find((c) => c.name === selectedColor)
     onSelectionChange?.({
-      color,
+      color: activeColor,
       size,
-      images: color?.images,
+      images: activeColor?.images,
     })
   }
 
@@ -104,17 +126,17 @@ export const VariantSelector: React.FC<Props> = ({
       )}
 
       {/* Size buttons */}
-      {hasSizes && (
+      {activeSizes.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {sizes.map(({ value }) => {
-            const available = isSizeAvailable(value)
+          {activeSizes.map((size) => {
+            const available = size.availability !== 'out_of_stock'
             return (
               <button
-                key={value}
+                key={size.value}
                 type="button"
-                onClick={() => available && handleSizeChange(value)}
+                onClick={() => available && handleSizeChange(size.value)}
                 className={`min-w-[44px] px-3 py-2 text-sm border transition-colors ${
-                  value === selectedSize
+                  size.value === selectedSize
                     ? 'border-brand-dark bg-brand-dark text-white'
                     : !available
                       ? 'border-gray-200 text-brand-gray/40 line-through cursor-not-allowed'
@@ -122,12 +144,17 @@ export const VariantSelector: React.FC<Props> = ({
                 }`}
                 disabled={!available}
               >
-                {value}
+                {size.value}
               </button>
             )
           })}
         </div>
       )}
+
+      {/* Price */}
+      <p className="text-xl font-semibold text-brand-dark">
+        {currentPrice.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
+      </p>
 
       {/* Out of stock */}
       {isOutOfStock && (

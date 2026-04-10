@@ -117,7 +117,7 @@ export const Products: CollectionConfig = {
       label: 'Cores disponíveis',
       type: 'array',
       admin: {
-        description: 'Define as cores do produto. Arrasta para reordenar.',
+        description: 'Define as cores do produto. Cada cor pode ter preço, disponibilidade e imagens próprias.',
         condition: (data) => Boolean(data?.enableColors),
       },
       fields: [
@@ -141,6 +141,26 @@ export const Products: CollectionConfig = {
           },
         },
         {
+          name: 'price',
+          label: 'Preço',
+          type: 'number',
+          min: 0,
+          admin: {
+            step: 0.01,
+            description: 'Deixa vazio para usar o preço base.',
+          },
+        },
+        {
+          name: 'availability',
+          label: 'Disponibilidade',
+          type: 'select',
+          defaultValue: 'in_stock',
+          options: [
+            { label: 'Em stock', value: 'in_stock' },
+            { label: 'Esgotado', value: 'out_of_stock' },
+          ],
+        },
+        {
           name: 'images',
           label: 'Imagens desta cor',
           type: 'upload',
@@ -150,9 +170,50 @@ export const Products: CollectionConfig = {
             description: 'Imagens específicas desta cor. Se vazio, usa as imagens principais.',
           },
         },
+        {
+          name: 'sizes',
+          label: 'Tamanhos desta cor',
+          type: 'array',
+          admin: {
+            description: 'Define tamanhos e disponibilidade para esta cor.',
+            condition: (_, siblingData) => {
+              // Access root data to check enableSizes
+              return true // Always show, visibility controlled by enableSizes at product level
+            },
+          },
+          fields: [
+            {
+              name: 'value',
+              label: 'Tamanho',
+              type: 'text',
+              required: true,
+              admin: { description: 'Ex: 17, 18, 19' },
+            },
+            {
+              name: 'price',
+              label: 'Preço',
+              type: 'number',
+              min: 0,
+              admin: {
+                step: 0.01,
+                description: 'Deixa vazio para usar o preço da cor ou base.',
+              },
+            },
+            {
+              name: 'availability',
+              label: 'Disponibilidade',
+              type: 'select',
+              defaultValue: 'in_stock',
+              options: [
+                { label: 'Em stock', value: 'in_stock' },
+                { label: 'Esgotado', value: 'out_of_stock' },
+              ],
+            },
+          ],
+        },
       ],
     },
-    // ── Tamanhos ──
+    // ── Tamanhos (sem cores) ──
     {
       name: 'enableSizes',
       label: 'Ativar tamanhos',
@@ -160,6 +221,7 @@ export const Products: CollectionConfig = {
       defaultValue: false,
       admin: {
         position: 'sidebar',
+        description: 'Para tamanhos sem cores. Se tiver cores, define os tamanhos dentro de cada cor.',
       },
     },
     {
@@ -167,8 +229,8 @@ export const Products: CollectionConfig = {
       label: 'Tamanhos disponíveis',
       type: 'array',
       admin: {
-        description: 'Define os tamanhos do produto.',
-        condition: (data) => Boolean(data?.enableSizes),
+        description: 'Define os tamanhos quando não há cores. Se tiver cores, usa os tamanhos dentro de cada cor.',
+        condition: (data) => Boolean(data?.enableSizes && !data?.enableColors),
       },
       fields: [
         {
@@ -178,37 +240,9 @@ export const Products: CollectionConfig = {
           required: true,
           admin: { description: 'Ex: 17, 18, 19, S, M, L' },
         },
-      ],
-    },
-    // ── Variantes (combinações) ──
-    {
-      name: 'variants',
-      label: 'Variantes (combinações)',
-      type: 'array',
-      admin: {
-        description: 'Cria uma linha para cada combinação de cor/tamanho que queres vender. Só preenche se quiseres preço diferente ou marcar como esgotado.',
-        condition: (data) => Boolean(data?.enableColors || data?.enableSizes),
-      },
-      fields: [
-        {
-          name: 'color',
-          label: 'Cor',
-          type: 'text',
-          admin: {
-            description: 'Nome exacto da cor (ex: Prata). Deixa vazio se não tiver cores.',
-          },
-        },
-        {
-          name: 'size',
-          label: 'Tamanho',
-          type: 'text',
-          admin: {
-            description: 'Tamanho exacto (ex: 17). Deixa vazio se não tiver tamanhos.',
-          },
-        },
         {
           name: 'price',
-          label: 'Preço (override)',
+          label: 'Preço',
           type: 'number',
           min: 0,
           admin: {

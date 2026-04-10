@@ -108,22 +108,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
     imageAlt: firstImg?.alt || product.name,
   }
 
-  // Extract colors, sizes, variants
+  // Extract colors with nested sizes
   const colors = ((product as any).colors || []).map((c: any) => ({
     name: c.name || '',
     hex: c.hex || '#ccc',
+    price: c.price ?? null,
+    availability: c.availability || 'in_stock',
     images: Array.isArray(c.images)
       ? c.images.filter((img: any) => typeof img === 'object' && img !== null)
       : [],
+    sizes: ((c.sizes || []) as any[]).map((s: any) => ({
+      value: s.value || '',
+      price: s.price ?? null,
+      availability: s.availability || 'in_stock',
+    })),
   }))
+  // Product-level sizes (when no colors)
   const sizes = ((product as any).sizes || []).map((s: any) => ({
     value: s.value || '',
-  }))
-  const variants = ((product as any).variants || []).map((v: any) => ({
-    color: v.color || '',
-    size: v.size || '',
-    price: v.price ?? null,
-    availability: v.availability || 'in_stock',
+    price: s.price ?? null,
+    availability: s.availability || 'in_stock',
   }))
 
   const price = (product as any).price || 0
@@ -137,7 +141,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           mainImages={images}
           colors={colors}
           sizes={sizes}
-          variants={variants}
           basePrice={price}
         >
           {/* Category */}

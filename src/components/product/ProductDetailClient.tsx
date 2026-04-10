@@ -4,28 +4,25 @@ import { ProductGallery } from './ProductGallery'
 import { VariantSelector } from './VariantSelector'
 import type { Media } from '../../../payload-types'
 
+type SizeEntry = {
+  value: string
+  price?: number | null
+  availability?: string
+}
+
 type Color = {
   name: string
   hex: string
-  images?: any[]
-}
-
-type Size = {
-  value: string
-}
-
-type VariantOverride = {
-  color?: string
-  size?: string
   price?: number | null
   availability?: string
+  images?: any[]
+  sizes?: SizeEntry[]
 }
 
 type Props = {
   mainImages: Media[]
   colors: Color[]
-  sizes: Size[]
-  variants: VariantOverride[]
+  sizes: SizeEntry[]
   basePrice: number
   children?: React.ReactNode
 }
@@ -34,7 +31,6 @@ export const ProductDetailClient: React.FC<Props> = ({
   mainImages,
   colors,
   sizes,
-  variants,
   basePrice,
   children,
 }) => {
@@ -58,10 +54,8 @@ export const ProductDetailClient: React.FC<Props> = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-      {/* Gallery */}
       <ProductGallery images={activeImages} />
 
-      {/* Product info */}
       <div className="flex flex-col gap-3">
         {children}
 
@@ -69,7 +63,6 @@ export const ProductDetailClient: React.FC<Props> = ({
           <VariantSelector
             colors={colors}
             sizes={sizes}
-            variants={variants}
             basePrice={basePrice}
             onSelectionChange={handleSelectionChange}
           />
