@@ -81,11 +81,12 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, produ
         </div>
       </Container>
 
-      {/* Horizontal scroller — edge-to-edge */}
-      <div
-        ref={scrollerRef}
-        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory px-6 md:px-12 pb-4 scrollbar-hide"
-      >
+      {/* Horizontal scroller */}
+      <Container>
+        <div
+          ref={scrollerRef}
+          className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide"
+        >
         {products.map((product) => {
           const imgUrl = getImg(product)
           return (
@@ -114,7 +115,8 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, produ
             </Link>
           )
         })}
-      </div>
+        </div>
+      </Container>
     </section>
   )
 }
