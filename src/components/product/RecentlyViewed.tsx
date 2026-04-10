@@ -15,36 +15,32 @@ type ViewedProduct = {
 const STORAGE_KEY = 'rm-recently-viewed'
 const MAX_ITEMS = 20
 
-/** Call this on product pages to track the viewed product */
-export function useTrackView(product: ViewedProduct) {
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as ViewedProduct[]
-      const filtered = stored.filter((p) => String(p.id) !== String(product.id))
-      filtered.unshift(product)
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered.slice(0, MAX_ITEMS)))
-    } catch {
-      // ignore
-    }
-  }, [product.id])
-}
-
 type Props = {
-  currentProductId: string | number
+  currentProduct: ViewedProduct
 }
 
-export const RecentlyViewed: React.FC<Props> = ({ currentProductId }) => {
+export const RecentlyViewed: React.FC<Props> = ({ currentProduct }) => {
   const [products, setProducts] = useState<ViewedProduct[]>([])
   const scrollerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     try {
+      // Read the previously stored list (snapshot before this visit)
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as ViewedProduct[]
-      setProducts(stored.filter((p) => String(p.id) !== String(currentProductId)))
+
+      // Display everything except the current product
+      const toDisplay = stored.filter((p) => String(p.id) !== String(currentProduct.id))
+      setProducts(toDisplay)
+
+      // Now persist the updated list with the current product prepended
+      const updated = [currentProduct, ...toDisplay].slice(0, MAX_ITEMS)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     } catch {
       // ignore
     }
-  }, [currentProductId])
+    // Only re-run when the current product id changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProduct.id])
 
   if (products.length === 0) return null
 

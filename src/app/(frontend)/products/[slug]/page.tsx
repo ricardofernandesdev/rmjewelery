@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { getAllProducts, getProductBySlug, getProductsByCategory, getSiteSettings } from '@/lib/queries'
+import type { Product } from '../../../../../payload-types'
 import { Container } from '@/components/ui/Container'
 import { InstagramCTA } from '@/components/product/InstagramCTA'
 import { ShareWhatsApp } from '@/components/product/ShareWhatsApp'
@@ -76,27 +77,38 @@ export default async function ProductDetailPage({ params }: PageProps) {
       ? (product.category as Category)
       : null
 
-  // Fetch similar products (same category, excluding current)
+  // Helper to serialize a product for the carousels
+  const toSimpleProduct = (p: Product) => {
+    const img = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object'
+      ? (p.images[0] as Media)
+      : null
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug || '',
+      price: (p as any).price,
+      imageUrl: img?.sizes?.card?.url || img?.url || null,
+      imageAlt: img?.alt || p.name,
+    }
+  }
+
+  // Fetch similar products (same category, excluding current).
+  // Fallback: if the category has no siblings, pick recent products from the catalog.
   const categorySlug = category?.slug
-  let similarProducts: any[] = []
+  let similarProducts: ReturnType<typeof toSimpleProduct>[] = []
   if (categorySlug) {
     const { docs } = await getProductsByCategory(categorySlug, 20)
     similarProducts = docs
       .filter((p) => p.id !== product.id)
       .slice(0, 12)
-      .map((p) => {
-        const img = Array.isArray(p.images) && p.images[0] && typeof p.images[0] === 'object'
-          ? (p.images[0] as Media)
-          : null
-        return {
-          id: p.id,
-          name: p.name,
-          slug: p.slug || '',
-          price: (p as any).price,
-          imageUrl: img?.sizes?.card?.url || img?.url || null,
-          imageAlt: img?.alt || p.name,
-        }
-      })
+      .map(toSimpleProduct)
+  }
+  if (similarProducts.length === 0) {
+    const { docs } = await getAllProducts(20)
+    similarProducts = docs
+      .filter((p) => p.id !== product.id)
+      .slice(0, 12)
+      .map(toSimpleProduct)
   }
 
   // Current product serialized for client tracking

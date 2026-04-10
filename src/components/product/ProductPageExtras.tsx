@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { SimilarProducts } from './SimilarProducts'
-import { RecentlyViewed, useTrackView } from './RecentlyViewed'
+import { RecentlyViewed } from './RecentlyViewed'
 
 type SimpleProduct = {
   id: string | number
@@ -18,13 +18,10 @@ type Props = {
 }
 
 export const ProductPageExtras: React.FC<Props> = ({ currentProduct, similarProducts }) => {
-  // Track this product view in localStorage
-  useTrackView(currentProduct)
-
   return (
     <>
       <SimilarProducts products={similarProducts} />
-      <RecentlyViewed currentProductId={currentProduct.id} />
+      <RecentlyViewed currentProduct={currentProduct} />
     </>
   )
 }
