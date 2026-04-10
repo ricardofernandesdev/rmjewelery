@@ -27,13 +27,15 @@ export const ProductDetailClient: React.FC<Props> = ({
   const [activeImages, setActiveImages] = useState<Media[]>(mainImages)
 
   const handleVariantChange = (variant: Variant) => {
-    // If variant has its own images, use those. Otherwise fall back to main images.
     if (variant.images && variant.images.length > 0) {
       const variantMedia = variant.images.filter(
         (img: any): img is Media => typeof img === 'object' && img !== null,
       )
       if (variantMedia.length > 0) {
-        setActiveImages(variantMedia)
+        // Variant images first, then main images (without duplicates)
+        const variantIds = new Set(variantMedia.map((m) => m.id))
+        const remaining = mainImages.filter((m) => !variantIds.has(m.id))
+        setActiveImages([...variantMedia, ...remaining])
         return
       }
     }
