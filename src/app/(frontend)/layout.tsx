@@ -1,5 +1,5 @@
 import React, { type CSSProperties } from 'react'
-import { headers as nextHeaders } from 'next/headers'
+import { headers as nextHeaders, cookies as nextCookies } from 'next/headers'
 import '../globals.css'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
@@ -16,16 +16,22 @@ export const revalidate = 60
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings().catch(() => null)
 
-  // Always resolve the current user so we can gate maintenance/coming-soon
-  // AND show the admin top bar on the frontend.
+  // Short-circuit: if there is no Payload session cookie at all, we know the
+  // visitor is anonymous and can skip the auth() call (which otherwise hits
+  // the database on every request).
   let isAuthenticated = false
-  try {
-    const payload = await getPayload()
-    const headers = await nextHeaders()
-    const { user } = await payload.auth({ headers })
-    isAuthenticated = Boolean(user)
-  } catch {
-    isAuthenticated = false
+  const cookieStore = await nextCookies()
+  const hasSessionCookie = cookieStore.getAll().some((c) => c.name.includes('payload-token'))
+
+  if (hasSessionCookie) {
+    try {
+      const payload = await getPayload()
+      const headers = await nextHeaders()
+      const { user } = await payload.auth({ headers })
+      isAuthenticated = Boolean(user)
+    } catch {
+      isAuthenticated = false
+    }
   }
 
   if (settings?.maintenanceMode && !isAuthenticated) {
