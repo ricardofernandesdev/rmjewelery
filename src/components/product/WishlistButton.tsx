@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import { showToast } from '@/components/ui/Toast'
 
 type WishlistItem = {
   id: string | number
@@ -63,8 +64,10 @@ export const WishlistButton: React.FC<Props> = ({ item, className = '', size = 1
     e.stopPropagation()
     if (active) {
       removeFromWishlist(item.id)
+      showToast(`"${item.name}" removido dos favoritos`, 'info')
     } else {
       addToWishlist(item)
+      showToast(`"${item.name}" adicionado aos favoritos`, 'success')
     }
     setActive(!active)
   }
