@@ -117,13 +117,17 @@ export const VariantSelector: React.FC<Props> = ({
               type="button"
               onClick={() => handleColorChange(color.name)}
               title={color.name}
-              className={`w-8 h-8 border-2 transition-all ${
+              className={`p-[3px] bg-white transition-all ${
                 color.name === selectedColor
-                  ? 'border-brand-dark ring-2 ring-brand-dark'
-                  : 'border-gray-200 hover:border-brand-dark'
+                  ? 'border-[3px] border-brand-dark'
+                  : 'border border-gray-200 hover:border-brand-dark'
               }`}
-              style={{ backgroundColor: color.hex }}
-            />
+            >
+              <span
+                className="block w-7 h-7"
+                style={{ backgroundColor: color.hex }}
+              />
+            </button>
           ))}
         </div>
       )}
