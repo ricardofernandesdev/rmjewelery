@@ -16,9 +16,15 @@ type Props = {
   logoUrl: string | null
   logoAlt: string
   navItems: NavItem[]
+  isAuthenticated?: boolean
 }
 
-export const HeaderClient: React.FC<Props> = ({ logoUrl, logoAlt, navItems }) => {
+export const HeaderClient: React.FC<Props> = ({
+  logoUrl,
+  logoAlt,
+  navItems,
+  isAuthenticated = false,
+}) => {
   const pathname = usePathname()
   const isHome = pathname === '/'
   const [scrolled, setScrolled] = useState(!isHome)
@@ -38,7 +44,7 @@ export const HeaderClient: React.FC<Props> = ({ logoUrl, logoAlt, navItems }) =>
 
   return (
     <header
-      className={`fixed top-[var(--admin-bar-h,0px)] left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed ${isAuthenticated ? 'top-10' : 'top-0'} left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-black/95 backdrop-blur-md text-white shadow-sm'
           : 'bg-transparent text-white'

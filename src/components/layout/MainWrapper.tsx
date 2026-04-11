@@ -2,19 +2,25 @@
 import React from 'react'
 import { usePathname } from 'next/navigation'
 
-export const MainWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+type Props = {
+  children: React.ReactNode
+  isAuthenticated?: boolean
+}
+
+export const MainWrapper: React.FC<Props> = ({ children, isAuthenticated = false }) => {
   const pathname = usePathname()
   const isHome = pathname === '/'
 
-  return (
-    <main
-      className={`flex-1 ${
-        isHome
-          ? 'pt-[var(--admin-bar-h,0px)]'
-          : 'pt-[calc(140px+var(--admin-bar-h,0px))]'
-      }`}
-    >
-      {children}
-    </main>
-  )
+  // Offsets:
+  //  - home: hero is full-bleed, only needs the admin bar offset (0 or 40px)
+  //  - other pages: fixed header is 140px tall, plus the admin bar offset
+  const padClass = isHome
+    ? isAuthenticated
+      ? 'pt-10'
+      : ''
+    : isAuthenticated
+      ? 'pt-[180px]'
+      : 'pt-[140px]'
+
+  return <main className={`flex-1 ${padClass}`}>{children}</main>
 }

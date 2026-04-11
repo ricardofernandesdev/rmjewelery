@@ -2,7 +2,7 @@ import React from 'react'
 import { getAllCategories, getSiteSettings } from '@/lib/queries'
 import { HeaderClient } from '@/components/layout/HeaderClient'
 
-export async function Header() {
+export async function Header({ isAuthenticated = false }: { isAuthenticated?: boolean } = {}) {
   const [categoriesResult, settings] = await Promise.all([
     getAllCategories().catch(() => ({ docs: [] as any[] })),
     getSiteSettings().catch(() => null),
@@ -25,5 +25,12 @@ export async function Header() {
     href: `/categories/${cat.slug}`,
   }))
 
-  return <HeaderClient logoUrl={logoUrl} logoAlt={logoAlt} navItems={navItems} />
+  return (
+    <HeaderClient
+      logoUrl={logoUrl}
+      logoAlt={logoAlt}
+      navItems={navItems}
+      isAuthenticated={isAuthenticated}
+    />
+  )
 }

@@ -1,4 +1,4 @@
-import React, { type CSSProperties } from 'react'
+import React from 'react'
 import { headers as nextHeaders, cookies as nextCookies } from 'next/headers'
 import '../globals.css'
 import { Header } from '@/components/layout/Header'
@@ -11,7 +11,9 @@ import { Toast } from '@/components/ui/Toast'
 import { getSiteSettings } from '@/lib/queries'
 import { getPayload } from '@/lib/payload'
 
-export const revalidate = 60
+// Note: no `revalidate` export here. The layout reads cookies dynamically
+// (see below) which opts into per-request rendering; pairing that with ISR
+// would leave Next.js in a confused in-between state.
 
 export default async function FrontendLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings().catch(() => null)
@@ -52,20 +54,13 @@ export default async function FrontendLayout({ children }: { children: React.Rea
     )
   }
 
-  const rootStyle: CSSProperties | undefined = isAuthenticated
-    ? ({ ['--admin-bar-h' as any]: '40px' } as CSSProperties)
-    : undefined
-
   return (
-    <div
-      className="font-body min-h-screen flex flex-col bg-white relative"
-      style={rootStyle}
-    >
+    <div className="font-body min-h-screen flex flex-col bg-white relative">
       <DiamondLoader />
       <Toast />
       {isAuthenticated && <AdminBarClient />}
-      <Header />
-      <MainWrapper>{children}</MainWrapper>
+      <Header isAuthenticated={isAuthenticated} />
+      <MainWrapper isAuthenticated={isAuthenticated}>{children}</MainWrapper>
       <Footer />
     </div>
   )
