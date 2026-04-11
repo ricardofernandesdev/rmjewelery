@@ -122,24 +122,39 @@ export default async function ProductDetailPage({ params }: PageProps) {
     imageAlt: firstImg?.alt || product.name,
   }
 
-  // Passo 2 — Termos
-  const colorTerms = ((product as any).colorTerms || []).map((c: any) => ({
-    name: c.name || '',
-    hex: c.hex || '#ccc',
-  }))
+  // Passo 2 — Cores (lidas da relação global) + tamanhos (ainda inline)
+  // product.colors vem populado a depth 2, por isso cada item é um doc
+  // completo { id, name, hex, slug }. Se vier como id (depth 0) ignoramos.
+  const rawColors = ((product as any).colors || []) as any[]
+  const colorById = new Map<string, { name: string; hex: string }>()
+  const colorTerms = rawColors
+    .filter((c) => c && typeof c === 'object')
+    .map((c) => {
+      const entry = { name: c.name || '', hex: c.hex || '#ccc' }
+      colorById.set(String(c.id), entry)
+      return entry
+    })
+
   const sizeTerms = ((product as any).sizeTerms || []).map((s: any) => ({
     value: s.value || '',
   }))
+
   // Passo 3 — Variantes
-  const variants = ((product as any).variants || []).map((v: any) => ({
-    color: v.color || '',
-    size: v.size || '',
-    price: v.price ?? null,
-    availability: v.availability || 'in_stock',
-    images: Array.isArray(v.images)
-      ? v.images.filter((img: any) => typeof img === 'object' && img !== null)
-      : [],
-  }))
+  // variant.color agora guarda o ID da cor (string numérico) em vez do nome,
+  // mas o componente VariantSelector continua a comparar pelo nome. Resolvemos
+  // o ID para o nome correspondente aqui antes de passar aos componentes.
+  const variants = ((product as any).variants || []).map((v: any) => {
+    const resolved = colorById.get(String(v.color))
+    return {
+      color: resolved?.name || '',
+      size: v.size || '',
+      price: v.price ?? null,
+      availability: v.availability || 'in_stock',
+      images: Array.isArray(v.images)
+        ? v.images.filter((img: any) => typeof img === 'object' && img !== null)
+        : [],
+    }
+  })
 
   const price = (product as any).price || 0
   const availabilityLabel =

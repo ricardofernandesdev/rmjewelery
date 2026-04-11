@@ -118,37 +118,21 @@ export const Products: CollectionConfig = {
       defaultValue: false,
     },
     // ══════════════════════════════════════════
-    // PASSO 2 — Termos (definir valores)
+    // PASSO 2 — Termos (escolher valores globais)
     // ══════════════════════════════════════════
     {
-      name: 'colorTerms',
-      label: 'Passo 2 — Termos de Cor',
-      type: 'array',
+      name: 'colors',
+      label: 'Passo 2 — Cores disponíveis',
+      type: 'relationship',
+      relationTo: 'colors',
+      hasMany: true,
       admin: {
-        description: 'Define as cores disponíveis. Arrasta para reordenar.',
+        description: 'Escolhe as cores deste produto a partir da biblioteca global. Gere a biblioteca em "Cores" no menu lateral.',
         condition: (data) => Boolean(data?.enableColors),
+        components: {
+          Field: './src/components/admin/ProductColorsField#ProductColorsField',
+        },
       },
-      fields: [
-        {
-          name: 'name',
-          label: 'Nome',
-          type: 'text',
-          required: true,
-          admin: { description: 'Ex: Prata, Dourado, Rose Gold' },
-        },
-        {
-          name: 'hex',
-          label: 'Cor',
-          type: 'text',
-          required: true,
-          defaultValue: '#C0C0C0',
-          admin: {
-            components: {
-              Field: './src/components/admin/ColorPickerField#ColorPickerField',
-            },
-          },
-        },
-      ],
     },
     {
       name: 'sizeTerms',

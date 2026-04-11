@@ -211,12 +211,15 @@
   color: var(--theme-elevation-500) !important;
 }
 
-/* Text inputs — clean border style */
-.field-type input[type='text'],
-.field-type input[type='email'],
-.field-type input[type='password'],
-.field-type input[type='number'],
-.field-type textarea {
+/* Text inputs — clean border style.
+   Scoped to specific field types so it doesn't bleed into react-select's
+   internal <input> (which sits inside .field-type.select and would
+   otherwise get a white border + padding box around the selected value). */
+.field-type.text input[type='text'],
+.field-type.email input[type='email'],
+.field-type.password input[type='password'],
+.field-type.number input[type='number'],
+.field-type.textarea textarea {
   border: 1px solid var(--theme-elevation-150) !important;
   border-radius: 4px !important;
   padding: 12px 16px !important;

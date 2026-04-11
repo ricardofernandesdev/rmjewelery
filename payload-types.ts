@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     media: Media;
     categories: Category;
+    colors: Color;
     products: Product;
     users: User;
     pages: Page;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    colors: ColorsSelect<false> | ColorsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -209,6 +211,21 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colors".
+ */
+export interface Color {
+  id: number;
+  /**
+   * Nome apresentado (ex.: Prateado, Dourado, Rose Gold).
+   */
+  name: string;
+  hex: string;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -239,18 +256,9 @@ export interface Product {
   enableColors?: boolean | null;
   enableSizes?: boolean | null;
   /**
-   * Define as cores disponíveis. Arrasta para reordenar.
+   * Escolhe as cores deste produto a partir da biblioteca global. Gere a biblioteca em "Cores" no menu lateral.
    */
-  colorTerms?:
-    | {
-        /**
-         * Ex: Prata, Dourado, Rose Gold
-         */
-        name: string;
-        hex: string;
-        id?: string | null;
-      }[]
-    | null;
+  colors?: (number | Color)[] | null;
   /**
    * Define os tamanhos disponíveis.
    */
@@ -375,6 +383,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'colors';
+        value: number | Color;
       } | null)
     | ({
         relationTo: 'products';
@@ -510,6 +522,17 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colors_select".
+ */
+export interface ColorsSelect<T extends boolean = true> {
+  name?: T;
+  hex?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
@@ -521,13 +544,7 @@ export interface ProductsSelect<T extends boolean = true> {
   availability?: T;
   enableColors?: T;
   enableSizes?: T;
-  colorTerms?:
-    | T
-    | {
-        name?: T;
-        hex?: T;
-        id?: T;
-      };
+  colors?: T;
   sizeTerms?:
     | T
     | {

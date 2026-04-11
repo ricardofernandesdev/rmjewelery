@@ -6,6 +6,7 @@ import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { Media } from './src/collections/Media'
 import { Categories } from './src/collections/Categories'
 import { Products } from './src/collections/Products'
+import { Colors } from './src/collections/Colors'
 import { Users } from './src/collections/Users'
 import { Pages } from './src/collections/Pages'
 import { SiteSettings } from './src/globals/SiteSettings'
@@ -19,9 +20,12 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || '',
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI || '' },
+    // Disable auto-push so Payload only applies explicit migrations from
+    // src/migrations/. Prevents destructive auto-sync when TS schema changes.
+    push: false,
   }),
   editor: lexicalEditor(),
-  collections: [Media, Categories, Products, Users, Pages],
+  collections: [Media, Categories, Colors, Products, Users, Pages],
   globals: [SiteSettings, HomeSettings, FooterSettings],
   sharp,
   i18n: {

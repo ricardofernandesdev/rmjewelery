@@ -42,9 +42,24 @@ const productsConfig: CollectionListConfig = {
   slug: 'products',
   createLabel: 'NOVO PRODUTO',
   columns: [
+    { key: 'thumbnail', label: 'IMAGEM' },
     { key: 'name', label: 'NOME' },
     { key: 'slug', label: 'SLUG' },
     { key: 'category', label: 'CATEGORIA' },
+  ],
+}
+
+// Colors config
+const colorsConfig: CollectionListConfig = {
+  title: 'CORES',
+  subtitle: 'BIBLIOTECA DE CORES',
+  slug: 'colors',
+  createLabel: 'NOVA COR',
+  columns: [
+    { key: 'swatch', label: 'COR' },
+    { key: 'name', label: 'NOME' },
+    { key: 'hex', label: 'HEX' },
+    { key: 'slug', label: 'SLUG' },
   ],
 }
 
@@ -63,6 +78,7 @@ const usersConfig: CollectionListConfig = {
 const configMap: Record<string, CollectionListConfig> = {
   categories: categoriesConfig,
   products: productsConfig,
+  colors: colorsConfig,
   users: usersConfig,
 }
 
@@ -72,6 +88,10 @@ export const CategoriesList: React.FC<ListViewServerProps> = async (props) => {
 
 export const ProductsList: React.FC<ListViewServerProps> = async (props) => {
   return renderList(props, 'products')
+}
+
+export const ColorsList: React.FC<ListViewServerProps> = async (props) => {
+  return renderList(props, 'colors')
 }
 
 export const UsersList: React.FC<ListViewServerProps> = async (props) => {
@@ -89,29 +109,36 @@ async function renderList(props: ListViewServerProps, slug: string) {
   // Get current user ID to protect from self-deletion
   const currentUserId = slug === 'users' ? (props as any)?.user?.id : undefined
 
+  const resolveMediaUrl = async (raw: any): Promise<string> => {
+    if (!raw) return ''
+    if (typeof raw === 'object') {
+      return raw.sizes?.thumbnail?.url || raw.url || ''
+    }
+    try {
+      const payload = await getPayloadClient()
+      const media = await payload.findByID({
+        collection: 'media',
+        id: raw,
+        depth: 0,
+      })
+      return media?.sizes?.thumbnail?.url || media?.url || ''
+    } catch {
+      return ''
+    }
+  }
+
   const serializedDocs = await Promise.all(
     docs.map(async (doc: any) => {
       const row: any = { id: doc.id }
       for (const col of config.columns) {
         if (col.key === 'image') {
-          if (typeof doc.image === 'object' && doc.image) {
-            row._imageUrl = doc.image.sizes?.thumbnail?.url || doc.image.url || ''
-          } else if (doc.image) {
-            // image is just an ID — resolve via Payload API
-            try {
-              const payload = await getPayloadClient()
-              const media = await payload.findByID({
-                collection: 'media',
-                id: doc.image,
-                depth: 0,
-              })
-              row._imageUrl = media?.sizes?.thumbnail?.url || media?.url || ''
-            } catch {
-              row._imageUrl = ''
-            }
-          } else {
-            row._imageUrl = ''
-          }
+          row._imageUrl = await resolveMediaUrl(doc.image)
+        } else if (col.key === 'thumbnail') {
+          // First entry of the product's `images` upload field
+          const first = Array.isArray(doc.images) && doc.images.length > 0 ? doc.images[0] : null
+          row._thumbnailUrl = await resolveMediaUrl(first)
+        } else if (col.key === 'swatch') {
+          row._swatchHex = doc.hex || '#cccccc'
         } else if (col.key === 'category') {
           row.category =
             typeof doc.category === 'object' && doc.category ? doc.category.name : doc.category || ''

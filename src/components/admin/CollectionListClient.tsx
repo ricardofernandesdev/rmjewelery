@@ -187,6 +187,24 @@ export const CollectionListClient: React.FC<Props> = ({
                           <div className="media-list__thumb-placeholder" />
                         )}
                       </div>
+                    ) : col.key === 'thumbnail' ? (
+                      <div className="media-list__thumb">
+                        {doc._thumbnailUrl ? (
+                          <img src={doc._thumbnailUrl} alt="" />
+                        ) : (
+                          <div className="media-list__thumb-placeholder" />
+                        )}
+                      </div>
+                    ) : col.key === 'swatch' ? (
+                      <div
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 4,
+                          border: '1px solid var(--theme-elevation-200)',
+                          backgroundColor: doc._swatchHex || '#cccccc',
+                        }}
+                      />
                     ) : col.key === 'name' ? (
                       <a
                         href={`/admin/collections/${config.slug}/${doc.id}`}
