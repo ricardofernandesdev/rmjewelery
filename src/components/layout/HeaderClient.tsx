@@ -38,7 +38,7 @@ export const HeaderClient: React.FC<Props> = ({ logoUrl, logoAlt, navItems }) =>
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-[var(--admin-bar-h,0px)] left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-black/95 backdrop-blur-md text-white shadow-sm'
           : 'bg-transparent text-white'

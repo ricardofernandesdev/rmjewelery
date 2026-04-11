@@ -7,7 +7,13 @@ export const MainWrapper: React.FC<{ children: React.ReactNode }> = ({ children 
   const isHome = pathname === '/'
 
   return (
-    <main className={`flex-1 ${isHome ? '' : 'pt-[140px]'}`}>
+    <main
+      className={`flex-1 ${
+        isHome
+          ? 'pt-[var(--admin-bar-h,0px)]'
+          : 'pt-[calc(140px+var(--admin-bar-h,0px))]'
+      }`}
+    >
       {children}
     </main>
   )
