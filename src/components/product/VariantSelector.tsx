@@ -124,8 +124,12 @@ export const VariantSelector: React.FC<Props> = ({
               }`}
             >
               <span
-                className="block w-7 h-7"
-                style={{ backgroundColor: color.hex }}
+                className="block"
+                style={{
+                  backgroundColor: color.hex,
+                  width: 'calc(var(--spacing) * 15)',
+                  height: 'calc(var(--spacing) * 15)',
+                }}
               />
             </button>
           ))}
