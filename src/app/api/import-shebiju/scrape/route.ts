@@ -1,41 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from '@/lib/payload'
 import { headers } from 'next/headers'
-import fs from 'fs'
-import puppeteerCore from 'puppeteer-core'
-import chromium from '@sparticuz/chromium'
 
-// Vercel free = 10s, Pro = 60s. Keep this tight.
 export const maxDuration = 10
 
-async function getBrowser() {
-  if (process.env.NODE_ENV === 'development') {
-    const possiblePaths = [
-      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-      '/usr/bin/google-chrome',
-      '/usr/bin/chromium-browser',
-      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    ]
-    const executablePath = possiblePaths.find((p) => {
-      try { return fs.existsSync(p) } catch { return false }
-    })
-    return puppeteerCore.launch({
-      headless: true,
-      executablePath: executablePath || undefined,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
-    })
-  }
-
-  // Serverless — lean Chromium flags for speed
-  chromium.setGraphicsMode = false
-  return puppeteerCore.launch({
-    args: [...chromium.args, '--disable-gpu', '--disable-dev-shm-usage', '--single-process'],
-    executablePath: await chromium.executablePath(),
-    headless: true,
-  })
-}
-
+/**
+ * Scrape a Shebiju product page using Jina Reader (r.jina.ai) which
+ * renders JavaScript and returns the full HTML. No Puppeteer needed,
+ * so this runs well within the 10s Vercel free-tier timeout.
+ */
 export async function POST(req: NextRequest) {
   try {
     const payload = await getPayload()
@@ -50,94 +23,142 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL inválido' }, { status: 400 })
     }
 
-    const browser = await getBrowser()
-    const page = await browser.newPage()
-
-    // Block images/css/fonts to speed up page load — we only need the DOM
-    await page.setRequestInterception(true)
-    page.on('request', (r: any) => {
-      const type = r.resourceType()
-      if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
-        r.abort()
-      } else {
-        r.continue()
-      }
+    // Use Jina Reader to get the JS-rendered HTML
+    const jinaUrl = `https://r.jina.ai/${url}`
+    const jinaRes = await fetch(jinaUrl, {
+      headers: {
+        Accept: 'text/html',
+        'X-Return-Format': 'html',
+      },
+      signal: AbortSignal.timeout(8000),
     })
 
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    )
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 8000 })
-
-    // Short wait for JS to hydrate
-    await new Promise((r) => setTimeout(r, 2000))
-
-    const productData = await page.evaluate(() => {
-      const nameEl = document.querySelector(
-        'h1, h2, .product-name, .product-title, [class*="product"][class*="name"]',
+    if (!jinaRes.ok) {
+      return NextResponse.json(
+        { error: `Jina Reader devolveu status ${jinaRes.status}` },
+        { status: 502 },
       )
-      let name = nameEl?.textContent?.trim() || ''
+    }
 
-      const refMatch = name.match(/([A-Z]{2,}[\d]+[\w.]*)/i)
-      const ref = refMatch ? refMatch[1] : ''
+    const html = await jinaRes.text()
 
-      if (ref && name.includes(ref)) {
-        name = name.replace(ref, '').trim()
-      }
-      name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
+    // Parse the HTML to extract product data
+    const productData = extractProductData(html, url)
 
-      const descEl = document.querySelector(
-        '.product-description, .description, [class*="descri"], [class*="detail"] p',
+    if (!productData.name && !productData.ref) {
+      return NextResponse.json(
+        { error: 'Não foi possível extrair dados do produto.' },
+        { status: 400 },
       )
-      const description = descEl?.textContent?.trim() || ''
-
-      // Collect image URLs from img[src], img[data-src], background-image
-      const imageUrls: string[] = []
-      document.querySelectorAll('img').forEach((img) => {
-        const src = img.src || img.dataset.src || img.dataset.lazy || img.getAttribute('data-original') || ''
-        if (
-          src &&
-          !src.includes('fill.gif') && !src.includes('fill_imagem') &&
-          !src.includes('logo') && !src.includes('icon') && !src.includes('svg') &&
-          !src.includes('ajax-loader') && !src.includes('pme.') &&
-          !src.includes('carrinho') && !src.includes('appstore') &&
-          !src.includes('playstore') && !src.includes('wechat')
-        ) {
-          if (!imageUrls.includes(src)) imageUrls.push(src)
-        }
-      })
-
-      document.querySelectorAll('[style*="background-image"]').forEach((el) => {
-        const match = (el as HTMLElement).style.backgroundImage.match(/url\(["']?(.+?)["']?\)/)
-        if (match?.[1] && !match[1].includes('fill.gif') && !imageUrls.includes(match[1])) {
-          imageUrls.push(match[1])
-        }
-      })
-
-      const colors: string[] = []
-      document
-        .querySelectorAll('[class*="color"], [class*="cor"], [data-cor], .swatch, [title*="Dourado"], [title*="Prateado"]')
-        .forEach((el) => {
-          const color =
-            el.textContent?.trim() || el.getAttribute('title') || (el as HTMLElement).dataset.cor || ''
-          if (color && !colors.includes(color) && color.length < 30) colors.push(color)
-        })
-
-      const priceEl = document.querySelector('.price, .preco, [class*="price"], [class*="preco"]')
-      let price = 0
-      if (priceEl) {
-        const priceMatch = priceEl.textContent?.match(/[\d]+[.,][\d]+/)
-        if (priceMatch) price = parseFloat(priceMatch[0].replace(',', '.'))
-      }
-
-      return { name, ref, description, imageUrls, colors, price }
-    })
-
-    await browser.close()
+    }
 
     return NextResponse.json({ success: true, ...productData })
   } catch (err: any) {
     console.error('Scrape error:', err)
-    return NextResponse.json({ error: err.message || 'Erro ao extrair dados' }, { status: 500 })
+    return NextResponse.json(
+      { error: err.message || 'Erro ao extrair dados' },
+      { status: 500 },
+    )
   }
+}
+
+function extractProductData(html: string, sourceUrl: string) {
+  // Extract product name — look for text patterns
+  let name = ''
+  let ref = ''
+
+  // Try to find product title in common patterns
+  const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i)
+  const h2Match = html.match(/<h2[^>]*>([^<]+)<\/h2>/i)
+  const titleText = h1Match?.[1]?.trim() || h2Match?.[1]?.trim() || ''
+
+  if (titleText) {
+    name = titleText
+    const refMatch = name.match(/([A-Z]{2,}[\d]+[\w.]*)/i)
+    ref = refMatch ? refMatch[1] : ''
+    if (ref && name.includes(ref)) {
+      name = name.replace(ref, '').trim()
+    }
+    name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
+  }
+
+  // Extract image URLs — product images typically in /imgs/produtos/ path
+  const imageUrls: string[] = []
+  const imgRegex = /(?:src|data-src|data-lazy|data-original)=["']([^"']*?(?:produto|product)[^"']*?)["']/gi
+  let imgMatch
+  while ((imgMatch = imgRegex.exec(html)) !== null) {
+    const src = imgMatch[1]
+    if (
+      src &&
+      !src.includes('fill.gif') &&
+      !src.includes('fill_imagem') &&
+      !imageUrls.includes(src)
+    ) {
+      // Make relative URLs absolute
+      const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
+      imageUrls.push(fullUrl)
+    }
+  }
+
+  // Also look for background-image URLs with produto in path
+  const bgRegex = /background-image:\s*url\(["']?([^"')]*?(?:produto|product)[^"')]*?)["']?\)/gi
+  let bgMatch
+  while ((bgMatch = bgRegex.exec(html)) !== null) {
+    const src = bgMatch[1]
+    if (src && !src.includes('fill.gif') && !imageUrls.includes(src)) {
+      const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src}`
+      imageUrls.push(fullUrl)
+    }
+  }
+
+  // Also try broader img src matching for any non-placeholder images
+  if (imageUrls.length === 0) {
+    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:jpg|jpeg|png|webp)[^"']*?)["']/gi
+    let broadMatch
+    while ((broadMatch = broadImgRegex.exec(html)) !== null) {
+      const src = broadMatch[1]
+      if (
+        src &&
+        !src.includes('fill.gif') && !src.includes('logo') &&
+        !src.includes('icon') && !src.includes('pme') &&
+        !src.includes('carrinho') && !src.includes('appstore') &&
+        !src.includes('playstore') && !src.includes('wechat') &&
+        !imageUrls.includes(src)
+      ) {
+        imageUrls.push(src)
+      }
+    }
+  }
+
+  // Extract colors
+  const colors: string[] = []
+  const colorPatterns = [
+    /title=["'](Dourado|Prateado|Rose Gold|Preto|Branco)["']/gi,
+    /data-cor=["']([^"']+)["']/gi,
+    /class=["'][^"']*cor[^"']*["'][^>]*>([^<]{2,20})</gi,
+  ]
+  for (const pattern of colorPatterns) {
+    let colorMatch
+    while ((colorMatch = pattern.exec(html)) !== null) {
+      const color = colorMatch[1].trim()
+      if (color && !colors.includes(color) && color.length < 30) {
+        colors.push(color)
+      }
+    }
+  }
+
+  // If no colors found via attributes, check for common color text near product
+  if (colors.length === 0) {
+    if (/dourado/i.test(html)) colors.push('Dourado')
+    if (/prateado/i.test(html)) colors.push('Prateado')
+  }
+
+  // Price
+  let price = 0
+  const priceMatch = html.match(/(?:preço|price|preco|€)\s*[:\s]*(\d+[.,]\d+)/i)
+  if (priceMatch) {
+    price = parseFloat(priceMatch[1].replace(',', '.'))
+  }
+
+  return { name, ref, description: '', imageUrls, colors, price }
 }
