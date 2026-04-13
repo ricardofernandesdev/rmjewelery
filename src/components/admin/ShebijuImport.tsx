@@ -82,7 +82,7 @@ export const ShebijuImport: React.FC = () => {
   const priceField = useField<number>({ path: 'price' })
   const imagesField = useField<number[]>({ path: 'images' })
   const categoryField = useField<number>({ path: 'category' })
-  const descriptionField = useField<any>({ path: 'description' })
+  const [descPreview, setDescPreview] = useState<string | null>(null)
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
 
   useEffect(() => {
@@ -153,11 +153,14 @@ export const ShebijuImport: React.FC = () => {
       categoryField.setValue(categoryId)
       if (mediaIds.length > 0) imagesField.setValue(mediaIds)
       if (result.colors.length > 0) enableColorsField.setValue(true)
-      // Generate and set description based on product name + category
+      // Show description preview (will be auto-generated server-side on save)
       const selectedCat = categories.find((c) => c.id === categoryId)
       const catKey = detectCat(productName, selectedCat?.name || '')
       if (catKey && descTemplates[catKey]) {
-        descriptionField.setValue(buildLexicalDescription(productName, catKey))
+        const [p1, p2] = descTemplates[catKey]
+        setDescPreview(
+          p1.replace('{name}', productName) + '\n\n' + p2.replace('{name}', productName),
+        )
       }
 
       setDone(true)
@@ -177,15 +180,32 @@ export const ShebijuImport: React.FC = () => {
       <div
         style={{
           marginBottom: '24px',
-          padding: '12px 16px',
+          padding: '16px',
           border: '1px solid var(--theme-success-500, #22c55e)',
           borderRadius: '8px',
           background: 'var(--theme-elevation-0)',
-          fontSize: '13px',
-          color: 'var(--theme-success-500, #22c55e)',
         }}
       >
-        {step}
+        <p style={{ fontSize: '13px', color: 'var(--theme-success-500, #22c55e)', marginBottom: descPreview ? '12px' : 0 }}>
+          {step}
+        </p>
+        {descPreview && (
+          <div
+            style={{
+              padding: '12px',
+              background: 'var(--theme-elevation-50)',
+              borderRadius: '6px',
+              border: '1px solid var(--theme-elevation-150)',
+            }}
+          >
+            <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--theme-elevation-500)', marginBottom: '8px' }}>
+              Descrição (gerada ao salvar)
+            </p>
+            <p style={{ fontSize: '13px', color: 'var(--theme-text)', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+              {descPreview}
+            </p>
+          </div>
+        )}
       </div>
     )
   }
