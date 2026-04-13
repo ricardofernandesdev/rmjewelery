@@ -1,6 +1,5 @@
 import React from 'react'
 import type { AdminViewServerProps } from 'payload'
-import { ShebijuImport } from './ShebijuImport'
 import './Dashboard.scss'
 
 const globalMeta: Array<{ slug: string; label: string; href: string; icon: React.ReactNode }> = [
@@ -91,8 +90,6 @@ export const Dashboard: React.FC<AdminViewServerProps> = async ({ initPageResult
 
   return (
     <div className="custom-dashboard">
-      <ShebijuImport />
-
       <div className="custom-dashboard__header">
         <h1 className="custom-dashboard__title">COLEÇÕES</h1>
         <p className="custom-dashboard__subtitle">GESTÃO DE INVENTÁRIO</p>

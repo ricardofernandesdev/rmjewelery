@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import { useField } from '@payloadcms/ui'
 
 type ScrapeResult = {
   name: string
@@ -11,6 +12,10 @@ type ScrapeResult = {
 
 type Category = { id: number; name: string }
 
+/**
+ * Import component that scrapes a Shebiju product URL, uploads images,
+ * and PRE-FILLS the form without saving. The user reviews and saves manually.
+ */
 export const ShebijuImport: React.FC = () => {
   const [url, setUrl] = useState('')
   const [categoryId, setCategoryId] = useState<number | null>(null)
@@ -18,8 +23,16 @@ export const ShebijuImport: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
 
-  // Fetch categories on mount
+  // Form field accessors — fill these after import
+  const nameField = useField<string>({ path: 'name' })
+  const slugField = useField<string>({ path: 'slug' })
+  const priceField = useField<number>({ path: 'price' })
+  const imagesField = useField<number[]>({ path: 'images' })
+  const categoryField = useField<number>({ path: 'category' })
+  const enableColorsField = useField<boolean>({ path: 'enableColors' })
+
   useEffect(() => {
     fetch('/api/categories?limit=100&depth=0&sort=name', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
@@ -37,10 +50,11 @@ export const ShebijuImport: React.FC = () => {
     }
     setLoading(true)
     setError(null)
+    setDone(false)
 
     try {
       // ── Step 1: Scrape ──
-      setStep('1/3 — A extrair dados do produto...')
+      setStep('1/2 — A extrair dados do produto...')
       const scrapeRes = await fetch('/api/import-shebiju/scrape', {
         method: 'POST',
         credentials: 'include',
@@ -56,7 +70,7 @@ export const ShebijuImport: React.FC = () => {
       const totalImages = result.imageUrls.length
 
       for (let i = 0; i < totalImages; i++) {
-        setStep(`2/3 — A carregar imagem ${i + 1} de ${totalImages}...`)
+        setStep(`2/2 — A carregar imagem ${i + 1} de ${totalImages}...`)
         try {
           const uploadRes = await fetch('/api/import-shebiju/upload-image', {
             method: 'POST',
@@ -73,42 +87,46 @@ export const ShebijuImport: React.FC = () => {
             mediaIds.push(uploadData.mediaId)
           }
         } catch {
-          // Skip failed, continue
+          // Skip failed
         }
       }
 
-      if (mediaIds.length === 0) {
-        throw new Error('Nenhuma imagem foi carregada com sucesso.')
-      }
+      // ── Fill the form (no save) ──
+      const productName = result.name || result.ref || ''
+      nameField.setValue(productName)
+      slugField.setValue(result.ref || '')
+      priceField.setValue(result.price || 0)
+      categoryField.setValue(categoryId)
+      if (mediaIds.length > 0) imagesField.setValue(mediaIds)
+      if (result.colors.length > 0) enableColorsField.setValue(true)
 
-      // ── Step 3: Create product with images + category ──
-      setStep('3/3 — A criar produto...')
-      const createRes = await fetch('/api/import-shebiju/create', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: result.name,
-          ref: result.ref,
-          colors: result.colors,
-          price: result.price,
-          sourceUrl: url.trim(),
-          categoryId,
-          mediaIds,
-        }),
-      })
-      const createData = await createRes.json()
-      if (!createRes.ok) throw new Error(createData.error || 'Erro ao criar produto')
-
-      setStep(`Importado com ${mediaIds.length} imagens. A redirecionar...`)
-      setTimeout(() => {
-        window.location.href = `/admin/collections/products/${createData.productId}`
-      }, 1200)
+      setStep(`Formulário preenchido com ${mediaIds.length} imagens. Revê e clica "Salvar".`)
+      setDone(true)
+      setLoading(false)
     } catch (err: any) {
       setError(err.message || 'Erro desconhecido')
       setLoading(false)
       setStep(null)
     }
+  }
+
+  // Hide the import box after successful fill
+  if (done) {
+    return (
+      <div
+        style={{
+          marginBottom: '24px',
+          padding: '12px 16px',
+          border: '1px solid var(--theme-success-500, #22c55e)',
+          borderRadius: '8px',
+          background: 'var(--theme-elevation-0)',
+          fontSize: '13px',
+          color: 'var(--theme-success-500, #22c55e)',
+        }}
+      >
+        {step}
+      </div>
+    )
   }
 
   const inputStyle: React.CSSProperties = {
@@ -145,7 +163,7 @@ export const ShebijuImport: React.FC = () => {
         Importar da Shebiju
       </label>
       <p style={{ fontSize: '12px', color: 'var(--theme-elevation-400)', marginBottom: '12px' }}>
-        Cola o URL de um produto da shebiju.pt, seleciona a categoria, e importa automaticamente.
+        Cola o URL, seleciona a categoria, e o formulário é preenchido automaticamente. Revê os dados e clica "Salvar" quando estiveres satisfeito.
       </p>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -212,7 +230,7 @@ export const ShebijuImport: React.FC = () => {
         </button>
       </div>
 
-      {step && (
+      {step && !done && (
         <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--theme-success-500, #22c55e)' }}>
           {step}
         </p>
