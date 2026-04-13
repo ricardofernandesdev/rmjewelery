@@ -82,67 +82,28 @@ function extractProductData(html: string, sourceUrl: string) {
     name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
   }
 
-  // Extract product images from Shebiju.
-  // Their pattern: /imgs/produtos/<filename>.<ext>.webp
-  // Thumbnails have a "pq_" prefix: /imgs/produtos/pq_<filename>.<ext>.webp
-  // We only want the full-size images (no pq_ prefix) and deduplicate
-  // by the core filename (strip pq_ and extensions).
-  const imagesByCore = new Map<string, string>()
+  // Extract product images from Shebiju using their known URL pattern:
+  //   /imgs/produtos/<filename>.<ext>.webp       — full size (keep)
+  //   /imgs/produtos/pq_<filename>.<ext>.webp    — thumbnail (skip)
+  //
+  // Use a single strict regex to avoid picking up related product images,
+  // meta tags, or other noise from the page.
+  const seenCores = new Set<string>()
+  const imageUrls: string[] = []
 
-  function getCoreFilename(url: string): string {
-    const filename = url.split('/').pop()?.split('?')[0] || ''
-    // Strip pq_ prefix and all extensions (.png.webp → base name only)
-    return filename.replace(/^pq_/, '').replace(/\.[^/]+$/, '').replace(/\.[^/]+$/, '')
-  }
-
-  function addImage(src: string) {
-    if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
-    if (!src.includes('/imgs/produtos/') && !src.includes('produto')) return
-    const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
-
-    const filename = fullUrl.split('/').pop() || ''
-    // Skip thumbnails (pq_ prefix = "pequeno")
-    if (filename.startsWith('pq_')) return
-
-    const core = getCoreFilename(fullUrl)
-    if (!core) return
-
-    // Keep the first (highest quality) occurrence per core filename
-    if (!imagesByCore.has(core)) {
-      imagesByCore.set(core, fullUrl)
-    }
-  }
-
-  // Product images from img tags
-  const imgRegex = /(?:src|data-src|data-lazy|data-original)=["']([^"']*?(?:produto|product)[^"']*?)["']/gi
+  // Match only /imgs/produtos/ URLs, skip pq_ thumbnails
+  const productImgRegex = /https?:\/\/www\.shebiju\.pt\/imgs\/produtos\/(?!pq_)([^\s"'<>]+)/gi
   let imgMatch
-  while ((imgMatch = imgRegex.exec(html)) !== null) addImage(imgMatch[1])
-
-  // Background images
-  const bgRegex = /background-image:\s*url\(["']?([^"')]*?(?:produto|product)[^"')]*?)["']?\)/gi
-  let bgMatch
-  while ((bgMatch = bgRegex.exec(html)) !== null) addImage(bgMatch[1])
-
-  // Broader fallback if nothing found via produto/product selectors
-  if (imagesByCore.size === 0) {
-    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:png|jpe?g)(?:\.webp)?[^"']*?)["']/gi
-    let broadMatch
-    while ((broadMatch = broadImgRegex.exec(html)) !== null) {
-      const src = broadMatch[1]
-      if (
-        src &&
-        !src.includes('fill.gif') && !src.includes('logo') &&
-        !src.includes('icon') && !src.includes('pme') &&
-        !src.includes('carrinho') && !src.includes('appstore') &&
-        !src.includes('playstore') && !src.includes('wechat')
-      ) {
-        addImage(src)
-      }
+  while ((imgMatch = productImgRegex.exec(html)) !== null) {
+    const fullUrl = imgMatch[0]
+    // Core filename: strip all extensions to deduplicate size variants
+    const filename = imgMatch[1].split('?')[0]
+    const core = filename.replace(/\.[^.]+$/, '').replace(/\.[^.]+$/, '')
+    if (core && !seenCores.has(core)) {
+      seenCores.add(core)
+      imageUrls.push(fullUrl)
     }
   }
-
-  // Build final deduplicated array — only full-size, no thumbnails
-  const imageUrls = Array.from(imagesByCore.values())
 
   // Extract colors
   const colors: string[] = []
