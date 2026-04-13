@@ -14,6 +14,7 @@ type Config = {
   slug: string
   createLabel: string
   columns: ColumnDef[]
+  previewPrefix?: string
 }
 
 type Props = {
@@ -219,6 +220,19 @@ export const CollectionListClient: React.FC<Props> = ({
                 ))}
                 <td>
                   <div className="media-list__row-actions">
+                    {config.previewPrefix && doc.slug && (
+                      <a
+                        href={`${config.previewPrefix}/${doc.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="media-list__action-btn"
+                        title="Ver no site"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                          <path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                        </svg>
+                      </a>
+                    )}
                     <a
                       href={`/admin/collections/${config.slug}/${doc.id}`}
                       className="media-list__action-btn"

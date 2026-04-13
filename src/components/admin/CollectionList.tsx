@@ -16,6 +16,7 @@ type CollectionListConfig = {
   slug: string
   createLabel: string
   columns: ColumnDef[]
+  previewPrefix?: string
 }
 
 // Categories config
@@ -24,6 +25,7 @@ const categoriesConfig: CollectionListConfig = {
   subtitle: 'GESTÃO DE CATEGORIAS',
   slug: 'categories',
   createLabel: 'NOVA CATEGORIA',
+  previewPrefix: '/categories',
   columns: [
     {
       key: 'image',
@@ -41,6 +43,7 @@ const productsConfig: CollectionListConfig = {
   subtitle: 'GESTÃO DE PRODUTOS',
   slug: 'products',
   createLabel: 'NOVO PRODUTO',
+  previewPrefix: '/products',
   columns: [
     { key: 'thumbnail', label: 'IMAGEM' },
     { key: 'name', label: 'NOME' },
