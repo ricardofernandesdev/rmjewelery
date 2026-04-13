@@ -216,6 +216,9 @@ export const Products: CollectionConfig = {
           hasMany: true,
           admin: {
             description: 'Se vazio, usa as imagens da cor ou as principais.',
+            components: {
+              Field: './src/components/admin/VariantImagesPicker#VariantImagesPicker',
+            },
           },
         },
       ],

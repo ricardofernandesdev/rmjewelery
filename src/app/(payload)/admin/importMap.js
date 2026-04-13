@@ -28,6 +28,7 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { ProductColorsField as ProductColorsField_4f2e7b7b404e6b2a29673a255d7a4535 } from '../../../../src/components/admin/ProductColorsField'
 import { VariantColorSelect as VariantColorSelect_7f99f7fe2eb6f4270e155a92c06c87d8 } from '../../../../src/components/admin/VariantColorSelect'
 import { VariantSizeSelect as VariantSizeSelect_2a218e1a6205846e93016d0a32ac526d } from '../../../../src/components/admin/VariantSizeSelect'
+import { VariantImagesPicker as VariantImagesPicker_85424c0d83fac763f48c23d5aab3a11d } from '../../../../src/components/admin/VariantImagesPicker'
 import { ProductPreviewButton as ProductPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821 } from '../../../../src/components/admin/PreviewButton'
 import { ProductsList as ProductsList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
 import { UserEdit as UserEdit_385d5fb107e188a8e8872cac737797dc } from '../../../../src/components/admin/UserEdit'
@@ -74,6 +75,7 @@ export const importMap = {
   "./src/components/admin/ProductColorsField#ProductColorsField": ProductColorsField_4f2e7b7b404e6b2a29673a255d7a4535,
   "./src/components/admin/VariantColorSelect#VariantColorSelect": VariantColorSelect_7f99f7fe2eb6f4270e155a92c06c87d8,
   "./src/components/admin/VariantSizeSelect#VariantSizeSelect": VariantSizeSelect_2a218e1a6205846e93016d0a32ac526d,
+  "./src/components/admin/VariantImagesPicker#VariantImagesPicker": VariantImagesPicker_85424c0d83fac763f48c23d5aab3a11d,
   "./src/components/admin/PreviewButton#ProductPreviewButton": ProductPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821,
   "./src/components/admin/CollectionList#ProductsList": ProductsList_d146a93ced1c7ad8e789610d5785ad89,
   "./src/components/admin/UserEdit#UserEdit": UserEdit_385d5fb107e188a8e8872cac737797dc,
