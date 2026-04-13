@@ -51,12 +51,24 @@ export async function POST(req: NextRequest) {
   }
 }
 
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+}
+
 function extractProductData(html: string) {
   // ── Product name ──
   let name = ''
   let ref = ''
   const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i)
-  const titleText = h1Match?.[1]?.trim() || ''
+  const titleText = h1Match?.[1]?.trim() ? decodeHtmlEntities(h1Match[1].trim()) : ''
 
   if (titleText) {
     name = titleText
