@@ -23,6 +23,16 @@ const globalMeta: Array<{ slug: string; label: string; href: string; icon: React
       </svg>
     ),
   },
+  {
+    slug: 'footer-settings',
+    label: 'RODAPÉ',
+    href: '/admin/globals/footer-settings',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-4h16v4z" />
+      </svg>
+    ),
+  },
 ]
 
 const pagesIcon = (
@@ -46,6 +56,14 @@ const collectionMeta: Record<string, { label: string; icon: React.ReactNode }> =
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2L2 19h20L12 2z" />
         <circle cx="12" cy="9" r="1.5" fill="white" />
+      </svg>
+    ),
+  },
+  colors: {
+    label: 'CORES',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.2-.64-1.67-.08-.1-.13-.21-.13-.33 0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
       </svg>
     ),
   },
@@ -99,7 +117,7 @@ export const Dashboard: React.FC<AdminViewServerProps> = async ({ initPageResult
 
       <div className="custom-dashboard__header" style={{ marginTop: 48 }}>
         <h1 className="custom-dashboard__title">CONFIGURAÇÃO</h1>
-        <p className="custom-dashboard__subtitle">DEFINIÇÕES DO SITE E HOMEPAGE</p>
+        <p className="custom-dashboard__subtitle">DEFINIÇÕES DO SITE, HOMEPAGE E RODAPÉ</p>
       </div>
       <div className="custom-dashboard__grid">
         {globalMeta.map((g) => (
