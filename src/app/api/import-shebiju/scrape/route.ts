@@ -82,38 +82,30 @@ function extractProductData(html: string, sourceUrl: string) {
     name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
   }
 
-  // Extract image URLs — product images typically in /imgs/produtos/ path
+  // Extract image URLs — only .jpg/.jpeg (skip .webp)
   const imageUrls: string[] = []
+
+  function addImage(src: string) {
+    if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
+    // Only keep jpg/jpeg
+    if (!src.match(/\.jpe?g/i)) return
+    const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
+    if (!imageUrls.includes(fullUrl)) imageUrls.push(fullUrl)
+  }
+
+  // Product images from img tags
   const imgRegex = /(?:src|data-src|data-lazy|data-original)=["']([^"']*?(?:produto|product)[^"']*?)["']/gi
   let imgMatch
-  while ((imgMatch = imgRegex.exec(html)) !== null) {
-    const src = imgMatch[1]
-    if (
-      src &&
-      !src.includes('fill.gif') &&
-      !src.includes('fill_imagem') &&
-      !imageUrls.includes(src)
-    ) {
-      // Make relative URLs absolute
-      const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
-      imageUrls.push(fullUrl)
-    }
-  }
+  while ((imgMatch = imgRegex.exec(html)) !== null) addImage(imgMatch[1])
 
-  // Also look for background-image URLs with produto in path
+  // Background images
   const bgRegex = /background-image:\s*url\(["']?([^"')]*?(?:produto|product)[^"')]*?)["']?\)/gi
   let bgMatch
-  while ((bgMatch = bgRegex.exec(html)) !== null) {
-    const src = bgMatch[1]
-    if (src && !src.includes('fill.gif') && !imageUrls.includes(src)) {
-      const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src}`
-      imageUrls.push(fullUrl)
-    }
-  }
+  while ((bgMatch = bgRegex.exec(html)) !== null) addImage(bgMatch[1])
 
-  // Also try broader img src matching for any non-placeholder images
+  // Broader fallback if nothing found
   if (imageUrls.length === 0) {
-    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:jpg|jpeg|png|webp)[^"']*?)["']/gi
+    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.jpe?g[^"']*?)["']/gi
     let broadMatch
     while ((broadMatch = broadImgRegex.exec(html)) !== null) {
       const src = broadMatch[1]

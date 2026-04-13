@@ -76,7 +76,8 @@ export async function POST(req: NextRequest) {
     if (!mediaIds || mediaIds.length === 0) return NextResponse.json({ error: 'Nenhuma imagem carregada' }, { status: 400 })
 
     const productName = name || ref || 'Produto Importado'
-    const slug = (ref || name || 'produto').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    // Slug = product reference as-is (e.g. "ACB113", "GKB250409082")
+    const slug = ref || (name || 'produto').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
     const detectedCat = detectCategory(sourceUrl || '', productName)
     const template = detectedCat ? descriptionTemplates[detectedCat] : null
