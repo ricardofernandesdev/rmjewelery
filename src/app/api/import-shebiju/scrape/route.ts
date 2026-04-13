@@ -83,20 +83,24 @@ function extractProductData(html: string, sourceUrl: string) {
   }
 
   // Extract image URLs — prefer .jpg but accept .webp if no jpg exists.
-  // Deduplicate by base path so the same image in different formats
-  // is only imported once.
-  const imagesByBase = new Map<string, string>() // basePath → fullUrl
+  // Deduplicate by FILENAME (not full path) because Shebiju serves the
+  // same image at multiple paths (thumbnail, medium, full size).
+  const imagesByFilename = new Map<string, string>() // filename (no ext) → fullUrl
 
   function addImage(src: string) {
     if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
     if (!src.match(/\.(jpe?g|webp|png)/i)) return
     const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
-    const basePath = fullUrl.replace(/\.[^./?]+(\?.*)?$/, '')
-    const existing = imagesByBase.get(basePath)
-    // Prefer jpg over webp — if we already have a jpg, skip the webp
+
+    // Extract just the filename without extension
+    const filenameWithExt = fullUrl.split('/').pop()?.split('?')[0] || ''
+    const filenameBase = filenameWithExt.replace(/\.[^.]+$/, '')
+    if (!filenameBase) return
+
+    const existing = imagesByFilename.get(filenameBase)
+    // Prefer jpg over webp
     if (existing && existing.match(/\.jpe?g/i)) return
-    // If new one is jpg, replace whatever was there (webp)
-    imagesByBase.set(basePath, fullUrl)
+    imagesByFilename.set(filenameBase, fullUrl)
   }
 
   // Product images from img tags
@@ -110,7 +114,7 @@ function extractProductData(html: string, sourceUrl: string) {
   while ((bgMatch = bgRegex.exec(html)) !== null) addImage(bgMatch[1])
 
   // Broader fallback if nothing found via produto/product selectors
-  if (imagesByBase.size === 0) {
+  if (imagesByFilename.size === 0) {
     const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:jpe?g|webp|png)[^"']*?)["']/gi
     let broadMatch
     while ((broadMatch = broadImgRegex.exec(html)) !== null) {
@@ -128,7 +132,7 @@ function extractProductData(html: string, sourceUrl: string) {
   }
 
   // Build final deduplicated array (jpg preferred over webp)
-  const imageUrls = Array.from(imagesByBase.values())
+  const imageUrls = Array.from(imagesByFilename.values())
 
   // Extract colors
   const colors: string[] = []
