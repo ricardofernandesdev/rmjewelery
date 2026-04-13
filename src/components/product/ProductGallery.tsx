@@ -33,7 +33,8 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   return (
     <div className="flex flex-col gap-3 max-w-lg">
-      {/* Main image with zoom */}
+      {/* Main image with zoom — all images are rendered but only the
+          selected one is visible, so switching is instant (no re-fetch) */}
       <div
         ref={containerRef}
         className="relative overflow-hidden rounded-sm bg-white border border-gray-100 cursor-crosshair"
@@ -41,22 +42,26 @@ export function ProductGallery({ images }: ProductGalleryProps) {
         onMouseLeave={() => setZooming(false)}
         onMouseMove={handleMouseMove}
       >
-        <Image
-          src={mainImage.sizes?.detail?.url || mainImage.url || ''}
-          alt={mainImage.alt || ''}
-          width={mainImage.sizes?.detail?.width || mainImage.width || 800}
-          height={mainImage.sizes?.detail?.height || mainImage.height || 800}
-          sizes="(max-width: 768px) 100vw, 500px"
-          placeholder={mainImage.blurDataURL ? 'blur' : 'empty'}
-          blurDataURL={mainImage.blurDataURL || undefined}
-          className="w-full h-auto object-contain"
-          priority
-          style={{
-            transform: zooming ? 'scale(2)' : 'scale(1)',
-            transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-            transition: zooming ? 'none' : 'transform 0.3s ease',
-          }}
-        />
+        {images.map((image, index) => (
+          <Image
+            key={image.id}
+            src={image.sizes?.detail?.url || image.url || ''}
+            alt={image.alt || ''}
+            width={image.sizes?.detail?.width || image.width || 800}
+            height={image.sizes?.detail?.height || image.height || 800}
+            sizes="(max-width: 768px) 100vw, 500px"
+            placeholder={image.blurDataURL ? 'blur' : 'empty'}
+            blurDataURL={image.blurDataURL || undefined}
+            className={`w-full h-auto object-contain ${index !== selectedIndex ? 'hidden' : ''}`}
+            priority={index === 0}
+            loading={index === 0 ? undefined : 'eager'}
+            style={{
+              transform: index === selectedIndex && zooming ? 'scale(2)' : 'scale(1)',
+              transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+              transition: index === selectedIndex && zooming ? 'none' : 'transform 0.3s ease',
+            }}
+          />
+        ))}
       </div>
 
       {/* Thumbnail strip */}
