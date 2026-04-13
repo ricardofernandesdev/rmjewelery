@@ -1,6 +1,12 @@
 /* ── Global Font ── */
 /* Manrope is loaded in the root layout via next/font/google and exposed
-   as the CSS variable --font-manrope. Apply it site-wide in the admin. */
+   as the CSS variable --font-manrope. Override Payload's own --font-body
+   variable so every internal component picks it up automatically. */
+:root {
+  --font-body: var(--font-manrope), system-ui, -apple-system, sans-serif !important;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
 body,
 html {
   font-family: var(--font-manrope), system-ui, -apple-system, sans-serif !important;
