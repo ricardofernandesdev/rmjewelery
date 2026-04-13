@@ -155,37 +155,25 @@ export const ShebijuImport: React.FC = () => {
       categoryField.setValue(categoryId)
       if (mediaIds.length > 0) imagesField.setValue(mediaIds)
 
-      // Fetch color library and match scraped colors to IDs
-      let colorIds: number[] = []
-      if (result.colors.length > 0) {
-        try {
-          const colorsRes = await fetch('/api/colors?limit=100&depth=0', { credentials: 'include' })
-          const colorsData = await colorsRes.json()
-          if (colorsData?.docs) {
-            const colorMap = new Map<string, number>()
-            for (const doc of colorsData.docs) {
-              colorMap.set(doc.name.toLowerCase(), doc.id)
-            }
-            colorIds = result.colors
-              .map((name: string) => colorMap.get(name.toLowerCase()))
-              .filter((id): id is number => id != null)
-          }
-        } catch {
-          // Skip color matching
+      // Select ALL colors from the library and create one variant per color
+      try {
+        const colorsRes = await fetch('/api/colors?limit=100&depth=0&sort=name', { credentials: 'include' })
+        const colorsData = await colorsRes.json()
+        if (colorsData?.docs?.length > 0) {
+          const allColorIds = colorsData.docs.map((d: any) => d.id as number)
+          enableColorsField.setValue(true)
+          colorsField.setValue(allColorIds)
+          variantsField.setValue(
+            allColorIds.map((colorId: number) => ({
+              color: String(colorId),
+              size: '',
+              price: null,
+              availability: 'in_stock',
+            })),
+          )
         }
-
-        enableColorsField.setValue(true)
-        if (colorIds.length > 0) {
-          colorsField.setValue(colorIds)
-          // Create one variant per color
-          const variants = colorIds.map((colorId) => ({
-            color: String(colorId),
-            size: '',
-            price: null,
-            availability: 'in_stock',
-          }))
-          variantsField.setValue(variants)
-        }
+      } catch {
+        // Skip if colors fetch fails
       }
       // Show description preview (will be auto-generated server-side on save)
       const selectedCat = categories.find((c) => c.id === categoryId)
