@@ -4,6 +4,40 @@ import { headers } from 'next/headers'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import puppeteerCore from 'puppeteer-core'
+import chromium from '@sparticuz/chromium'
+
+// Allow up to 60s for the scraping + image upload flow
+export const maxDuration = 60
+
+async function getBrowser() {
+  if (process.env.NODE_ENV === 'development') {
+    // In dev, try to find a local Chrome/Chromium installation
+    const possiblePaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium-browser',
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    ]
+    const executablePath = possiblePaths.find((p) => {
+      try { return fs.existsSync(p) } catch { return false }
+    })
+
+    return puppeteerCore.launch({
+      headless: true,
+      executablePath: executablePath || undefined,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
+  }
+
+  // Production (Vercel / serverless) — use bundled Chromium
+  return puppeteerCore.launch({
+    args: chromium.args,
+    executablePath: await chromium.executablePath(),
+    headless: true,
+  })
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,27 +54,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL inválido. Deve ser um URL de shebiju.pt' }, { status: 400 })
     }
 
-    // Puppeteer is a devDependency — only available locally.
-    // Use createRequire to load it at runtime without webpack trying to
-    // bundle it or TypeScript checking the module at build time.
-    let puppeteer: any
-    try {
-      const { createRequire } = await import('node:module')
-      const req = createRequire(import.meta.url)
-      puppeteer = req('puppeteer')
-    } catch {
-      return NextResponse.json(
-        { error: 'Puppeteer não disponível. Esta funcionalidade só funciona em ambiente local (dev).' },
-        { status: 500 },
-      )
-    }
-
     // Launch browser and scrape
-    const launch = puppeteer.launch || puppeteer.default?.launch
-    const browser = await launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    })
+    const browser = await getBrowser()
 
     const page = await browser.newPage()
     await page.setUserAgent(
@@ -83,7 +98,6 @@ export async function POST(req: NextRequest) {
       if (ref && name.includes(ref)) {
         name = name.replace(ref, '').trim()
       }
-      // Remove trailing/leading dashes, dots, spaces
       name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
 
       // Description
@@ -92,7 +106,7 @@ export async function POST(req: NextRequest) {
       )
       const description = descEl?.textContent?.trim() || ''
 
-      // Images — all product images (not icons, logos, placeholders)
+      // Images
       const imageUrls: string[] = []
       const allImgs = document.querySelectorAll('img')
       allImgs.forEach((img) => {
@@ -116,7 +130,6 @@ export async function POST(req: NextRequest) {
         }
       })
 
-      // Also check background images
       document.querySelectorAll('[style*="background-image"]').forEach((el) => {
         const match = (el as HTMLElement).style.backgroundImage.match(/url\(["']?(.+?)["']?\)/)
         if (match?.[1] && !match[1].includes('fill.gif') && !imageUrls.includes(match[1])) {
@@ -169,7 +182,6 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < productData.imageUrls.length; i++) {
       const imgUrl = productData.imageUrls[i]
       try {
-        // Download to temp file
         const ext = path.extname(new URL(imgUrl).pathname).split('?')[0] || '.webp'
         const filename = `${productData.ref || 'img'}_${i + 1}${ext}`
         const tmpPath = path.join(tmpDir, filename)
@@ -179,7 +191,6 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(await response.arrayBuffer())
         fs.writeFileSync(tmpPath, buffer)
 
-        // Upload to Payload Media
         const media = await payload.create({
           collection: 'media',
           data: {
@@ -198,7 +209,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Cleanup temp dir
     try {
       fs.rmSync(tmpDir, { recursive: true })
     } catch {
@@ -225,7 +235,6 @@ export async function POST(req: NextRequest) {
       productPayload.category = categoryId
     }
 
-    // Create the product
     const product = await payload.create({
       collection: 'products',
       data: productPayload,
