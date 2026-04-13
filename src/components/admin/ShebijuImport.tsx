@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { useField, useForm } from '@payloadcms/ui'
+import { useField } from '@payloadcms/ui'
 
 type ScrapeResult = {
   name: string
@@ -8,6 +8,7 @@ type ScrapeResult = {
   imageUrls: string[]
   colors: string[]
   price: number
+  description: any | null
 }
 
 type Category = { id: number; name: string }
@@ -17,20 +18,17 @@ export const ShebijuImport: React.FC = () => {
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [step, setStep] = useState<string | null>(null)
-
-  // Pending image URLs (not yet uploaded to Media)
-  const [pendingImages, setPendingImages] = useState<string[]>([])
+  const [done, setDone] = useState(false)
 
   const nameField = useField<string>({ path: 'name' })
   const slugField = useField<string>({ path: 'slug' })
   const priceField = useField<number>({ path: 'price' })
   const imagesField = useField<number[]>({ path: 'images' })
   const categoryField = useField<number>({ path: 'category' })
+  const descriptionField = useField<any>({ path: 'description' })
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
-  const { submit } = useForm()
 
   useEffect(() => {
     fetch('/api/categories?limit=100&depth=0&sort=name', { credentials: 'include' })
@@ -41,7 +39,6 @@ export const ShebijuImport: React.FC = () => {
       .catch(() => {})
   }, [])
 
-  // ── Step 1: Scrape only (no image uploads) ──
   const handleImport = async () => {
     if (!url.trim()) return
     if (!categoryId) {
@@ -50,10 +47,11 @@ export const ShebijuImport: React.FC = () => {
     }
     setLoading(true)
     setError(null)
-    setPendingImages([])
+    setDone(false)
 
     try {
-      setStep('A extrair dados do produto...')
+      // ── Step 1: Scrape ──
+      setStep('1/2 — A extrair dados do produto...')
       const scrapeRes = await fetch('/api/import-shebiju/scrape', {
         method: 'POST',
         credentials: 'include',
@@ -64,45 +62,20 @@ export const ShebijuImport: React.FC = () => {
       if (!scrapeRes.ok) throw new Error(scrapeData.error || 'Erro ao extrair dados')
       const result = scrapeData as ScrapeResult
 
-      // Fill form fields (no images yet)
-      nameField.setValue(result.name || result.ref || '')
-      slugField.setValue(result.ref || '')
-      priceField.setValue(result.price || 0)
-      categoryField.setValue(categoryId)
-      if (result.colors.length > 0) enableColorsField.setValue(true)
-
-      // Store image URLs for later upload
-      setPendingImages(result.imageUrls)
-
-      setStep(
-        `Dados extraídos: "${result.name || result.ref}" — ${result.imageUrls.length} imagens prontas. Revê o formulário e clica "Guardar Produto".`,
-      )
-      setLoading(false)
-    } catch (err: any) {
-      setError(err.message || 'Erro desconhecido')
-      setLoading(false)
-      setStep(null)
-    }
-  }
-
-  // ── Step 2: Upload images + submit form ──
-  const handleSave = async () => {
-    setSaving(true)
-    setError(null)
-
-    try {
+      // ── Step 2: Upload images one by one ──
       const mediaIds: number[] = []
+      const totalImages = result.imageUrls.length
 
-      for (let i = 0; i < pendingImages.length; i++) {
-        setStep(`A carregar imagem ${i + 1} de ${pendingImages.length}...`)
+      for (let i = 0; i < totalImages; i++) {
+        setStep(`2/2 — A carregar imagem ${i + 1} de ${totalImages}...`)
         try {
           const uploadRes = await fetch('/api/import-shebiju/upload-image', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              imageUrl: pendingImages[i],
-              altText: slugField.value || nameField.value || 'img',
+              imageUrl: result.imageUrls[i],
+              altText: result.ref || result.name,
               index: i + 1,
             }),
           })
@@ -115,21 +88,43 @@ export const ShebijuImport: React.FC = () => {
         }
       }
 
-      if (mediaIds.length === 0) {
-        throw new Error('Nenhuma imagem foi carregada.')
-      }
+      // ── Fill form fields ──
+      nameField.setValue(result.name || result.ref || '')
+      slugField.setValue(result.ref || '')
+      priceField.setValue(result.price || 0)
+      categoryField.setValue(categoryId)
+      if (mediaIds.length > 0) imagesField.setValue(mediaIds)
+      if (result.colors.length > 0) enableColorsField.setValue(true)
+      if (result.description) descriptionField.setValue(result.description)
 
-      imagesField.setValue(mediaIds)
-
-      setStep('A guardar produto...')
-      // Small delay for Payload form state to update before submit
-      await new Promise((r) => setTimeout(r, 300))
-      await submit()
+      setDone(true)
+      setStep(
+        `Formulário preenchido: "${result.name || result.ref}" — ${mediaIds.length} imagens. Clica "Salvar" para guardar.`,
+      )
+      setLoading(false)
     } catch (err: any) {
-      setError(err.message || 'Erro ao guardar')
-      setSaving(false)
+      setError(err.message || 'Erro desconhecido')
+      setLoading(false)
       setStep(null)
     }
+  }
+
+  if (done) {
+    return (
+      <div
+        style={{
+          marginBottom: '24px',
+          padding: '12px 16px',
+          border: '1px solid var(--theme-success-500, #22c55e)',
+          borderRadius: '8px',
+          background: 'var(--theme-elevation-0)',
+          fontSize: '13px',
+          color: 'var(--theme-success-500, #22c55e)',
+        }}
+      >
+        {step}
+      </div>
+    )
   }
 
   const inputStyle: React.CSSProperties = {
@@ -166,8 +161,7 @@ export const ShebijuImport: React.FC = () => {
         Importar da Shebiju
       </label>
       <p style={{ fontSize: '12px', color: 'var(--theme-elevation-400)', marginBottom: '12px' }}>
-        Cola o URL, seleciona a categoria. O formulário é preenchido sem guardar. Revê os dados e
-        clica "Guardar Produto" quando estiveres satisfeito.
+        Cola o URL, seleciona a categoria. O formulário é preenchido automaticamente. Depois clica "Salvar".
       </p>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -176,16 +170,16 @@ export const ShebijuImport: React.FC = () => {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.shebiju.pt/pt/..."
-          disabled={loading || saving}
+          disabled={loading}
           style={{ ...inputStyle, flex: '1 1 250px' }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && !loading && !saving) handleImport()
+            if (e.key === 'Enter' && !loading) handleImport()
           }}
         />
         <select
           value={categoryId || ''}
           onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
-          disabled={loading || saving}
+          disabled={loading}
           style={{ ...inputStyle, minWidth: '160px' }}
         >
           <option value="">Categoria...</option>
@@ -198,7 +192,7 @@ export const ShebijuImport: React.FC = () => {
         <button
           type="button"
           onClick={handleImport}
-          disabled={loading || saving || !url.trim()}
+          disabled={loading || !url.trim()}
           style={{
             padding: '10px 20px',
             fontSize: '13px',
@@ -216,63 +210,24 @@ export const ShebijuImport: React.FC = () => {
         >
           {loading ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Spinner /> A extrair...
+              <span
+                style={{
+                  width: '14px',
+                  height: '14px',
+                  border: '2px solid var(--theme-elevation-300)',
+                  borderTopColor: 'var(--theme-elevation-500)',
+                  borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite',
+                  display: 'inline-block',
+                }}
+              />
+              A importar...
             </span>
           ) : (
             'Importar'
           )}
         </button>
       </div>
-
-      {/* Image previews from source URLs (not yet uploaded) */}
-      {pendingImages.length > 0 && (
-        <div style={{ marginTop: '12px' }}>
-          <p style={{ fontSize: '12px', color: 'var(--theme-elevation-500)', marginBottom: '8px' }}>
-            {pendingImages.length} imagens prontas (serão carregadas ao guardar):
-          </p>
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {pendingImages.map((imgUrl, i) => (
-              <img
-                key={i}
-                src={imgUrl}
-                alt={`Preview ${i + 1}`}
-                style={{
-                  width: '60px',
-                  height: '60px',
-                  objectFit: 'cover',
-                  borderRadius: '4px',
-                  border: '1px solid var(--theme-elevation-200)',
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Save button — only shows after import */}
-      {pendingImages.length > 0 && !saving && (
-        <button
-          type="button"
-          onClick={handleSave}
-          style={{
-            marginTop: '14px',
-            padding: '12px 28px',
-            fontSize: '14px',
-            fontWeight: 700,
-            letterSpacing: '0.5px',
-            textTransform: 'uppercase',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            background: 'var(--theme-success-500, #22c55e)',
-            color: 'white',
-            transition: 'opacity 0.15s',
-            width: '100%',
-          }}
-        >
-          Guardar Produto
-        </button>
-      )}
 
       {step && (
         <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--theme-success-500, #22c55e)' }}>
@@ -288,17 +243,3 @@ export const ShebijuImport: React.FC = () => {
     </div>
   )
 }
-
-const Spinner: React.FC = () => (
-  <span
-    style={{
-      width: '14px',
-      height: '14px',
-      border: '2px solid var(--theme-elevation-300)',
-      borderTopColor: 'var(--theme-elevation-500)',
-      borderRadius: '50%',
-      animation: 'spin 0.6s linear infinite',
-      display: 'inline-block',
-    }}
-  />
-)
