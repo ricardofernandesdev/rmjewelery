@@ -1,63 +1,76 @@
 'use client'
 import React, { useState } from 'react'
 
-type ImportResult = {
-  productId: number
-  data: {
-    name: string
-    ref: string
-    imagesUploaded: number
-    colors: string[]
-    price: number
-  }
+type ScrapeResult = {
+  name: string
+  ref: string
+  description: string
+  imageUrls: string[]
+  colors: string[]
+  price: number
 }
 
-/**
- * Admin UI field that accepts a Shebiju product URL, scrapes the page,
- * uploads images to Media, creates a pre-filled product, and redirects
- * to the edit page.
- */
 export const ShebijuImport: React.FC = () => {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [status, setStatus] = useState<string | null>(null)
+  const [step, setStep] = useState<string | null>(null)
 
   const handleImport = async () => {
     if (!url.trim()) return
     setLoading(true)
     setError(null)
-    setStatus('A abrir página...')
 
     try {
-      setStatus('A extrair dados do produto e imagens... (pode demorar 15-30s)')
+      // ── Step 1: Scrape product data (browser, ~5-8s) ──
+      setStep('Passo 1/2 — A extrair dados do produto...')
 
-      const res = await fetch('/api/import-shebiju', {
+      const scrapeRes = await fetch('/api/import-shebiju/scrape', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
       })
+      const scrapeData = await scrapeRes.json()
 
-      const json = await res.json()
+      if (!scrapeRes.ok) throw new Error(scrapeData.error || 'Erro ao extrair dados')
 
-      if (!res.ok) {
-        throw new Error(json.error || 'Erro ao importar')
-      }
+      const result = scrapeData as ScrapeResult
 
-      const result = json as ImportResult
-      setStatus(
-        `Importado: "${result.data.name}" — ${result.data.imagesUploaded} imagens, ${result.data.colors.length} cores`,
+      // ── Step 2: Download images + create product (~3-8s) ──
+      setStep(
+        `Passo 2/2 — A carregar ${result.imageUrls.length} imagens e a criar produto...`,
       )
 
-      // Redirect to the newly created product edit page after a brief delay
+      const createRes = await fetch('/api/import-shebiju/create', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: result.name,
+          ref: result.ref,
+          description: result.description,
+          imageUrls: result.imageUrls,
+          colors: result.colors,
+          price: result.price,
+        }),
+      })
+      const createData = await createRes.json()
+
+      if (!createRes.ok) throw new Error(createData.error || 'Erro ao criar produto')
+
+      setStep(
+        `Importado: "${result.name || result.ref}" — ${createData.imagesUploaded} imagens`,
+      )
+
+      // Redirect to the new product
       setTimeout(() => {
-        window.location.href = `/admin/collections/products/${result.productId}`
+        window.location.href = `/admin/collections/products/${createData.productId}`
       }, 1500)
     } catch (err: any) {
       setError(err.message || 'Erro desconhecido')
       setLoading(false)
-      setStatus(null)
+      setStep(null)
     }
   }
 
@@ -84,13 +97,7 @@ export const ShebijuImport: React.FC = () => {
       >
         Importar da Shebiju
       </label>
-      <p
-        style={{
-          fontSize: '12px',
-          color: 'var(--theme-elevation-400)',
-          marginBottom: '12px',
-        }}
-      >
+      <p style={{ fontSize: '12px', color: 'var(--theme-elevation-400)', marginBottom: '12px' }}>
         Cola o URL de um produto da shebiju.pt para importar automaticamente nome, imagens e
         cores. O produto é criado e podes editar antes de publicar.
       </p>
@@ -155,26 +162,14 @@ export const ShebijuImport: React.FC = () => {
         </button>
       </div>
 
-      {status && (
-        <p
-          style={{
-            marginTop: '10px',
-            fontSize: '13px',
-            color: 'var(--theme-success-500, #22c55e)',
-          }}
-        >
-          {status}
+      {step && (
+        <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--theme-success-500, #22c55e)' }}>
+          {step}
         </p>
       )}
 
       {error && (
-        <p
-          style={{
-            marginTop: '10px',
-            fontSize: '13px',
-            color: 'var(--theme-error-500, #ef4444)',
-          }}
-        >
+        <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--theme-error-500, #ef4444)' }}>
           {error}
         </p>
       )}
