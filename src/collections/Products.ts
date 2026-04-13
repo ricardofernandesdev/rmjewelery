@@ -31,8 +31,8 @@ export const Products: CollectionConfig = {
   },
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        if (data && data.name) {
+      ({ data, operation }) => {
+        if (operation === 'create' && data && !data.slug && data.name) {
           data.slug = formatSlug(data.name)
         }
         return data
@@ -60,10 +60,9 @@ export const Products: CollectionConfig = {
       name: 'slug',
       type: 'text',
       unique: true,
+      required: true,
       admin: {
         position: 'sidebar',
-        readOnly: true,
-        description: 'Gerado automaticamente a partir do nome.',
       },
     },
     {
