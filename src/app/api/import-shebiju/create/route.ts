@@ -70,8 +70,10 @@ export async function POST(req: NextRequest) {
     const { user } = await payload.auth({ headers: hdrs })
     if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    const { name, ref, colors, price, categoryId, sourceUrl } = await req.json()
+    const { name, ref, colors, price, categoryId, sourceUrl, mediaIds } = await req.json()
     if (!name && !ref) return NextResponse.json({ error: 'Dados insuficientes' }, { status: 400 })
+    if (!categoryId) return NextResponse.json({ error: 'Seleciona uma categoria' }, { status: 400 })
+    if (!mediaIds || mediaIds.length === 0) return NextResponse.json({ error: 'Nenhuma imagem carregada' }, { status: 400 })
 
     const productName = name || ref || 'Produto Importado'
     const slug = (ref || name || 'produto').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -83,14 +85,14 @@ export async function POST(req: NextRequest) {
     const productData: any = {
       name: productName,
       slug,
-      images: [],
+      images: mediaIds,
       price: price || 0,
       availability: 'in_stock',
       enableColors: (colors || []).length > 0,
       enableSizes: false,
+      category: categoryId,
       ...(description ? { description } : {}),
     }
-    if (categoryId) productData.category = categoryId
 
     const product = await payload.create({ collection: 'products', data: productData })
 
