@@ -87,20 +87,39 @@ function extractProductData(html: string, sourceUrl: string) {
   // same image at multiple paths (thumbnail, medium, full size).
   const imagesByFilename = new Map<string, string>() // filename (no ext) → fullUrl
 
+  // Score URL quality: longer path usually = higher resolution variant.
+  // Shebiju uses paths like /thumbs/, /media/, /full/ or size suffixes.
+  function qualityScore(url: string): number {
+    let score = 0
+    const lower = url.toLowerCase()
+    // Prefer larger variants
+    if (lower.includes('/full/') || lower.includes('_full')) score += 10
+    if (lower.includes('/large/') || lower.includes('_large')) score += 8
+    if (lower.includes('/media/') || lower.includes('_media')) score += 5
+    // Penalize thumbnails
+    if (lower.includes('/thumb') || lower.includes('_thumb') || lower.includes('/mini')) score -= 10
+    if (lower.includes('/small') || lower.includes('_small')) score -= 5
+    // Prefer jpg over webp
+    if (lower.match(/\.jpe?g/)) score += 2
+    // Longer path segments often mean higher-res variant
+    score += url.split('/').length
+    return score
+  }
+
   function addImage(src: string) {
     if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
     if (!src.match(/\.(jpe?g|webp|png)/i)) return
     const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
 
-    // Extract just the filename without extension
     const filenameWithExt = fullUrl.split('/').pop()?.split('?')[0] || ''
     const filenameBase = filenameWithExt.replace(/\.[^.]+$/, '')
     if (!filenameBase) return
 
     const existing = imagesByFilename.get(filenameBase)
-    // Prefer jpg over webp
-    if (existing && existing.match(/\.jpe?g/i)) return
-    imagesByFilename.set(filenameBase, fullUrl)
+    // Keep whichever URL scores higher (better quality)
+    if (!existing || qualityScore(fullUrl) > qualityScore(existing)) {
+      imagesByFilename.set(filenameBase, fullUrl)
+    }
   }
 
   // Product images from img tags
