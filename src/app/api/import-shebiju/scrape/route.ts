@@ -72,12 +72,21 @@ function extractProductData(html: string, url: string) {
 
   if (titleText) {
     name = titleText
+    // Try to extract ref from the product name first
     const refMatch = name.match(/([A-Z]{2,}[\d]+[\w.]*)/i)
     ref = refMatch ? refMatch[1] : ''
     if (ref && name.includes(ref)) {
       name = name.replace(ref, '').trim()
     }
     name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
+  }
+
+  // If no ref in the title, extract from the .detalhe_ref element
+  if (!ref) {
+    const detRefMatch = html.match(/detalhe_ref[^>]*>([^<]+)</i)
+    if (detRefMatch) {
+      ref = decodeHtmlEntities(detRefMatch[1].trim())
+    }
   }
 
   // ── Images from .img_big[big] attribute — full-size .png URLs ──
