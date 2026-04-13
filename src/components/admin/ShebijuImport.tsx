@@ -13,6 +13,61 @@ type ScrapeResult = {
 
 type Category = { id: number; name: string }
 
+const descTemplates: Record<string, [string, string]> = {
+  brincos: [
+    'Os {name} foram concebidos para realçar o rosto com suavidade e brilho, ideais para quem procura acessórios discretos, mas cheios de charme. O seu design moderno acrescenta equilíbrio e luminosidade ao visual, tornando-os perfeitos para todas as ocasiões.',
+    'Seja para o dia a dia ou para complementar um look especial, estes brincos conferem um toque de elegância intuitiva que não passa despercebida — um verdadeiro clássico contemporâneo.',
+  ],
+  colares: [
+    'O {name} foi desenhado para adornar o pescoço com delicadeza e sofisticação, ideal para quem valoriza peças que combinam elegância e versatilidade. O seu design cuidado realça qualquer decote, acrescentando um toque de luminosidade ao visual.',
+    'Perfeito tanto para ocasiões especiais como para o uso diário, este colar é a escolha ideal para quem procura um acessório que se destaca pela sua simplicidade refinada — uma peça intemporal que complementa qualquer estilo.',
+  ],
+  pulseiras: [
+    'A {name} foi criada para envolver o pulso com elegância e subtileza, perfeita para quem procura um acessório que alia design moderno a um conforto excepcional. O seu acabamento cuidado reflete a luz de forma delicada, acrescentando um brilho discreto ao visual.',
+    'Seja usada sozinha ou combinada com outras peças, esta pulseira adapta-se a qualquer ocasião — do dia a dia aos momentos mais especiais. Um acessório versátil que se torna rapidamente indispensável.',
+  ],
+  aneis: [
+    'O {name} foi concebido para adornar os dedos com elegância e personalidade, ideal para quem procura peças que se destacam pela sua beleza discreta. O seu design harmonioso combina modernidade e atemporalidade, tornando-o perfeito para qualquer ocasião.',
+    'Seja para uso diário ou para complementar um look mais elaborado, este anel confere um toque de sofisticação que não passa despercebido — uma peça que se torna parte da sua identidade.',
+  ],
+}
+
+function detectCat(name: string, catName: string): string | null {
+  const text = `${name} ${catName}`.toLowerCase()
+  if (text.includes('brinco')) return 'brincos'
+  if (text.includes('colar')) return 'colares'
+  if (text.includes('pulseira')) return 'pulseiras'
+  if (text.includes('anel') || text.includes('anéis')) return 'aneis'
+  return null
+}
+
+function buildLexicalDescription(productName: string, cat: string) {
+  const [p1Raw, p2Raw] = descTemplates[cat]
+  const p1 = p1Raw.replace('{name}', productName)
+  const p2 = p2Raw.replace('{name}', productName)
+  const idx = p1.indexOf(productName)
+  const children =
+    idx >= 0
+      ? [
+          ...(idx > 0 ? [{ type: 'text', text: p1.slice(0, idx), version: 1 }] : []),
+          { type: 'text', text: productName, format: 1, version: 1 },
+          ...(idx + productName.length < p1.length
+            ? [{ type: 'text', text: p1.slice(idx + productName.length), version: 1 }]
+            : []),
+        ]
+      : [{ type: 'text', text: p1, version: 1 }]
+  return {
+    root: {
+      type: 'root',
+      children: [
+        { type: 'paragraph', children, direction: 'ltr', format: '', indent: 0, version: 1 },
+        { type: 'paragraph', children: [{ type: 'text', text: p2, version: 1 }], direction: 'ltr', format: '', indent: 0, version: 1 },
+      ],
+      direction: 'ltr', format: '', indent: 0, version: 1,
+    },
+  }
+}
+
 export const ShebijuImport: React.FC = () => {
   const [url, setUrl] = useState('')
   const [categoryId, setCategoryId] = useState<number | null>(null)
@@ -27,7 +82,7 @@ export const ShebijuImport: React.FC = () => {
   const priceField = useField<number>({ path: 'price' })
   const imagesField = useField<number[]>({ path: 'images' })
   const categoryField = useField<number>({ path: 'category' })
-  // Description is auto-generated server-side in beforeValidate hook
+  const descriptionField = useField<any>({ path: 'description' })
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
 
   useEffect(() => {
@@ -91,13 +146,19 @@ export const ShebijuImport: React.FC = () => {
       }
 
       // ── Fill form fields ──
-      nameField.setValue(result.name || result.ref || '')
+      const productName = result.name || result.ref || ''
+      nameField.setValue(productName)
       slugField.setValue(result.ref || '')
       priceField.setValue(result.price || 0)
       categoryField.setValue(categoryId)
       if (mediaIds.length > 0) imagesField.setValue(mediaIds)
       if (result.colors.length > 0) enableColorsField.setValue(true)
-      // Description is auto-generated server-side when saving
+      // Generate and set description based on product name + category
+      const selectedCat = categories.find((c) => c.id === categoryId)
+      const catKey = detectCat(productName, selectedCat?.name || '')
+      if (catKey && descTemplates[catKey]) {
+        descriptionField.setValue(buildLexicalDescription(productName, catKey))
+      }
 
       setDone(true)
       setStep(
