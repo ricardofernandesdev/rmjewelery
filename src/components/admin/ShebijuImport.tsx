@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 type ScrapeResult = {
   name: string
   ref: string
-  description: string
   imageUrls: string[]
   colors: string[]
   price: number
@@ -22,8 +21,8 @@ export const ShebijuImport: React.FC = () => {
     setError(null)
 
     try {
-      // ── Step 1: Scrape product data (browser, ~5-8s) ──
-      setStep('Passo 1/2 — A extrair dados do produto...')
+      // ── Step 1: Scrape ──
+      setStep('1/3 — A extrair dados do produto...')
 
       const scrapeRes = await fetch('/api/import-shebiju/scrape', {
         method: 'POST',
@@ -32,15 +31,11 @@ export const ShebijuImport: React.FC = () => {
         body: JSON.stringify({ url: url.trim() }),
       })
       const scrapeData = await scrapeRes.json()
-
       if (!scrapeRes.ok) throw new Error(scrapeData.error || 'Erro ao extrair dados')
-
       const result = scrapeData as ScrapeResult
 
-      // ── Step 2: Download images + create product (~3-8s) ──
-      setStep(
-        `Passo 2/2 — A carregar ${result.imageUrls.length} imagens e a criar produto...`,
-      )
+      // ── Step 2: Create product (no images) ──
+      setStep(`2/3 — A criar produto "${result.name || result.ref}"...`)
 
       const createRes = await fetch('/api/import-shebiju/create', {
         method: 'POST',
@@ -49,24 +44,45 @@ export const ShebijuImport: React.FC = () => {
         body: JSON.stringify({
           name: result.name,
           ref: result.ref,
-          imageUrls: result.imageUrls,
           colors: result.colors,
           price: result.price,
           sourceUrl: url.trim(),
         }),
       })
       const createData = await createRes.json()
-
       if (!createRes.ok) throw new Error(createData.error || 'Erro ao criar produto')
 
-      setStep(
-        `Importado: "${result.name || result.ref}" — ${createData.imagesUploaded} imagens`,
-      )
+      const productId = createData.productId
+      const totalImages = result.imageUrls.length
 
-      // Redirect to the new product
+      // ── Step 3: Upload images one by one ──
+      let uploaded = 0
+      for (let i = 0; i < totalImages; i++) {
+        setStep(`3/3 — A carregar imagem ${i + 1} de ${totalImages}...`)
+
+        try {
+          const uploadRes = await fetch('/api/import-shebiju/upload-image', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageUrl: result.imageUrls[i],
+              productId,
+              productName: result.ref || result.name,
+              index: i + 1,
+            }),
+          })
+          if (uploadRes.ok) uploaded++
+        } catch {
+          // Skip failed images, continue with others
+        }
+      }
+
+      setStep(`Importado com ${uploaded}/${totalImages} imagens. A redirecionar...`)
+
       setTimeout(() => {
-        window.location.href = `/admin/collections/products/${createData.productId}`
-      }, 1500)
+        window.location.href = `/admin/collections/products/${productId}`
+      }, 1200)
     } catch (err: any) {
       setError(err.message || 'Erro desconhecido')
       setLoading(false)
@@ -98,8 +114,8 @@ export const ShebijuImport: React.FC = () => {
         Importar da Shebiju
       </label>
       <p style={{ fontSize: '12px', color: 'var(--theme-elevation-400)', marginBottom: '12px' }}>
-        Cola o URL de um produto da shebiju.pt para importar automaticamente nome, imagens e
-        cores. O produto é criado e podes editar antes de publicar.
+        Cola o URL de um produto da shebiju.pt para importar automaticamente nome, descrição,
+        imagens e cores.
       </p>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -167,13 +183,11 @@ export const ShebijuImport: React.FC = () => {
           {step}
         </p>
       )}
-
       {error && (
         <p style={{ marginTop: '10px', fontSize: '13px', color: 'var(--theme-error-500, #ef4444)' }}>
           {error}
         </p>
       )}
-
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )

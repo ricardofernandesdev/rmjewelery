@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from '@/lib/payload'
 import { headers } from 'next/headers'
-import path from 'path'
 
-// Image download + upload + product creation — no browser needed, should be fast
 export const maxDuration = 10
 
-// ── Description templates per product category ──────────────────────────
-// {name} is replaced with the product name. Two paragraphs each.
-
+// ── Description templates per category ──
 const descriptionTemplates: Record<string, [string, string]> = {
   brincos: [
     'Os {name} foram concebidos para realçar o rosto com suavidade e brilho, ideais para quem procura acessórios discretos, mas cheios de charme. O seu design moderno acrescenta equilíbrio e luminosidade ao visual, tornando-os perfeitos para todas as ocasiões.',
@@ -28,10 +24,6 @@ const descriptionTemplates: Record<string, [string, string]> = {
   ],
 }
 
-/**
- * Detect product category from the source URL or product name.
- * Returns the key into descriptionTemplates, or null.
- */
 function detectCategory(sourceUrl: string, productName: string): string | null {
   const text = `${sourceUrl} ${productName}`.toLowerCase()
   if (text.includes('brinco')) return 'brincos'
@@ -41,110 +33,49 @@ function detectCategory(sourceUrl: string, productName: string): string | null {
   return null
 }
 
-/**
- * Build a Lexical rich-text JSON structure from two paragraphs.
- * The product name in the first paragraph is rendered in bold.
- */
 function buildDescription(productName: string, [para1, para2]: [string, string]) {
   const filled1 = para1.replace('{name}', productName)
   const filled2 = para2.replace('{name}', productName)
-
-  // Split first paragraph around the product name for bold formatting
   const idx = filled1.indexOf(productName)
   const p1Children =
     idx >= 0
       ? [
           ...(idx > 0 ? [{ type: 'text', text: filled1.slice(0, idx), version: 1 }] : []),
-          { type: 'text', text: productName, format: 1, version: 1 }, // format 1 = bold
+          { type: 'text', text: productName, format: 1, version: 1 },
           ...(idx + productName.length < filled1.length
             ? [{ type: 'text', text: filled1.slice(idx + productName.length), version: 1 }]
             : []),
         ]
       : [{ type: 'text', text: filled1, version: 1 }]
-
   return {
     root: {
       type: 'root',
       children: [
-        {
-          type: 'paragraph',
-          children: p1Children,
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          version: 1,
-        },
-        {
-          type: 'paragraph',
-          children: [{ type: 'text', text: filled2, version: 1 }],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          version: 1,
-        },
+        { type: 'paragraph', children: p1Children, direction: 'ltr', format: '', indent: 0, version: 1 },
+        { type: 'paragraph', children: [{ type: 'text', text: filled2, version: 1 }], direction: 'ltr', format: '', indent: 0, version: 1 },
       ],
-      direction: 'ltr',
-      format: '',
-      indent: 0,
-      version: 1,
+      direction: 'ltr', format: '', indent: 0, version: 1,
     },
   }
 }
 
+/**
+ * Create the product WITHOUT images. Images are uploaded separately
+ * via /api/import-shebiju/upload-image one at a time.
+ */
 export async function POST(req: NextRequest) {
   try {
     const payload = await getPayload()
     const hdrs = await headers()
     const { user } = await payload.auth({ headers: hdrs })
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
+    if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    const { name, ref, imageUrls, colors, price, categoryId, sourceUrl } = await req.json()
-
-    if (!name && !ref) {
-      return NextResponse.json({ error: 'Dados insuficientes' }, { status: 400 })
-    }
+    const { name, ref, colors, price, categoryId, sourceUrl } = await req.json()
+    if (!name && !ref) return NextResponse.json({ error: 'Dados insuficientes' }, { status: 400 })
 
     const productName = name || ref || 'Produto Importado'
+    const slug = (ref || name || 'produto').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
-    // Download images and upload to Payload Media
-    const mediaIds: number[] = []
-
-    for (let i = 0; i < (imageUrls || []).length; i++) {
-      const imgUrl = imageUrls[i]
-      try {
-        const response = await fetch(imgUrl, { signal: AbortSignal.timeout(5000) })
-        if (!response.ok) continue
-
-        const buffer = Buffer.from(await response.arrayBuffer())
-        const ext = path.extname(new URL(imgUrl).pathname).split('?')[0] || '.webp'
-        const filename = `${ref || 'img'}_${i + 1}${ext}`
-
-        const media = await payload.create({
-          collection: 'media',
-          data: {
-            alt: `${productName} ${i + 1}`,
-          },
-          file: {
-            data: buffer,
-            name: filename,
-            mimetype: ext === '.webp' ? 'image/webp' : ext === '.png' ? 'image/png' : 'image/jpeg',
-            size: buffer.length,
-          },
-        })
-        mediaIds.push(media.id as number)
-      } catch {
-        // Skip failed images
-      }
-    }
-
-    const slug = (ref || name || 'produto')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '')
-
-    // Auto-generate description based on detected category
     const detectedCat = detectCategory(sourceUrl || '', productName)
     const template = detectedCat ? descriptionTemplates[detectedCat] : null
     const description = template ? buildDescription(productName, template) : undefined
@@ -152,27 +83,20 @@ export async function POST(req: NextRequest) {
     const productData: any = {
       name: productName,
       slug,
-      images: mediaIds,
+      images: [],
       price: price || 0,
       availability: 'in_stock',
       enableColors: (colors || []).length > 0,
       enableSizes: false,
       ...(description ? { description } : {}),
     }
+    if (categoryId) productData.category = categoryId
 
-    if (categoryId) {
-      productData.category = categoryId
-    }
-
-    const product = await payload.create({
-      collection: 'products',
-      data: productData,
-    })
+    const product = await payload.create({ collection: 'products', data: productData })
 
     return NextResponse.json({
       success: true,
       productId: product.id,
-      imagesUploaded: mediaIds.length,
       detectedCategory: detectedCat,
     })
   } catch (err: any) {
