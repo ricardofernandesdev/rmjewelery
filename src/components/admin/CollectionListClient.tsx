@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { ConfirmModal } from './ConfirmModal'
+import { BulkImport } from './BulkImport'
 import './ConfirmModal.scss'
 
 type ColumnDef = {
@@ -130,6 +131,7 @@ export const CollectionListClient: React.FC<Props> = ({
               APAGAR ({selected.size})
             </button>
           )}
+          {config.slug === 'products' && <BulkImport />}
           <a
             href={`/admin/collections/${config.slug}/create`}
             className="media-list__btn media-list__btn--filled"
