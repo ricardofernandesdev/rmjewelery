@@ -82,44 +82,34 @@ function extractProductData(html: string, sourceUrl: string) {
     name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
   }
 
-  // Extract image URLs — prefer .jpg but accept .webp if no jpg exists.
-  // Deduplicate by FILENAME (not full path) because Shebiju serves the
-  // same image at multiple paths (thumbnail, medium, full size).
-  const imagesByFilename = new Map<string, string>() // filename (no ext) → fullUrl
+  // Extract product images from Shebiju.
+  // Their pattern: /imgs/produtos/<filename>.<ext>.webp
+  // Thumbnails have a "pq_" prefix: /imgs/produtos/pq_<filename>.<ext>.webp
+  // We only want the full-size images (no pq_ prefix) and deduplicate
+  // by the core filename (strip pq_ and extensions).
+  const imagesByCore = new Map<string, string>()
 
-  // Score URL quality: longer path usually = higher resolution variant.
-  // Shebiju uses paths like /thumbs/, /media/, /full/ or size suffixes.
-  function qualityScore(url: string): number {
-    let score = 0
-    const lower = url.toLowerCase()
-    // Prefer larger variants
-    if (lower.includes('/full/') || lower.includes('_full')) score += 10
-    if (lower.includes('/large/') || lower.includes('_large')) score += 8
-    if (lower.includes('/media/') || lower.includes('_media')) score += 5
-    // Penalize thumbnails
-    if (lower.includes('/thumb') || lower.includes('_thumb') || lower.includes('/mini')) score -= 10
-    if (lower.includes('/small') || lower.includes('_small')) score -= 5
-    // Prefer png
-    if (lower.includes('.png')) score += 2
-    // Longer path segments often mean higher-res variant
-    score += url.split('/').length
-    return score
+  function getCoreFilename(url: string): string {
+    const filename = url.split('/').pop()?.split('?')[0] || ''
+    // Strip pq_ prefix and all extensions (.png.webp → base name only)
+    return filename.replace(/^pq_/, '').replace(/\.[^/]+$/, '').replace(/\.[^/]+$/, '')
   }
 
   function addImage(src: string) {
     if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
-    // Only import .png images
-    if (!src.match(/\.png/i)) return
+    if (!src.includes('/imgs/produtos/') && !src.includes('produto')) return
     const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
 
-    const filenameWithExt = fullUrl.split('/').pop()?.split('?')[0] || ''
-    const filenameBase = filenameWithExt.replace(/\.[^.]+$/, '')
-    if (!filenameBase) return
+    const filename = fullUrl.split('/').pop() || ''
+    // Skip thumbnails (pq_ prefix = "pequeno")
+    if (filename.startsWith('pq_')) return
 
-    const existing = imagesByFilename.get(filenameBase)
-    // Keep whichever URL scores higher (better quality)
-    if (!existing || qualityScore(fullUrl) > qualityScore(existing)) {
-      imagesByFilename.set(filenameBase, fullUrl)
+    const core = getCoreFilename(fullUrl)
+    if (!core) return
+
+    // Keep the first (highest quality) occurrence per core filename
+    if (!imagesByCore.has(core)) {
+      imagesByCore.set(core, fullUrl)
     }
   }
 
@@ -134,8 +124,8 @@ function extractProductData(html: string, sourceUrl: string) {
   while ((bgMatch = bgRegex.exec(html)) !== null) addImage(bgMatch[1])
 
   // Broader fallback if nothing found via produto/product selectors
-  if (imagesByFilename.size === 0) {
-    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.png[^"']*?)["']/gi
+  if (imagesByCore.size === 0) {
+    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:png|jpe?g)(?:\.webp)?[^"']*?)["']/gi
     let broadMatch
     while ((broadMatch = broadImgRegex.exec(html)) !== null) {
       const src = broadMatch[1]
@@ -151,8 +141,8 @@ function extractProductData(html: string, sourceUrl: string) {
     }
   }
 
-  // Build final deduplicated array (jpg preferred over webp)
-  const imageUrls = Array.from(imagesByFilename.values())
+  // Build final deduplicated array — only full-size, no thumbnails
+  const imageUrls = Array.from(imagesByCore.values())
 
   // Extract colors
   const colors: string[] = []
