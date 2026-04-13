@@ -5,45 +5,37 @@ import { headers } from 'next/headers'
 export const maxDuration = 10
 
 /**
- * Scrape a Shebiju product page using Jina Reader (r.jina.ai) which
- * renders JavaScript and returns the full HTML. No Puppeteer needed,
- * so this runs well within the 10s Vercel free-tier timeout.
+ * Scrape a Shebiju product page via direct HTTP fetch (no browser needed).
+ * Product images are extracted from elements with class "img_big" and
+ * their "big" attribute which holds the full-size .png URL.
  */
 export async function POST(req: NextRequest) {
   try {
     const payload = await getPayload()
     const hdrs = await headers()
     const { user } = await payload.auth({ headers: hdrs })
-    if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-    }
+    if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
     const { url } = await req.json()
     if (!url || !url.includes('shebiju.pt')) {
       return NextResponse.json({ error: 'URL inválido' }, { status: 400 })
     }
 
-    // Use Jina Reader to get the JS-rendered HTML
-    const jinaUrl = `https://r.jina.ai/${url}`
-    const jinaRes = await fetch(jinaUrl, {
+    // Direct fetch — no Jina Reader needed, the data is in the static HTML
+    const pageRes = await fetch(url, {
       headers: {
-        Accept: 'text/html',
-        'X-Return-Format': 'html',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
       signal: AbortSignal.timeout(8000),
     })
 
-    if (!jinaRes.ok) {
-      return NextResponse.json(
-        { error: `Jina Reader devolveu status ${jinaRes.status}` },
-        { status: 502 },
-      )
+    if (!pageRes.ok) {
+      return NextResponse.json({ error: `Página devolveu status ${pageRes.status}` }, { status: 502 })
     }
 
-    const html = await jinaRes.text()
-
-    // Parse the HTML to extract product data
-    const productData = extractProductData(html, url)
+    const html = await pageRes.text()
+    const productData = extractProductData(html)
 
     if (!productData.name && !productData.ref) {
       return NextResponse.json(
@@ -55,22 +47,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, ...productData })
   } catch (err: any) {
     console.error('Scrape error:', err)
-    return NextResponse.json(
-      { error: err.message || 'Erro ao extrair dados' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: err.message || 'Erro ao extrair dados' }, { status: 500 })
   }
 }
 
-function extractProductData(html: string, sourceUrl: string) {
-  // Extract product name — look for text patterns
+function extractProductData(html: string) {
+  // ── Product name ──
   let name = ''
   let ref = ''
-
-  // Try to find product title in common patterns
   const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i)
-  const h2Match = html.match(/<h2[^>]*>([^<]+)<\/h2>/i)
-  const titleText = h1Match?.[1]?.trim() || h2Match?.[1]?.trim() || ''
+  const titleText = h1Match?.[1]?.trim() || ''
 
   if (titleText) {
     name = titleText
@@ -82,55 +68,41 @@ function extractProductData(html: string, sourceUrl: string) {
     name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
   }
 
-  // Extract product images from Shebiju using their known URL pattern:
-  //   /imgs/produtos/<filename>.<ext>.webp       — full size (keep)
-  //   /imgs/produtos/pq_<filename>.<ext>.webp    — thumbnail (skip)
-  //
-  // Use a single strict regex to avoid picking up related product images,
-  // meta tags, or other noise from the page.
-  const seenCores = new Set<string>()
+  // ── Images from .img_big[big] attribute — full-size .png URLs ──
   const imageUrls: string[] = []
+  // Match big="..." on elements that have class img_big (either order)
+  const bigRegex1 = /class=["'][^"']*img_big[^"']*["'][^>]*big=["']([^"']+)["']/gi
+  const bigRegex2 = /big=["']([^"']+)["'][^>]*class=["'][^"']*img_big/gi
+  const seen = new Set<string>()
 
-  // Match only /imgs/produtos/ URLs, skip pq_ thumbnails
-  const productImgRegex = /https?:\/\/www\.shebiju\.pt\/imgs\/produtos\/(?!pq_)([^\s"'<>]+)/gi
-  let imgMatch
-  while ((imgMatch = productImgRegex.exec(html)) !== null) {
-    const fullUrl = imgMatch[0]
-    // Core filename: strip all extensions to deduplicate size variants
-    const filename = imgMatch[1].split('?')[0]
-    const core = filename.replace(/\.[^.]+$/, '').replace(/\.[^.]+$/, '')
-    if (core && !seenCores.has(core)) {
-      seenCores.add(core)
-      imageUrls.push(fullUrl)
-    }
-  }
-
-  // Extract colors
-  const colors: string[] = []
-  const colorPatterns = [
-    /title=["'](Dourado|Prateado|Rose Gold|Preto|Branco)["']/gi,
-    /data-cor=["']([^"']+)["']/gi,
-    /class=["'][^"']*cor[^"']*["'][^>]*>([^<]{2,20})</gi,
-  ]
-  for (const pattern of colorPatterns) {
-    let colorMatch
-    while ((colorMatch = pattern.exec(html)) !== null) {
-      const color = colorMatch[1].trim()
-      if (color && !colors.includes(color) && color.length < 30) {
-        colors.push(color)
+  for (const regex of [bigRegex1, bigRegex2]) {
+    let m
+    while ((m = regex.exec(html)) !== null) {
+      const imgUrl = m[1]
+      if (imgUrl && !seen.has(imgUrl)) {
+        seen.add(imgUrl)
+        imageUrls.push(imgUrl)
       }
     }
   }
 
-  // If no colors found via attributes, check for common color text near product
+  // ── Colors ──
+  const colors: string[] = []
+  const colorRegex = /title=["'](Dourado|Prateado|Rose Gold|Preto|Branco)["']/gi
+  let colorMatch
+  while ((colorMatch = colorRegex.exec(html)) !== null) {
+    const color = colorMatch[1]
+    if (!colors.includes(color)) colors.push(color)
+  }
+  // Fallback text search
   if (colors.length === 0) {
     if (/dourado/i.test(html)) colors.push('Dourado')
     if (/prateado/i.test(html)) colors.push('Prateado')
   }
 
-  // Price
+  // ── Price ──
   let price = 0
-  const priceMatch = html.match(/(?:preço|price|preco|€)\s*[:\s]*(\d+[.,]\d+)/i)
+  const priceMatch = html.match(/(?:preço|price|€)\s*[:\s]*(\d+[.,]\d+)/i)
   if (priceMatch) {
     price = parseFloat(priceMatch[1].replace(',', '.'))
   }
