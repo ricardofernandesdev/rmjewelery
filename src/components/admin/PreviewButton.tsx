@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useDocumentInfo, useField } from '@payloadcms/ui'
+import { useDocumentInfo, useAllFormFields } from '@payloadcms/ui'
 
 const btnStyle: React.CSSProperties = {
   display: 'inline-flex',
@@ -17,8 +17,25 @@ const btnStyle: React.CSSProperties = {
 }
 
 function PreviewLink({ prefix }: { prefix: string }) {
-  const { id } = useDocumentInfo()
-  const { value: slug } = useField<string>({ path: 'slug' })
+  const { id, initialData } = useDocumentInfo()
+
+  // Try multiple sources for the slug
+  let slug: string | undefined
+
+  // 1. From initialData (works on first load)
+  if (!slug && initialData && typeof initialData === 'object') {
+    slug = (initialData as any).slug
+  }
+
+  // 2. From form fields (works after edits)
+  try {
+    const [fields] = useAllFormFields()
+    if (!slug && fields?.slug?.value) {
+      slug = fields.slug.value as string
+    }
+  } catch {
+    // useAllFormFields may not be available in all contexts
+  }
 
   if (!id || !slug) return null
 
