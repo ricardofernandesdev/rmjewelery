@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await response.arrayBuffer())
     const ext = path.extname(new URL(imageUrl).pathname).split('?')[0] || '.webp'
-    const filename = `${(altText || 'img').replace(/[^a-zA-Z0-9_.-]/g, '_')}_${index || 1}${ext}`
+    const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+    const filename = `${(altText || 'img').replace(/[^a-zA-Z0-9_.-]/g, '_')}_${index || 1}_${uid}${ext}`
 
     const media = await payload.create({
       collection: 'media',
