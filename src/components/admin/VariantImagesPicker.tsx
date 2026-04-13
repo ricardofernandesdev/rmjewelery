@@ -20,16 +20,26 @@ export const VariantImagesPicker: React.FC<{ path: string }> = ({ path }) => {
   const galleryIds: number[] = useMemo(() => {
     const ids: number[] = []
     if (!fields) return ids
-    // Payload stores hasMany uploads as images.0, images.1, etc. in form state
-    // The value can be an ID (number) or an object with .id
+
+    function pushId(v: any) {
+      if (typeof v === 'number') ids.push(v)
+      else if (typeof v === 'string' && /^\d+$/.test(v)) ids.push(parseInt(v, 10))
+      else if (v && typeof v === 'object' && 'id' in v) ids.push(v.id)
+    }
+
+    // Try reading as single array value first (e.g. after setValue)
+    const raw = fields['images']?.value
+    if (Array.isArray(raw)) {
+      raw.forEach(pushId)
+      return ids
+    }
+
+    // Fallback: read indexed fields (images.0, images.1, ...)
     let i = 0
     while (true) {
       const field = fields[`images.${i}`]
       if (!field) break
-      const v = field.value
-      if (typeof v === 'number') ids.push(v)
-      else if (typeof v === 'string' && /^\d+$/.test(v)) ids.push(parseInt(v, 10))
-      else if (v && typeof v === 'object' && 'id' in (v as any)) ids.push((v as any).id)
+      pushId(field.value)
       i++
     }
     return ids
