@@ -49,10 +49,10 @@ export const ShebijuImport: React.FC = () => {
         body: JSON.stringify({
           name: result.name,
           ref: result.ref,
-          description: result.description,
           imageUrls: result.imageUrls,
           colors: result.colors,
           price: result.price,
+          sourceUrl: url.trim(),
         }),
       })
       const createData = await createRes.json()
