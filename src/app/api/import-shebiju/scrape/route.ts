@@ -82,22 +82,21 @@ function extractProductData(html: string, sourceUrl: string) {
     name = name.replace(/^[\s\-–.]+|[\s\-–.]+$/g, '').trim()
   }
 
-  // Extract image URLs — only .jpg/.jpeg (skip .webp)
-  const imageUrls: string[] = []
-
-  // Track base filenames (without extension) to avoid importing the same
-  // image twice when both .jpg and .webp versions exist.
-  const seenBases = new Set<string>()
+  // Extract image URLs — prefer .jpg but accept .webp if no jpg exists.
+  // Deduplicate by base path so the same image in different formats
+  // is only imported once.
+  const imagesByBase = new Map<string, string>() // basePath → fullUrl
 
   function addImage(src: string) {
     if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
-    if (!src.match(/\.jpe?g/i)) return
+    if (!src.match(/\.(jpe?g|webp|png)/i)) return
     const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
-    // Deduplicate by base path (strip extension + query)
     const basePath = fullUrl.replace(/\.[^./?]+(\?.*)?$/, '')
-    if (seenBases.has(basePath)) return
-    seenBases.add(basePath)
-    imageUrls.push(fullUrl)
+    const existing = imagesByBase.get(basePath)
+    // Prefer jpg over webp — if we already have a jpg, skip the webp
+    if (existing && existing.match(/\.jpe?g/i)) return
+    // If new one is jpg, replace whatever was there (webp)
+    imagesByBase.set(basePath, fullUrl)
   }
 
   // Product images from img tags
@@ -110,9 +109,9 @@ function extractProductData(html: string, sourceUrl: string) {
   let bgMatch
   while ((bgMatch = bgRegex.exec(html)) !== null) addImage(bgMatch[1])
 
-  // Broader fallback if nothing found
-  if (imageUrls.length === 0) {
-    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.jpe?g[^"']*?)["']/gi
+  // Broader fallback if nothing found via produto/product selectors
+  if (imagesByBase.size === 0) {
+    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:jpe?g|webp|png)[^"']*?)["']/gi
     let broadMatch
     while ((broadMatch = broadImgRegex.exec(html)) !== null) {
       const src = broadMatch[1]
@@ -121,13 +120,15 @@ function extractProductData(html: string, sourceUrl: string) {
         !src.includes('fill.gif') && !src.includes('logo') &&
         !src.includes('icon') && !src.includes('pme') &&
         !src.includes('carrinho') && !src.includes('appstore') &&
-        !src.includes('playstore') && !src.includes('wechat') &&
-        !imageUrls.includes(src)
+        !src.includes('playstore') && !src.includes('wechat')
       ) {
-        imageUrls.push(src)
+        addImage(src)
       }
     }
   }
+
+  // Build final deduplicated array (jpg preferred over webp)
+  const imageUrls = Array.from(imagesByBase.values())
 
   // Extract colors
   const colors: string[] = []
