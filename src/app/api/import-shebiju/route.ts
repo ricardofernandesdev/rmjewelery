@@ -20,10 +20,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL inválido. Deve ser um URL de shebiju.pt' }, { status: 400 })
     }
 
-    // Dynamic import — puppeteer is only available in dev
+    // Puppeteer is a devDependency — only available locally.
+    // Use createRequire to load it at runtime without webpack trying to
+    // bundle it or TypeScript checking the module at build time.
     let puppeteer: any
     try {
-      puppeteer = await import('puppeteer')
+      const { createRequire } = await import('node:module')
+      const req = createRequire(import.meta.url)
+      puppeteer = req('puppeteer')
     } catch {
       return NextResponse.json(
         { error: 'Puppeteer não disponível. Esta funcionalidade só funciona em ambiente local (dev).' },
@@ -32,7 +36,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Launch browser and scrape
-    const browser = await puppeteer.default.launch({
+    const launch = puppeteer.launch || puppeteer.default?.launch
+    const browser = await launch({
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
