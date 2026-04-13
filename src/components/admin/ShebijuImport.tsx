@@ -82,9 +82,11 @@ export const ShebijuImport: React.FC = () => {
           const uploadData = await uploadRes.json()
           if (uploadRes.ok && uploadData.mediaId) {
             mediaIds.push(uploadData.mediaId)
+          } else {
+            console.warn(`Image ${i + 1} failed:`, uploadData.error || uploadRes.status)
           }
-        } catch {
-          // Skip failed
+        } catch (imgErr: any) {
+          console.warn(`Image ${i + 1} error:`, imgErr.message)
         }
       }
 
