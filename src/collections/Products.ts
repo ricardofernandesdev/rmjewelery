@@ -53,6 +53,15 @@ export const Products: CollectionConfig = {
   },
   fields: [
     {
+      name: 'shebijuImport',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './src/components/admin/ShebijuImport#ShebijuImport',
+        },
+      },
+    },
+    {
       name: 'name',
       type: 'text',
       required: true,

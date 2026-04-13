@@ -2,6 +2,7 @@ import { CategoryPreviewButton as CategoryPreviewButton_7ccf2e022b187f9c23be2b6e
 import { CategoriesList as CategoriesList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
 import { ColorPickerField as ColorPickerField_85d2ec7f8f1f8605bd8abc216b3dfa7e } from '../../../../src/components/admin/ColorPickerField'
 import { ColorsList as ColorsList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
+import { ShebijuImport as ShebijuImport_dc2b0886f194a1885ea868b98a922cef } from '../../../../src/components/admin/ShebijuImport'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -49,6 +50,7 @@ export const importMap = {
   "./src/components/admin/CollectionList#CategoriesList": CategoriesList_d146a93ced1c7ad8e789610d5785ad89,
   "./src/components/admin/ColorPickerField#ColorPickerField": ColorPickerField_85d2ec7f8f1f8605bd8abc216b3dfa7e,
   "./src/components/admin/CollectionList#ColorsList": ColorsList_d146a93ced1c7ad8e789610d5785ad89,
+  "./src/components/admin/ShebijuImport#ShebijuImport": ShebijuImport_dc2b0886f194a1885ea868b98a922cef,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
