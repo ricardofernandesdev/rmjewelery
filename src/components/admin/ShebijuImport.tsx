@@ -27,7 +27,7 @@ export const ShebijuImport: React.FC = () => {
   const priceField = useField<number>({ path: 'price' })
   const imagesField = useField<number[]>({ path: 'images' })
   const categoryField = useField<number>({ path: 'category' })
-  const descriptionField = useField<any>({ path: 'description' })
+  // Description is auto-generated server-side in beforeValidate hook
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export const ShebijuImport: React.FC = () => {
       categoryField.setValue(categoryId)
       if (mediaIds.length > 0) imagesField.setValue(mediaIds)
       if (result.colors.length > 0) enableColorsField.setValue(true)
-      if (result.description) descriptionField.setValue(result.description)
+      // Description is auto-generated server-side when saving
 
       setDone(true)
       setStep(
