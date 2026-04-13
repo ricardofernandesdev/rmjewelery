@@ -99,8 +99,8 @@ function extractProductData(html: string, sourceUrl: string) {
     // Penalize thumbnails
     if (lower.includes('/thumb') || lower.includes('_thumb') || lower.includes('/mini')) score -= 10
     if (lower.includes('/small') || lower.includes('_small')) score -= 5
-    // Prefer jpg over webp
-    if (lower.match(/\.jpe?g/)) score += 2
+    // Prefer png
+    if (lower.includes('.png')) score += 2
     // Longer path segments often mean higher-res variant
     score += url.split('/').length
     return score
@@ -108,7 +108,8 @@ function extractProductData(html: string, sourceUrl: string) {
 
   function addImage(src: string) {
     if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
-    if (!src.match(/\.(jpe?g|webp|png)/i)) return
+    // Only import .png images
+    if (!src.match(/\.png/i)) return
     const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
 
     const filenameWithExt = fullUrl.split('/').pop()?.split('?')[0] || ''
@@ -134,7 +135,7 @@ function extractProductData(html: string, sourceUrl: string) {
 
   // Broader fallback if nothing found via produto/product selectors
   if (imagesByFilename.size === 0) {
-    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.(?:jpe?g|webp|png)[^"']*?)["']/gi
+    const broadImgRegex = /(?:src|data-src)=["'](https?:\/\/[^"']*?\.png[^"']*?)["']/gi
     let broadMatch
     while ((broadMatch = broadImgRegex.exec(html)) !== null) {
       const src = broadMatch[1]
