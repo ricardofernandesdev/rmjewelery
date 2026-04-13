@@ -12,6 +12,7 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'category', 'createdAt'],
+    preview: (doc) => `/products/${doc.slug}`,
     components: {
       edit: {
         PreviewButton: './src/components/admin/PreviewButton#ProductPreviewButton',

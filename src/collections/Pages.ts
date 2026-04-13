@@ -12,6 +12,7 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'published', 'updatedAt'],
+    preview: (doc) => `/${doc.slug}`,
     components: {
       edit: {
         PreviewButton: './src/components/admin/PreviewButton#PagePreviewButton',

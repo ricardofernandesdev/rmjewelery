@@ -11,6 +11,7 @@ export const Categories: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'name',
+    preview: (doc) => `/categories/${doc.slug}`,
     components: {
       edit: {
         PreviewButton: './src/components/admin/PreviewButton#CategoryPreviewButton',
