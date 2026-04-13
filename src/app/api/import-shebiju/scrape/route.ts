@@ -85,12 +85,19 @@ function extractProductData(html: string, sourceUrl: string) {
   // Extract image URLs — only .jpg/.jpeg (skip .webp)
   const imageUrls: string[] = []
 
+  // Track base filenames (without extension) to avoid importing the same
+  // image twice when both .jpg and .webp versions exist.
+  const seenBases = new Set<string>()
+
   function addImage(src: string) {
     if (!src || src.includes('fill.gif') || src.includes('fill_imagem')) return
-    // Only keep jpg/jpeg
     if (!src.match(/\.jpe?g/i)) return
     const fullUrl = src.startsWith('http') ? src : `https://www.shebiju.pt${src.startsWith('/') ? '' : '/'}${src}`
-    if (!imageUrls.includes(fullUrl)) imageUrls.push(fullUrl)
+    // Deduplicate by base path (strip extension + query)
+    const basePath = fullUrl.replace(/\.[^./?]+(\?.*)?$/, '')
+    if (seenBases.has(basePath)) return
+    seenBases.add(basePath)
+    imageUrls.push(fullUrl)
   }
 
   // Product images from img tags
