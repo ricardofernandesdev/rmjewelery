@@ -73,8 +73,24 @@ export const ProductColorsField: React.FC<{ path: string }> = ({ path }) => {
   if (loading) {
     return (
       <div style={{ marginBottom: '20px' }}>
-        <label style={labelStyle}>Cores disponíveis</label>
-        <p style={descStyle}>A carregar biblioteca de cores...</p>
+        <label style={labelStyle}>Passo 2 — Cores disponíveis</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 0' }}>
+          <span
+            style={{
+              width: '18px',
+              height: '18px',
+              border: '2px solid var(--theme-elevation-200)',
+              borderTopColor: 'var(--theme-text)',
+              borderRadius: '50%',
+              animation: 'spin 0.6s linear infinite',
+              flexShrink: 0,
+            }}
+          />
+          <span style={{ fontSize: '13px', color: 'var(--theme-elevation-500)' }}>
+            A carregar cores...
+          </span>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
       </div>
     )
   }
