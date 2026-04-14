@@ -68,7 +68,8 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, count
             )}
           </div>
 
-          <div className="flex gap-2">
+          {/* Arrows hidden on mobile where we use a grid layout */}
+          <div className="hidden md:flex gap-2">
             <button
               type="button"
               onClick={() => scroll('left')}
@@ -94,7 +95,7 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, count
 
         <div
           ref={scrollerRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide"
+          className="grid grid-cols-2 gap-4 md:flex md:gap-6 md:overflow-x-auto md:scroll-smooth md:snap-x md:snap-mandatory md:pb-3 md:scrollbar-thin"
         >
           {products.map((product) => {
             const imgUrl = getImg(product)
@@ -102,7 +103,7 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, count
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
-                className="group shrink-0 w-64 md:w-80 snap-start"
+                className="group w-full md:shrink-0 md:w-80 md:snap-start"
               >
                 <div className="relative aspect-square bg-white border border-gray-100 overflow-hidden mb-4">
                   {imgUrl && (
