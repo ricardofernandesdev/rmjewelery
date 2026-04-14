@@ -61,66 +61,41 @@ const DiamondLoaderInner: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none"
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{ background: 'rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(2px)' }}
+      onClick={(e) => e.preventDefault()}
+      onMouseDown={(e) => e.preventDefault()}
     >
       <div className="relative">
-        <svg
-          width="120"
-          height="120"
-          viewBox="0 0 100 100"
-          className="diamond-loader-svg"
-        >
-          {/* Flat line-art diamond */}
+        <svg width="120" height="120" viewBox="0 0 100 100" className="diamond-loader-svg">
+          {/* Flat line-art diamond — static, no animation */}
           <g
-            className="diamond-rotate"
             fill="none"
             stroke="#0a0a0a"
             strokeWidth="2"
             strokeLinejoin="round"
             strokeLinecap="round"
           >
-            {/* Outer outline */}
             <polygon points="50,10 20,40 50,90 80,40" />
-            {/* Girdle (horizontal crown line) */}
             <line x1="20" y1="40" x2="80" y2="40" />
-            {/* Crown facets */}
             <line x1="35" y1="25" x2="50" y2="40" />
             <line x1="65" y1="25" x2="50" y2="40" />
-            {/* Pavilion facets */}
             <line x1="35" y1="40" x2="50" y2="90" />
             <line x1="65" y1="40" x2="50" y2="90" />
           </g>
         </svg>
 
-        {/* Sparkles around */}
+        {/* Sparkles around — the only moving parts */}
         <span className="sparkle sparkle-1">✦</span>
         <span className="sparkle sparkle-2">✦</span>
         <span className="sparkle sparkle-3">✦</span>
+        <span className="sparkle sparkle-4">✦</span>
+        <span className="sparkle sparkle-5">✦</span>
       </div>
 
       <style jsx>{`
         .diamond-loader-svg {
           filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
-          animation: diamond-pulse 1.4s ease-in-out infinite;
-        }
-        .diamond-rotate {
-          transform-origin: 50px 50px;
-          animation: diamond-spin 2.5s linear infinite;
-        }
-        @keyframes diamond-spin {
-          from { transform: rotateY(0deg); }
-          to { transform: rotateY(360deg); }
-        }
-        @keyframes diamond-pulse {
-          0%, 100% {
-            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
-            transform: scale(1);
-          }
-          50% {
-            filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.35));
-            transform: scale(1.05);
-          }
         }
         .sparkle {
           position: absolute;
@@ -129,24 +104,35 @@ const DiamondLoaderInner: React.FC = () => {
           pointer-events: none;
           opacity: 0;
           animation: sparkle-fade 1.8s ease-in-out infinite;
-          text-shadow: none;
         }
         .sparkle-1 {
-          top: -12px;
-          left: -12px;
+          top: -14px;
+          left: -14px;
           animation-delay: 0s;
         }
         .sparkle-2 {
-          top: 50%;
-          right: -16px;
-          animation-delay: 0.6s;
+          top: 45%;
+          right: -18px;
+          animation-delay: 0.4s;
           font-size: 12px;
         }
         .sparkle-3 {
-          bottom: -12px;
-          left: 30%;
-          animation-delay: 1.2s;
+          bottom: -14px;
+          left: 35%;
+          animation-delay: 0.8s;
           font-size: 16px;
+        }
+        .sparkle-4 {
+          top: -10px;
+          right: 20%;
+          animation-delay: 1.2s;
+          font-size: 11px;
+        }
+        .sparkle-5 {
+          top: 55%;
+          left: -18px;
+          animation-delay: 1.5s;
+          font-size: 13px;
         }
         @keyframes sparkle-fade {
           0%, 100% { opacity: 0; transform: scale(0.5); }
