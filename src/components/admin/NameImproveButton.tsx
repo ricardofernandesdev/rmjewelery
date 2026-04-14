@@ -1,30 +1,61 @@
 'use client'
 import React, { useState } from 'react'
-import { useField } from '@payloadcms/ui'
+import { useField, useAllFormFields } from '@payloadcms/ui'
 
 /**
  * Button rendered next to the product name field. Calls the AI to
- * generate a more descriptive name from the current value.
+ * generate a more descriptive name from the current value and, when
+ * available, the first product image (so each product gets a unique
+ * description based on what's in the picture).
  * Disabled when the field is empty.
  */
 export const NameImproveButton: React.FC = () => {
   const { value, setValue } = useField<string>({ path: 'name' })
+  const [fields] = useAllFormFields()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const trimmed = (value || '').trim()
   const disabled = loading || !trimmed
 
+  const resolveFirstImageUrl = async (): Promise<string | null> => {
+    if (!fields) return null
+    // Read the first image (id or object) from the form's images field
+    const raw = fields['images']?.value ?? fields['images.0']?.value
+    let firstId: number | null = null
+    if (Array.isArray(raw) && raw.length > 0) {
+      const v = raw[0]
+      if (typeof v === 'number') firstId = v
+      else if (typeof v === 'string' && /^\d+$/.test(v)) firstId = parseInt(v, 10)
+      else if (v && typeof v === 'object' && 'id' in v) firstId = (v as any).id
+    } else if (typeof raw === 'number') {
+      firstId = raw
+    }
+
+    if (firstId == null) return null
+
+    try {
+      const res = await fetch(`/api/media/${firstId}?depth=0`, { credentials: 'include' })
+      if (!res.ok) return null
+      const doc = await res.json()
+      // Prefer full URL; Pollinations needs something publicly reachable
+      return doc?.url || null
+    } catch {
+      return null
+    }
+  }
+
   const handleClick = async () => {
     if (!trimmed) return
     setLoading(true)
     setError(null)
     try {
+      const imageUrl = await resolveFirstImageUrl()
       const res = await fetch('/api/improve-name', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmed }),
+        body: JSON.stringify({ name: trimmed, imageUrl }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erro')
