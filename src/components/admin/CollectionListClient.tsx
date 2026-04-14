@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ConfirmModal } from './ConfirmModal'
 import { BulkImport } from './BulkImport'
 import './ConfirmModal.scss'
@@ -45,14 +45,71 @@ export const CollectionListClient: React.FC<Props> = ({
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [modal, setModal] = useState<ModalState>(null)
+  const [serverResults, setServerResults] = useState<any[] | null>(null)
+  const [searching, setSearching] = useState(false)
 
-  const filtered = search
-    ? docs.filter((d) =>
-        Object.values(d).some(
-          (v) => typeof v === 'string' && v.toLowerCase().includes(search.toLowerCase()),
-        ),
-      )
-    : docs
+  // Debounced server-side search across the WHOLE collection
+  useEffect(() => {
+    const term = search.trim()
+    if (!term) {
+      setServerResults(null)
+      return
+    }
+    setSearching(true)
+    const handle = setTimeout(async () => {
+      try {
+        const fields = ['name', 'slug', 'title', 'email']
+        const where = fields
+          .map((f) => `where[or][${fields.indexOf(f)}][${f}][like]=${encodeURIComponent(term)}`)
+          .join('&')
+        const res = await fetch(
+          `/api/${config.slug}?${where}&limit=100&depth=1`,
+          { credentials: 'include' },
+        )
+        if (!res.ok) {
+          setServerResults([])
+          return
+        }
+        const data = await res.json()
+        // Map server docs to row shape compatible with current renderer
+        const rows = await Promise.all(
+          (data.docs || []).map(async (doc: any) => {
+            const row: any = { id: doc.id, name: doc.name || '', slug: doc.slug || '' }
+            // Shared columns
+            for (const col of config.columns) {
+              if (col.key === 'name' || col.key === 'slug') continue
+              if (col.key === 'thumbnail') {
+                const first = Array.isArray(doc.images) && doc.images[0]
+                row._thumbnailUrl =
+                  typeof first === 'object' ? first?.sizes?.thumbnail?.url || first?.url || '' : ''
+              } else if (col.key === 'image') {
+                row._imageUrl =
+                  typeof doc.image === 'object'
+                    ? doc.image?.sizes?.thumbnail?.url || doc.image?.url || ''
+                    : ''
+              } else if (col.key === 'swatch') {
+                row._swatchHex = doc.hex || '#cccccc'
+              } else if (col.key === 'category') {
+                row.category =
+                  typeof doc.category === 'object' && doc.category ? doc.category.name : ''
+              } else {
+                row[col.key] = doc[col.key] || ''
+              }
+            }
+            return row
+          }),
+        )
+        setServerResults(rows)
+      } catch {
+        setServerResults([])
+      } finally {
+        setSearching(false)
+      }
+    }, 350)
+    return () => clearTimeout(handle)
+  }, [search, config.slug, config.columns])
+
+  const filtered = serverResults !== null ? serverResults : docs
 
   const deletable = filtered.filter((d) => !protectedIds.includes(String(d.id)))
 
@@ -147,11 +204,26 @@ export const CollectionListClient: React.FC<Props> = ({
         </svg>
         <input
           type="text"
-          placeholder="Pesquisar..."
+          placeholder="Pesquisar em todos..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {searching && (
+          <span
+            style={{
+              width: 14,
+              height: 14,
+              border: '2px solid var(--theme-elevation-200)',
+              borderTopColor: 'var(--theme-text)',
+              borderRadius: '50%',
+              animation: 'spin 0.6s linear infinite',
+              marginLeft: 'auto',
+              flexShrink: 0,
+            }}
+          />
+        )}
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
       <div className="media-list__table-wrapper">
         <table className="media-list__table">
