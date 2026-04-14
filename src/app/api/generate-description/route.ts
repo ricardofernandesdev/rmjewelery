@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     try {
       const res = await withTimeout(
         fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
               generationConfig: {
                 temperature: 0.9,
                 maxOutputTokens: 500,
+                thinkingConfig: { thinkingBudget: 0 },
               },
             }),
           },
