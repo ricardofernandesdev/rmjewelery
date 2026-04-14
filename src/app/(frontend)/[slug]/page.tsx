@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { slug } = await params
     const page = await getPageBySlug(slug)
     if (!page) return {}
-    return { title: `${page.title} | RM Jewelry` }
+    return { title: `${page.title} | R&M Jewelry` }
   } catch {
     return {}
   }

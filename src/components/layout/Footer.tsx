@@ -21,7 +21,7 @@ export async function Footer() {
   ])
   const columns: FooterColumn[] = (settings as any)?.columns || []
   const copyrightRaw: string =
-    (settings as any)?.copyright || '© {year} RM Jewelry. Todos os direitos reservados.'
+    (settings as any)?.copyright || '© {year} R&M Jewelry. Todos os direitos reservados.'
   const copyright = copyrightRaw.replace('{year}', String(new Date().getFullYear()))
   const instagramPageUrl: string =
     (siteSettings as any)?.instagramPageUrl || 'https://www.instagram.com/rmjewelry.collection/'

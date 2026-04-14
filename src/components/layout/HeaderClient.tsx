@@ -63,7 +63,7 @@ export const HeaderClient: React.FC<Props> = ({
               />
             ) : (
               <span className="font-heading text-lg font-semibold tracking-wide">
-                RM Jewelry
+                R&M Jewelry
               </span>
             )}
           </Link>

@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const category = await getCategoryBySlug(slug)
     if (!category) return {}
     return {
-      title: `${category.name} | RM Jewelry`,
+      title: `${category.name} | R&M Jewelry`,
     }
   } catch {
     return {}

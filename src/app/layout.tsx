@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Metadata } from 'next'
 import { Manrope } from 'next/font/google'
 
 const manrope = Manrope({
@@ -7,6 +8,14 @@ const manrope = Manrope({
   variable: '--font-manrope',
   display: 'swap',
 })
+
+export const metadata: Metadata = {
+  title: {
+    default: 'R&M Jewelry',
+    template: '%s | R&M Jewelry',
+  },
+  description: 'Peças de joalharia minimalistas e elegantes — R&M Jewelry.',
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -45,8 +45,8 @@ export async function generateMetadata({
       : undefined
 
   return {
-    title: `${product.name} | RM Jewelry`,
-    description: `${product.name} - RM Jewelry`,
+    title: `${product.name} | R&M Jewelry`,
+    description: `${product.name} - R&M Jewelry`,
     openGraph: ogImage ? { images: [{ url: ogImage }] } : undefined,
   }
   } catch {

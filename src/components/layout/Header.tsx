@@ -12,7 +12,7 @@ export async function Header({ isAuthenticated = false }: { isAuthenticated?: bo
   // Resolve logo URL — make relative URLs absolute
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
   let logoUrl: string | null = null
-  let logoAlt = 'RM Jewelry'
+  let logoAlt = 'R&M Jewelry'
   const rawLogo = (settings as any)?.logo
   if (rawLogo && typeof rawLogo === 'object' && rawLogo.url) {
     const url = rawLogo.url as string

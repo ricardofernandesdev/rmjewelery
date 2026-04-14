@@ -5,7 +5,7 @@ import { ProductGrid } from '@/components/product/ProductGrid'
 import { SearchBox } from '@/components/layout/SearchBox'
 
 export const metadata: Metadata = {
-  title: 'Pesquisa | RM Jewelry',
+  title: 'Pesquisa | R&M Jewelry',
 }
 
 type Props = {

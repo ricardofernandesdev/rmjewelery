@@ -8,7 +8,7 @@ import { Pagination } from '@/components/ui/Pagination'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Catalogo | RM Jewelry',
+  title: 'Catalogo | R&M Jewelry',
 }
 
 const PER_PAGE = 24

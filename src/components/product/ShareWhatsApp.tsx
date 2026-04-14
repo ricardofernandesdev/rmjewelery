@@ -11,7 +11,7 @@ export const ShareWhatsApp: React.FC<Props> = ({ productName, productSlug, class
   const handleShare = () => {
     if (typeof window === 'undefined') return
     const url = `${window.location.origin}/products/${productSlug}`
-    const text = `Olha este produto da RM Jewelry: ${productName}\n${url}`
+    const text = `Olha este produto da R&M Jewelry: ${productName}\n${url}`
     const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
     window.open(waUrl, '_blank', 'noopener,noreferrer')
   }

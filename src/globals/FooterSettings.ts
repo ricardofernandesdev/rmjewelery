@@ -64,7 +64,7 @@ export const FooterSettings: GlobalConfig = {
       name: 'copyright',
       label: 'Texto copyright',
       type: 'text',
-      defaultValue: '© {year} RM Jewelry. Todos os direitos reservados.',
+      defaultValue: '© {year} R&M Jewelry. Todos os direitos reservados.',
       admin: {
         description: 'Use {year} para o ano atual.',
       },

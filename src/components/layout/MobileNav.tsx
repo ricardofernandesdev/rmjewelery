@@ -50,7 +50,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
           <nav className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl flex flex-col" style={{ height: '100dvh' }}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <span className="text-lg font-heading font-semibold text-brand-dark tracking-wide">
-                RM Jewelry
+                R&M Jewelry
               </span>
               <button
                 type="button"

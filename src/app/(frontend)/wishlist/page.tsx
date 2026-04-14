@@ -5,7 +5,7 @@ import { WishlistClient } from '@/components/product/WishlistClient'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Favoritos | RM Jewelry',
+  title: 'Favoritos | R&M Jewelry',
 }
 
 export default function WishlistPage() {
