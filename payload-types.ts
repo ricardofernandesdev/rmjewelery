@@ -231,7 +231,7 @@ export interface Color {
 export interface Product {
   id: number;
   name: string;
-  slug?: string | null;
+  slug: string;
   description?: {
     root: {
       type: string;
@@ -661,6 +661,14 @@ export interface SiteSetting {
    */
   instagramPageUrl?: string | null;
   /**
+   * URL do perfil TikTok. Ex.: https://www.tiktok.com/@rmjewelry. Deixa vazio para esconder do footer.
+   */
+  tiktokUrl?: string | null;
+  /**
+   * URL da página do Facebook. Ex.: https://www.facebook.com/rmjewelry. Deixa vazio para esconder do footer.
+   */
+  facebookUrl?: string | null;
+  /**
    * Ativa o modo manutenção. O site público fica indisponível para visitantes não autenticados.
    */
   maintenanceMode?: boolean | null;
@@ -782,6 +790,8 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   logo?: T;
   instagramUrl?: T;
   instagramPageUrl?: T;
+  tiktokUrl?: T;
+  facebookUrl?: T;
   maintenanceMode?: T;
   maintenanceMessage?: T;
   comingSoon?: T;

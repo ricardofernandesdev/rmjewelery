@@ -47,6 +47,22 @@ export const SiteSettings: GlobalConfig = {
       },
     },
     {
+      name: 'tiktokUrl',
+      label: 'Página do TikTok',
+      type: 'text',
+      admin: {
+        description: 'URL do perfil TikTok. Ex.: https://www.tiktok.com/@rmjewelry. Deixa vazio para esconder do footer.',
+      },
+    },
+    {
+      name: 'facebookUrl',
+      label: 'Página do Facebook',
+      type: 'text',
+      admin: {
+        description: 'URL da página do Facebook. Ex.: https://www.facebook.com/rmjewelry. Deixa vazio para esconder do footer.',
+      },
+    },
+    {
       name: 'maintenanceMode',
       label: 'Modo Manutenção',
       type: 'checkbox',

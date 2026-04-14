@@ -8,6 +8,7 @@ import * as migration_20260410_183000_fix_array_ids from './20260410_183000_fix_
 import * as migration_20260410_210000_cleanup_orphaned_rels from './20260410_210000_cleanup_orphaned_rels';
 import * as migration_20260410_220000_create_home_settings_blocks from './20260410_220000_create_home_settings_blocks';
 import * as migration_20260411_200000_colors_collection from './20260411_200000_colors_collection';
+import * as migration_20260414_100000_social_links from './20260414_100000_social_links';
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20260411_200000_colors_collection.up,
     down: migration_20260411_200000_colors_collection.down,
     name: '20260411_200000_colors_collection',
+  },
+  {
+    up: migration_20260414_100000_social_links.up,
+    down: migration_20260414_100000_social_links.down,
+    name: '20260414_100000_social_links',
   },
 ];
