@@ -18,7 +18,15 @@ const DiamondLoaderInner: React.FC = () => {
   // Intercept internal link clicks
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      // If any inner handler already called preventDefault (e.g. a button
+      // inside a card Link that should not navigate) — skip the loader.
+      if (e.defaultPrevented) return
+
       const target = e.target as HTMLElement
+      // Skip if the click originated on a button (or inside one) — buttons
+      // that exist inside Link wrappers should never trigger navigation UI.
+      if (target.closest('button')) return
+
       const anchor = target.closest('a') as HTMLAnchorElement | null
       if (!anchor) return
       if (anchor.target === '_blank') return
