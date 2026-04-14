@@ -21,6 +21,7 @@
     "@payloadcms/ui": "^3.82.1",
     "@tailwindcss/postcss": "4.2.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@vercel/analytics": "^2.0.1",
     "graphql": "16.13.1",
     "next": "15.4.11",
     "payload": "^3.82.1",
