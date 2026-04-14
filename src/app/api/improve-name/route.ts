@@ -4,6 +4,11 @@ import { headers } from 'next/headers'
 
 export const maxDuration = 10
 
+/**
+ * Generate a descriptive product name from a base name and (optional)
+ * image description obtained via /api/analyze-image. Text-only prompt,
+ * fast enough to run comfortably within Vercel's 10s limit.
+ */
 export async function POST(req: NextRequest) {
   try {
     const payload = await getPayload()
@@ -11,65 +16,36 @@ export async function POST(req: NextRequest) {
     const { user } = await payload.auth({ headers: hdrs })
     if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    const { name, imageUrl } = await req.json()
+    const { name, description } = await req.json()
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'Nome obrigatório' }, { status: 400 })
     }
 
-    const userText =
-      `Cria um nome de produto descritivo e único em português para esta peça de joalharia. ` +
+    const prompt =
+      `Cria um nome de produto descritivo e único em português para uma peça de joalharia. ` +
       `Nome base: "${name.trim()}". ` +
-      `Olha para a imagem e descreve visualmente a peça no nome (formato, detalhes, decoração, etc.). ` +
+      (description ? `Descrição visual da peça: "${description}". ` : '') +
+      `Usa a descrição visual para destacar detalhes específicos (material, forma, decoração). ` +
       `Devolve APENAS o nome melhorado (máximo 8 palavras), sem aspas, sem pontuação final, sem explicações. ` +
-      `Estilo sofisticado e minimalista. Exemplos de bons nomes: ` +
+      `Estilo sofisticado e minimalista. Exemplos: ` +
       `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
 
-    // Hard 6s ceiling enforced via Promise.race — AbortSignal.timeout alone
-    // sometimes fails to cut off serverless fetches cleanly. One attempt,
-    // no fallback, so we never push past Vercel's 10s function limit.
-    const BUDGET_MS = 6000
-
+    // Text-only is fast — 5s budget
+    const BUDGET_MS = 5000
     const withTimeout = <T,>(p: Promise<T>): Promise<T> =>
       Promise.race([
         p,
-        new Promise<T>((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), BUDGET_MS),
-        ),
+        new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), BUDGET_MS)),
       ])
 
     let aiText = ''
     try {
-      if (imageUrl) {
-        const res = await withTimeout(
-          fetch('https://text.pollinations.ai/openai', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'openai-large',
-              messages: [
-                {
-                  role: 'user',
-                  content: [
-                    { type: 'text', text: userText },
-                    { type: 'image_url', image_url: { url: imageUrl } },
-                  ],
-                },
-              ],
-            }),
-          }),
-        )
-        if (res.ok) {
-          const data = await withTimeout(res.json())
-          aiText = data?.choices?.[0]?.message?.content?.trim() || ''
-        }
-      } else {
-        const res = await withTimeout(
-          fetch(`https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`),
-        )
-        if (res.ok) aiText = (await withTimeout(res.text())).trim()
-      }
+      const res = await withTimeout(
+        fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`),
+      )
+      if (res.ok) aiText = (await withTimeout(res.text())).trim()
     } catch {
-      // Timed out — return graceful error so client knows to retry
+      /* timeout */
     }
 
     if (!aiText) {
@@ -79,9 +55,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!aiText || aiText.length > 100 || aiText.includes('\n')) {
-      return NextResponse.json({ error: 'Resposta inválida' }, { status: 502 })
+    if (aiText.length > 100 || aiText.includes('\n')) {
+      // Take only the first line if multi-line
+      aiText = aiText.split('\n')[0].trim()
+      if (aiText.length > 100) aiText = aiText.slice(0, 100)
     }
+
     const cleaned = aiText.replace(/^["'"']|["'"']$/g, '').trim()
     return NextResponse.json({ success: true, name: cleaned || name })
   } catch (err: any) {
