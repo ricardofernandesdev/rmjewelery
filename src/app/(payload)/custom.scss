@@ -70,7 +70,17 @@ nav.nav {
   border-right: 1px solid var(--theme-elevation-100);
 }
 
-/* Nav links — Title-case, comfortable spacing, no right border, rounded */
+/* Nav links — Title-case, comfortable spacing, no borders, rounded */
+.nav__link,
+.nav__link:hover,
+.nav__link:active,
+.nav__link:focus,
+.nav__link--active {
+  text-decoration: none !important;
+  border-right: none !important;
+  border-left: none !important;
+}
+
 .nav__link {
   font-size: 14px !important;
   line-height: 20px !important;
@@ -81,7 +91,6 @@ nav.nav {
   margin: 2px 8px !important;
   border-radius: 6px !important;
   position: relative;
-  border-right: none !important;
   color: var(--theme-elevation-600) !important;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -91,7 +100,6 @@ nav.nav {
   background: var(--theme-elevation-100) !important;
   color: var(--theme-text) !important;
   font-weight: 600 !important;
-  border-right: none !important;
 }
 
 .nav__link:hover {
