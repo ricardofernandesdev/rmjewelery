@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import { ConfirmModal } from './ConfirmModal'
 import { BulkImport } from './BulkImport'
+import { RegenerateNamesButton } from './RegenerateNamesButton'
 import './ConfirmModal.scss'
 
 type ColumnDef = {
@@ -236,6 +237,7 @@ export const CollectionListClient: React.FC<Props> = ({
             </button>
           )}
           {config.slug === 'products' && <BulkImport />}
+          {config.slug === 'products' && <RegenerateNamesButton />}
           <a
             href={`/admin/collections/${config.slug}/create`}
             className="media-list__btn media-list__btn--filled"
