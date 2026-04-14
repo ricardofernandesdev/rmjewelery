@@ -44,51 +44,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Try to improve generic names using a free AI service
-    productData.name = await maybeImproveName(productData.name, productData.imageUrls[0])
-
+    // Name improvement now happens via the /enhance endpoint which uses
+    // Gemini with vision — called by the client after upload.
     return NextResponse.json({ success: true, ...productData })
   } catch (err: any) {
     console.error('Scrape error:', err)
     return NextResponse.json({ error: err.message || 'Erro ao extrair dados' }, { status: 500 })
-  }
-}
-
-/**
- * If the product name is generic (e.g. "Pulseira Aço"), try to generate
- * a better descriptive name using Pollinations.ai (free, no API key).
- * Falls back to the original name on any failure or timeout.
- */
-async function maybeImproveName(name: string, imageUrl?: string): Promise<string> {
-  if (!name) return name
-  // Only trigger for generic short names (≤3 meaningful words)
-  const words = name.split(/\s+/).filter((w) => w.length > 1)
-  if (words.length > 3) return name
-
-  const prompt =
-    `Cria um nome de produto descritivo e atrativo em português para uma peça de joalharia. ` +
-    `Nome base: "${name}". ` +
-    (imageUrl ? `Imagem: ${imageUrl}. ` : '') +
-    `Devolve APENAS o nome melhorado (máximo 8 palavras), sem aspas, sem pontuação final, sem explicações. ` +
-    `Mantém o estilo sofisticado e minimalista. Exemplos de bons nomes: ` +
-    `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
-
-  try {
-    // Tight 4s budget — scrape already ate time on the page fetch, and
-    // Vercel free caps the whole function at 10s. Fall back to original
-    // name silently if the AI is slow.
-    const aiRes = await fetch(
-      `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`,
-      { signal: AbortSignal.timeout(4000) },
-    )
-    if (!aiRes.ok) return name
-    const improved = (await aiRes.text()).trim()
-    // Sanity check: not empty, not too long, no newlines
-    if (!improved || improved.length > 80 || improved.includes('\n')) return name
-    // Remove surrounding quotes if any
-    return improved.replace(/^["'"']|["'"']$/g, '').trim() || name
-  } catch {
-    return name
   }
 }
 

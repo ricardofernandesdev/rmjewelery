@@ -75,17 +75,40 @@ export const BulkImport: React.FC = () => {
 
       if (mediaIds.length === 0) throw new Error('Nenhuma imagem carregada')
 
-      // 3. Create product via Payload REST API (beforeValidate hook generates description)
-      updateResult(index, { status: 'creating' })
+      // 3. Enhance name + description with Gemini (single request, ≤10s)
+      let finalName = productName
+      let enhancedDescription: any = null
+      try {
+        const enhanceRes = await fetch('/api/import-shebiju/enhance', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: productName,
+            imageUrl: scrapeData.imageUrls[0],
+          }),
+        })
+        const enhanceData = await enhanceRes.json()
+        if (enhanceRes.ok) {
+          if (enhanceData.name) finalName = enhanceData.name
+          if (enhanceData.description) enhancedDescription = enhanceData.description
+        }
+      } catch {
+        // Keep original name; server hook will generate template description
+      }
+
+      // 4. Create product via Payload REST API
+      updateResult(index, { status: 'creating', name: finalName })
 
       const productData: any = {
-        name: productName,
+        name: finalName,
         slug: scrapeData.ref || undefined,
         images: mediaIds,
         price: scrapeData.price || 0,
         availability: 'in_stock',
         category: categoryId,
         enableColors: allColorIds.length > 0,
+        ...(enhancedDescription ? { description: enhancedDescription } : {}),
       }
 
       // Add colors + variants

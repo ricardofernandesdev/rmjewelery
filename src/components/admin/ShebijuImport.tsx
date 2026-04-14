@@ -84,6 +84,7 @@ export const ShebijuImport: React.FC = () => {
   const categoryField = useField<number>({ path: 'category' })
   const [descPreview, setDescPreview] = useState<string | null>(null)
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
+  const descriptionField = useField<any>({ path: 'description' })
   const colorsField = useField<number[]>({ path: 'colors' })
   const variantsField = useField<any[]>({ path: 'variants' })
 
@@ -124,7 +125,7 @@ export const ShebijuImport: React.FC = () => {
       const totalImages = result.imageUrls.length
 
       for (let i = 0; i < totalImages; i++) {
-        setStep(`2/2 — A carregar imagem ${i + 1} de ${totalImages}...`)
+        setStep(`2/3 — A carregar imagem ${i + 1} de ${totalImages}...`)
         try {
           const uploadRes = await fetch('/api/import-shebiju/upload-image', {
             method: 'POST',
@@ -147,8 +148,31 @@ export const ShebijuImport: React.FC = () => {
         }
       }
 
+      // ── Step 3: Enhance name + description via Gemini (single request) ──
+      let finalName = result.name || result.ref || ''
+      let enhancedDescription: any = null
+      try {
+        setStep('3/3 — A gerar nome e descrição com IA...')
+        const enhanceRes = await fetch('/api/import-shebiju/enhance', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: finalName,
+            imageUrl: result.imageUrls[0],
+          }),
+        })
+        const enhanceData = await enhanceRes.json()
+        if (enhanceRes.ok) {
+          if (enhanceData.name) finalName = enhanceData.name
+          if (enhanceData.description) enhancedDescription = enhanceData.description
+        }
+      } catch {
+        // Keep original name / let server hook generate fallback description
+      }
+
       // ── Fill form fields ──
-      const productName = result.name || result.ref || ''
+      const productName = finalName
       nameField.setValue(productName)
       slugField.setValue(result.ref || '')
       priceField.setValue(result.price || 0)
@@ -175,7 +199,13 @@ export const ShebijuImport: React.FC = () => {
       } catch {
         // Skip if colors fetch fails
       }
-      // Show description preview (will be auto-generated server-side on save)
+      // If Gemini gave us a description, set it; otherwise fall back to the
+      // category template (server hook also handles this on save)
+      if (enhancedDescription) {
+        descriptionField.setValue(enhancedDescription)
+      }
+
+      // Show description preview (from AI if available, else template)
       const selectedCat = categories.find((c) => c.id === categoryId)
       const catKey = detectCat(productName, selectedCat?.name || '')
       if (catKey && descTemplates[catKey]) {
