@@ -5,9 +5,10 @@ import { headers } from 'next/headers'
 export const maxDuration = 10
 
 /**
- * Generate a descriptive product name from a base name and (optional)
- * image description obtained via /api/analyze-image. Text-only prompt,
- * fast enough to run comfortably within Vercel's 10s limit.
+ * Generate a descriptive product name using Google Gemini 2.0 Flash.
+ * When an image URL is provided, fetches the image and includes it in
+ * the prompt so the model can describe what it sees (material, shape,
+ * details) and produce a unique name per product.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -16,22 +17,56 @@ export async function POST(req: NextRequest) {
     const { user } = await payload.auth({ headers: hdrs })
     if (!user) return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
 
-    const { name, description } = await req.json()
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'GEMINI_API_KEY não configurada no servidor.' },
+        { status: 500 },
+      )
+    }
+
+    const { name, imageUrl } = await req.json()
     if (!name || typeof name !== 'string' || !name.trim()) {
       return NextResponse.json({ error: 'Nome obrigatório' }, { status: 400 })
     }
 
     const prompt =
-      `Cria um nome de produto descritivo e único em português para uma peça de joalharia. ` +
+      `Cria um nome de produto descritivo e único em português para esta peça de joalharia. ` +
       `Nome base: "${name.trim()}". ` +
-      (description ? `Descrição visual da peça: "${description}". ` : '') +
-      `Usa a descrição visual para destacar detalhes específicos (material, forma, decoração). ` +
-      `Devolve APENAS o nome melhorado (máximo 8 palavras), sem aspas, sem pontuação final, sem explicações. ` +
+      (imageUrl
+        ? `Olha atentamente para a imagem e descreve no nome os detalhes visuais específicos ` +
+          `(material, formato, pérolas, zircónias, decoração, acabamento, etc.). `
+        : '') +
+      `Devolve APENAS o nome melhorado (máximo 8 palavras), sem aspas, sem pontuação final, ` +
+      `sem explicações, sem quebras de linha. ` +
       `Estilo sofisticado e minimalista. Exemplos: ` +
-      `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
+      `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", ` +
+      `"Brincos Aço Forma Geométrica".`
 
-    // Text-only budget — 7s gives Pollinations room on slow days while
-    // keeping 3s margin before Vercel's 10s function limit.
+    // Build Gemini request parts
+    const parts: any[] = [{ text: prompt }]
+
+    // Fetch and embed image if provided
+    if (imageUrl) {
+      try {
+        const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(4000) })
+        if (imgRes.ok) {
+          const buffer = Buffer.from(await imgRes.arrayBuffer())
+          const mimeType = imgRes.headers.get('content-type') || 'image/jpeg'
+          parts.push({
+            inline_data: {
+              mime_type: mimeType.split(';')[0].trim(),
+              data: buffer.toString('base64'),
+            },
+          })
+        }
+      } catch {
+        // Image fetch failed — proceed with text-only
+      }
+    }
+
+    // Hard 7s ceiling via Promise.race — Gemini is typically <2s but we
+    // want to return gracefully if something is slow today.
     const BUDGET_MS = 7000
     const withTimeout = <T,>(p: Promise<T>): Promise<T> =>
       Promise.race([
@@ -42,27 +77,44 @@ export async function POST(req: NextRequest) {
     let aiText = ''
     try {
       const res = await withTimeout(
-        fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`),
+        fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts }],
+              generationConfig: {
+                temperature: 0.8,
+                maxOutputTokens: 50,
+              },
+            }),
+          },
+        ),
       )
-      if (res.ok) aiText = (await withTimeout(res.text())).trim()
+      if (res.ok) {
+        const data = await withTimeout(res.json())
+        aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
+      } else {
+        const errData = await res.text()
+        console.error('Gemini error:', res.status, errData)
+      }
     } catch {
       /* timeout */
     }
 
     if (!aiText) {
       return NextResponse.json(
-        { error: 'Serviço de IA indisponível ou demasiado lento. Tenta novamente.' },
+        { error: 'Serviço de IA indisponível ou demasiado lento.' },
         { status: 502 },
       )
     }
 
-    if (aiText.length > 100 || aiText.includes('\n')) {
-      // Take only the first line if multi-line
-      aiText = aiText.split('\n')[0].trim()
-      if (aiText.length > 100) aiText = aiText.slice(0, 100)
-    }
+    // Clean response
+    if (aiText.includes('\n')) aiText = aiText.split('\n')[0].trim()
+    if (aiText.length > 100) aiText = aiText.slice(0, 100)
+    const cleaned = aiText.replace(/^["'"']|["'"']$/g, '').replace(/\.$/, '').trim()
 
-    const cleaned = aiText.replace(/^["'"']|["'"']$/g, '').trim()
     return NextResponse.json({ success: true, name: cleaned || name })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Erro' }, { status: 500 })

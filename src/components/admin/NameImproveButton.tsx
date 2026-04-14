@@ -45,40 +45,17 @@ export const NameImproveButton: React.FC = () => {
     }
   }
 
-  const [step, setStep] = useState<string | null>(null)
-
   const handleClick = async () => {
     if (!trimmed) return
     setLoading(true)
     setError(null)
-    setStep(null)
     try {
       const imageUrl = await resolveFirstImageUrl()
-
-      // Step 1: analyze image (slow, vision AI) — only if we have an image
-      let description: string | null = null
-      if (imageUrl) {
-        setStep('A analisar imagem...')
-        const analyzeRes = await fetch('/api/analyze-image', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrl }),
-        })
-        const analyzeData = await analyzeRes.json()
-        if (analyzeRes.ok && analyzeData.description) {
-          description = analyzeData.description
-        }
-        // If analysis fails, continue without description (text-only fallback)
-      }
-
-      // Step 2: generate name (fast, text-only)
-      setStep('A gerar nome...')
       const res = await fetch('/api/improve-name', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: trimmed, description }),
+        body: JSON.stringify({ name: trimmed, imageUrl }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erro')
@@ -87,7 +64,6 @@ export const NameImproveButton: React.FC = () => {
       setError(err.message || 'Erro ao gerar nome')
     } finally {
       setLoading(false)
-      setStep(null)
     }
   }
 
@@ -129,7 +105,7 @@ export const NameImproveButton: React.FC = () => {
                 display: 'inline-block',
               }}
             />
-            {step || 'A gerar...'}
+            A gerar...
           </>
         ) : (
           <>
