@@ -131,6 +131,11 @@ export const Products: CollectionConfig = {
       name: 'name',
       type: 'text',
       required: true,
+      admin: {
+        components: {
+          afterInput: ['./src/components/admin/NameImproveButton#NameImproveButton'],
+        },
+      },
     },
     {
       name: 'slug',
