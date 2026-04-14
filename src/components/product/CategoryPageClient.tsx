@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { ProductCard } from './ProductCard'
+import { Pagination } from '../ui/Pagination'
 import type { Product } from '../../../payload-types'
 
 type SortOption = 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'
@@ -10,9 +11,24 @@ type GridCols = 4 | 5
 type Props = {
   products: Product[]
   categoryName: string
+  categorySlug: string
+  currentPage: number
+  totalPages: number
+  totalDocs: number
+  perPage: number
+  perPageOptions: number[]
 }
 
-export const CategoryPageClient: React.FC<Props> = ({ products, categoryName }) => {
+export const CategoryPageClient: React.FC<Props> = ({
+  products,
+  categoryName,
+  categorySlug,
+  currentPage,
+  totalPages,
+  totalDocs,
+  perPage,
+  perPageOptions,
+}) => {
   const [availability, setAvailability] = useState<AvailFilter>('all')
   const [availOpen, setAvailOpen] = useState(false)
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 0])
@@ -189,7 +205,25 @@ export const CategoryPageClient: React.FC<Props> = ({ products, categoryName }) 
         </div>
 
         <div className="flex items-center gap-4 text-sm text-brand-gray">
-          <span>{filtered.length} {filtered.length === 1 ? 'item' : 'itens'}</span>
+          <span>{totalDocs} {totalDocs === 1 ? 'item' : 'itens'}</span>
+
+          {/* Per-page selector */}
+          <label className="flex items-center gap-2">
+            <span className="hidden sm:inline">Por página</span>
+            <select
+              value={perPage}
+              onChange={(e) => {
+                const params = new URLSearchParams()
+                params.set('perPage', e.target.value)
+                window.location.href = `/categories/${categorySlug}?${params.toString()}`
+              }}
+              className="border border-gray-200 rounded px-2 py-1 text-sm bg-white"
+            >
+              {perPageOptions.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </label>
 
           {/* Sort dropdown */}
           <div className="relative">
@@ -271,6 +305,18 @@ export const CategoryPageClient: React.FC<Props> = ({ products, categoryName }) 
           ))}
         </div>
       )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildHref={(p) => {
+          const params = new URLSearchParams()
+          if (perPage !== 24) params.set('perPage', String(perPage))
+          if (p > 1) params.set('page', String(p))
+          const qs = params.toString()
+          return qs ? `/categories/${categorySlug}?${qs}` : `/categories/${categorySlug}`
+        }}
+      />
     </>
   )
 }

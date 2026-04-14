@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import {
   getCategoryBySlug,
-  getProductsByCategory,
+  getProductsPaginated,
   getAllCategories,
 } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
@@ -11,8 +11,12 @@ import { CategoryPageClient } from '@/components/product/CategoryPageClient'
 
 export const dynamic = 'force-dynamic'
 
+const PER_PAGE_OPTIONS = [24, 48, 96] as const
+const DEFAULT_PER_PAGE = 24
+
 type PageProps = {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ page?: string; perPage?: string }>
 }
 
 export async function generateStaticParams() {
@@ -37,15 +41,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function CategoryPage({ params }: PageProps) {
+export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const { page: pageParam, perPage: perPageParam } = await searchParams
+
+  const currentPage = Math.max(1, parseInt(pageParam || '1', 10) || 1)
+  const parsedPerPage = parseInt(perPageParam || '', 10)
+  const perPage = (PER_PAGE_OPTIONS as readonly number[]).includes(parsedPerPage)
+    ? parsedPerPage
+    : DEFAULT_PER_PAGE
+
   const [category, productsResult] = await Promise.all([
     getCategoryBySlug(slug).catch(() => null),
-    getProductsByCategory(slug, 200).catch(() => ({ docs: [] as any[] })),
+    getProductsPaginated({ page: currentPage, limit: perPage, categorySlug: slug }).catch(
+      () => ({ docs: [] as any[], totalDocs: 0, totalPages: 0, page: 1 }),
+    ),
   ])
-  const products = productsResult.docs
 
   if (!category) notFound()
+
+  const products = productsResult.docs
+  const totalPages = productsResult.totalPages || 1
+  const totalDocs = productsResult.totalDocs || 0
 
   const catImage =
     category.image && typeof category.image === 'object' ? (category.image as any) : null
@@ -84,7 +101,16 @@ export default async function CategoryPage({ params }: PageProps) {
 
       {/* ── Filters + Products ── */}
       <Container className="py-6">
-        <CategoryPageClient products={products} categoryName={category.name} />
+        <CategoryPageClient
+          products={products}
+          categoryName={category.name}
+          categorySlug={slug}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalDocs={totalDocs}
+          perPage={perPage}
+          perPageOptions={[...PER_PAGE_OPTIONS]}
+        />
       </Container>
     </>
   )
