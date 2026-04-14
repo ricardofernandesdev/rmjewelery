@@ -1,6 +1,6 @@
 .custom-dashboard {
   padding: 40px;
-  max-width: 1200px;
+  max-width: 1400px;
 
   &__header {
     margin-bottom: 24px;
@@ -24,8 +24,18 @@
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+
+    @media (max-width: 1100px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @media (max-width: 800px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width: 520px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__card {
