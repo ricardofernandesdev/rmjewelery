@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
       ])
 
     let aiText = ''
+    let geminiError: { status: number; message: string } | null = null
     try {
       const res = await withTimeout(
         fetch(
@@ -99,16 +100,26 @@ export async function POST(req: NextRequest) {
         const data = await withTimeout(res.json())
         aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
       } else {
-        const errData = await res.text()
-        console.error('Gemini error:', res.status, errData)
+        let body: any
+        try {
+          body = await res.json()
+        } catch {
+          body = await res.text()
+        }
+        const message =
+          (typeof body === 'object' && body?.error?.message) ||
+          (typeof body === 'string' ? body.slice(0, 200) : `HTTP ${res.status}`)
+        geminiError = { status: res.status, message }
+        console.error('Gemini error:', res.status, message)
       }
-    } catch {
-      /* timeout */
+    } catch (e: any) {
+      geminiError = { status: 0, message: e?.message === 'timeout' ? 'Timeout (>7s)' : (e?.message || 'Network error') }
     }
 
     if (!aiText) {
+      const detail = geminiError ? ` (${geminiError.status}: ${geminiError.message})` : ''
       return NextResponse.json(
-        { error: 'Serviço de IA indisponível ou demasiado lento.' },
+        { error: `Serviço de IA indisponível${detail}` },
         { status: 502 },
       )
     }
