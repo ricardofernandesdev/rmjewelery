@@ -130,13 +130,11 @@ const globalItems: CardItem[] = [
   },
 ]
 
-function Card({ item, index }: { item: CardItem; index: number }) {
-  const number = String(index + 1).padStart(2, '0')
+function Card({ item }: { item: CardItem }) {
   return (
     <a href={item.href} className="custom-dashboard__card">
       <div className="custom-dashboard__card-top">
         <span className="custom-dashboard__card-icon">{item.icon}</span>
-        <span className="custom-dashboard__card-number">{number}</span>
       </div>
       <h3 className="custom-dashboard__card-title">{item.label}</h3>
       <p className="custom-dashboard__card-desc">{item.description}</p>
@@ -151,7 +149,6 @@ function Card({ item, index }: { item: CardItem; index: number }) {
 }
 
 export const Dashboard: React.FC<AdminViewServerProps> = async () => {
-  let counter = 0
   return (
     <div className="custom-dashboard">
       <div className="custom-dashboard__header">
@@ -160,7 +157,7 @@ export const Dashboard: React.FC<AdminViewServerProps> = async () => {
       </div>
       <div className="custom-dashboard__grid">
         {collectionItems.map((item) => (
-          <Card key={item.slug} item={item} index={counter++} />
+          <Card key={item.slug} item={item} />
         ))}
       </div>
 
@@ -170,7 +167,7 @@ export const Dashboard: React.FC<AdminViewServerProps> = async () => {
       </div>
       <div className="custom-dashboard__grid">
         {globalItems.map((item) => (
-          <Card key={item.slug} item={item} index={counter++} />
+          <Card key={item.slug} item={item} />
         ))}
       </div>
     </div>
