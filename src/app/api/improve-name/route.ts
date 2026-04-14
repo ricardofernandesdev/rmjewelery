@@ -24,14 +24,19 @@ export async function POST(req: NextRequest) {
       `Estilo sofisticado e minimalista. Exemplos de bons nomes: ` +
       `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
 
-    // If we have an image, use Pollinations vision via POST (OpenAI-compatible format)
+    // Single attempt, hard-capped well under Vercel's 10s function limit.
+    // When we have an image, use Pollinations vision (OpenAI-compatible
+    // POST). Otherwise, use the simpler GET text endpoint.
     let aiText = ''
+    const started = Date.now()
+    const HARD_BUDGET_MS = 8500 // leave ~1.5s headroom for the rest of the route
+
     try {
       if (imageUrl) {
         const visionRes = await fetch('https://text.pollinations.ai/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(8000),
+          signal: AbortSignal.timeout(HARD_BUDGET_MS),
           body: JSON.stringify({
             model: 'openai-large',
             messages: [
@@ -49,21 +54,37 @@ export async function POST(req: NextRequest) {
           const data = await visionRes.json()
           aiText = data?.choices?.[0]?.message?.content?.trim() || ''
         }
+      } else {
+        // No image — go straight to text endpoint
+        const remaining = Math.max(2000, HARD_BUDGET_MS - (Date.now() - started))
+        const textRes = await fetch(
+          `https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`,
+          { signal: AbortSignal.timeout(remaining) },
+        )
+        if (textRes.ok) aiText = (await textRes.text()).trim()
       }
     } catch {
-      // Vision failed, fall through to text-only
+      // Timed out or network error — fall through with empty aiText
     }
 
-    // Fallback: text-only prompt
-    if (!aiText) {
-      const textRes = await fetch(
-        `https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`,
-        { signal: AbortSignal.timeout(8000) },
-      )
-      if (!textRes.ok) {
-        return NextResponse.json({ error: 'Serviço de IA indisponível' }, { status: 502 })
+    // If vision returned nothing and we still have budget, try text as backup
+    if (!aiText && imageUrl) {
+      const remaining = HARD_BUDGET_MS - (Date.now() - started)
+      if (remaining > 2500) {
+        try {
+          const textRes = await fetch(
+            `https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`,
+            { signal: AbortSignal.timeout(remaining - 500) },
+          )
+          if (textRes.ok) aiText = (await textRes.text()).trim()
+        } catch {
+          /* give up */
+        }
       }
-      aiText = (await textRes.text()).trim()
+    }
+
+    if (!aiText) {
+      return NextResponse.json({ error: 'Serviço de IA indisponível ou demasiado lento' }, { status: 502 })
     }
 
     if (!aiText || aiText.length > 100 || aiText.includes('\n')) {

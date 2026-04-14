@@ -74,9 +74,12 @@ async function maybeImproveName(name: string, imageUrl?: string): Promise<string
     `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
 
   try {
+    // Tight 4s budget — scrape already ate time on the page fetch, and
+    // Vercel free caps the whole function at 10s. Fall back to original
+    // name silently if the AI is slow.
     const aiRes = await fetch(
       `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai`,
-      { signal: AbortSignal.timeout(5000) },
+      { signal: AbortSignal.timeout(4000) },
     )
     if (!aiRes.ok) return name
     const improved = (await aiRes.text()).trim()
