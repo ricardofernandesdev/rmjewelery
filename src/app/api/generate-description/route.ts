@@ -62,10 +62,11 @@ export async function POST(req: NextRequest) {
       ])
 
     let aiText = ''
+    let geminiError: { status: number; message: string } | null = null
     try {
       const res = await withTimeout(
         fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -83,13 +84,27 @@ export async function POST(req: NextRequest) {
       if (res.ok) {
         const data = await withTimeout(res.json())
         aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || ''
+      } else {
+        let body: any
+        try { body = await res.json() } catch { body = await res.text() }
+        const message =
+          (typeof body === 'object' && body?.error?.message) ||
+          (typeof body === 'string' ? body.slice(0, 200) : `HTTP ${res.status}`)
+        geminiError = { status: res.status, message }
       }
-    } catch {
-      /* timeout */
+    } catch (e: any) {
+      geminiError = { status: 0, message: e?.message === 'timeout' ? 'Timeout (>7s)' : e?.message || 'Erro' }
     }
 
     if (!aiText) {
-      return NextResponse.json({ error: 'Serviço de IA indisponível ou demasiado lento.' }, { status: 502 })
+      if (geminiError?.status === 429) {
+        return NextResponse.json(
+          { error: 'Limite de IA atingido. Aguarda 1 minuto e tenta novamente.' },
+          { status: 429 },
+        )
+      }
+      const detail = geminiError ? ` (${geminiError.status}: ${geminiError.message})` : ''
+      return NextResponse.json({ error: `Serviço de IA indisponível${detail}` }, { status: 502 })
     }
 
     // Clean up: remove stray markdown, split into paragraphs

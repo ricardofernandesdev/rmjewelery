@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     try {
       const res = await withTimeout(
         fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -117,6 +117,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (!aiText) {
+      // Surface a friendlier message for the common rate-limit case
+      if (geminiError?.status === 429) {
+        return NextResponse.json(
+          { error: 'Limite de IA atingido. Aguarda 1 minuto e tenta novamente.' },
+          { status: 429 },
+        )
+      }
       const detail = geminiError ? ` (${geminiError.status}: ${geminiError.message})` : ''
       return NextResponse.json(
         { error: `Serviço de IA indisponível${detail}` },

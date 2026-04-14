@@ -152,6 +152,12 @@ export const BulkImport: React.FC = () => {
 
     for (let i = 0; i < urlList.length; i++) {
       await importProduct(urlList[i], i)
+      // Gemini free tier is 5 RPM — wait 13s before next product so the
+      // enhance step doesn't hit the per-minute rate limit. No delay
+      // after the last one.
+      if (i < urlList.length - 1) {
+        await new Promise((r) => setTimeout(r, 13000))
+      }
     }
 
     setRunning(false)
