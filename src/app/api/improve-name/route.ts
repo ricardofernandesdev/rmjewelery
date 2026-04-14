@@ -24,67 +24,59 @@ export async function POST(req: NextRequest) {
       `Estilo sofisticado e minimalista. Exemplos de bons nomes: ` +
       `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
 
-    // Single attempt, hard-capped well under Vercel's 10s function limit.
-    // When we have an image, use Pollinations vision (OpenAI-compatible
-    // POST). Otherwise, use the simpler GET text endpoint.
-    let aiText = ''
-    const started = Date.now()
-    const HARD_BUDGET_MS = 8500 // leave ~1.5s headroom for the rest of the route
+    // Hard 6s ceiling enforced via Promise.race — AbortSignal.timeout alone
+    // sometimes fails to cut off serverless fetches cleanly. One attempt,
+    // no fallback, so we never push past Vercel's 10s function limit.
+    const BUDGET_MS = 6000
 
+    const withTimeout = <T,>(p: Promise<T>): Promise<T> =>
+      Promise.race([
+        p,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), BUDGET_MS),
+        ),
+      ])
+
+    let aiText = ''
     try {
       if (imageUrl) {
-        const visionRes = await fetch('https://text.pollinations.ai/openai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: AbortSignal.timeout(HARD_BUDGET_MS),
-          body: JSON.stringify({
-            model: 'openai-large',
-            messages: [
-              {
-                role: 'user',
-                content: [
-                  { type: 'text', text: userText },
-                  { type: 'image_url', image_url: { url: imageUrl } },
-                ],
-              },
-            ],
+        const res = await withTimeout(
+          fetch('https://text.pollinations.ai/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: 'openai-large',
+              messages: [
+                {
+                  role: 'user',
+                  content: [
+                    { type: 'text', text: userText },
+                    { type: 'image_url', image_url: { url: imageUrl } },
+                  ],
+                },
+              ],
+            }),
           }),
-        })
-        if (visionRes.ok) {
-          const data = await visionRes.json()
+        )
+        if (res.ok) {
+          const data = await withTimeout(res.json())
           aiText = data?.choices?.[0]?.message?.content?.trim() || ''
         }
       } else {
-        // No image — go straight to text endpoint
-        const remaining = Math.max(2000, HARD_BUDGET_MS - (Date.now() - started))
-        const textRes = await fetch(
-          `https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`,
-          { signal: AbortSignal.timeout(remaining) },
+        const res = await withTimeout(
+          fetch(`https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`),
         )
-        if (textRes.ok) aiText = (await textRes.text()).trim()
+        if (res.ok) aiText = (await withTimeout(res.text())).trim()
       }
     } catch {
-      // Timed out or network error — fall through with empty aiText
-    }
-
-    // If vision returned nothing and we still have budget, try text as backup
-    if (!aiText && imageUrl) {
-      const remaining = HARD_BUDGET_MS - (Date.now() - started)
-      if (remaining > 2500) {
-        try {
-          const textRes = await fetch(
-            `https://text.pollinations.ai/${encodeURIComponent(userText)}?model=openai`,
-            { signal: AbortSignal.timeout(remaining - 500) },
-          )
-          if (textRes.ok) aiText = (await textRes.text()).trim()
-        } catch {
-          /* give up */
-        }
-      }
+      // Timed out — return graceful error so client knows to retry
     }
 
     if (!aiText) {
-      return NextResponse.json({ error: 'Serviço de IA indisponível ou demasiado lento' }, { status: 502 })
+      return NextResponse.json(
+        { error: 'Serviço de IA indisponível ou demasiado lento. Tenta novamente.' },
+        { status: 502 },
+      )
     }
 
     if (!aiText || aiText.length > 100 || aiText.includes('\n')) {
