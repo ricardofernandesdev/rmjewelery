@@ -17,6 +17,7 @@ type Config = {
   columns: ColumnDef[]
   previewPrefix?: string
   hasCategoryFilter?: boolean
+  searchFields?: string[]
 }
 
 type Category = { id: number; name: string }
@@ -93,7 +94,8 @@ export const CollectionListClient: React.FC<Props> = ({
             } catch { /* ignore */ }
           }
 
-          const fields = ['name', 'slug', 'title', 'email']
+          // Use only fields that actually exist on this collection
+          const fields = config.searchFields ?? ['name', 'slug']
           const orConditions: string[] = fields.map(
             (f, i) => `where[or][${i}][${f}][like]=${encodeURIComponent(term)}`,
           )

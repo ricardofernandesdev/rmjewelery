@@ -18,6 +18,7 @@ type CollectionListConfig = {
   columns: ColumnDef[]
   previewPrefix?: string
   hasCategoryFilter?: boolean
+  searchFields?: string[]
 }
 
 // Categories config
@@ -27,6 +28,7 @@ const categoriesConfig: CollectionListConfig = {
   slug: 'categories',
   createLabel: 'NOVA CATEGORIA',
   previewPrefix: '/categories',
+  searchFields: ['name', 'slug'],
   columns: [
     {
       key: 'image',
@@ -46,6 +48,7 @@ const productsConfig: CollectionListConfig = {
   createLabel: 'NOVO PRODUTO',
   previewPrefix: '/products',
   hasCategoryFilter: true,
+  searchFields: ['name', 'slug'],
   columns: [
     { key: 'thumbnail', label: 'IMAGEM' },
     { key: 'name', label: 'NOME' },
@@ -60,6 +63,7 @@ const colorsConfig: CollectionListConfig = {
   subtitle: 'BIBLIOTECA DE CORES',
   slug: 'colors',
   createLabel: 'NOVA COR',
+  searchFields: ['name', 'slug', 'hex'],
   columns: [
     { key: 'swatch', label: 'COR' },
     { key: 'name', label: 'NOME' },
@@ -74,6 +78,7 @@ const usersConfig: CollectionListConfig = {
   subtitle: 'GESTÃO DE UTILIZADORES',
   slug: 'users',
   createLabel: 'NOVO UTILIZADOR',
+  searchFields: ['email', 'name'],
   columns: [
     { key: 'email', label: 'EMAIL' },
     { key: 'name', label: 'NOME' },

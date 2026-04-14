@@ -4,6 +4,59 @@ import { headers } from 'next/headers'
 
 export const maxDuration = 10
 
+// ── Word fixes & strips applied to AI-generated names ──
+const PT_BR_ES_FIXES: Array<[RegExp, string]> = [
+  [/\bplateado\b/gi, 'Prateado'],
+  [/\bplateada\b/gi, 'Prateada'],
+  [/\bdorado\b/gi, 'Dourado'],
+  [/\bdorada\b/gi, 'Dourada'],
+  [/\bplata\b/gi, 'Prata'],
+  [/\boro\b/gi, 'Ouro'],
+]
+
+// Colors that should NEVER appear in a product name (variants vary)
+const COLOR_WORDS = [
+  'dourado', 'dourada', 'dourados', 'douradas',
+  'prateado', 'prateada', 'prateados', 'prateadas',
+  'prata', 'ouro',
+  'rose gold', 'rosegold',
+  'preto', 'preta', 'pretos', 'pretas',
+  'branco', 'branca', 'brancos', 'brancas',
+  'azul', 'azuis', 'verde', 'verdes', 'vermelho', 'vermelha',
+  'cobre', 'bronze',
+]
+
+function postProcessName(raw: string): string {
+  let out = raw
+    .replace(/^["'"'`]|["'"'`]$/g, '')
+    .replace(/\.$/, '')
+    .trim()
+
+  // Apply European Portuguese fixes
+  for (const [pattern, replacement] of PT_BR_ES_FIXES) {
+    out = out.replace(pattern, replacement)
+  }
+
+  // Strip "aço" mentions
+  out = out
+    .replace(/\s+(de|em)?\s*aço\b/gi, '')
+    .replace(/\baço\s+/gi, '')
+
+  // Strip color words (with optional "em"/"de" before)
+  for (const color of COLOR_WORDS) {
+    const escaped = color.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    out = out
+      .replace(new RegExp(`\\s+(em|de|com|cor)?\\s*${escaped}\\b`, 'gi'), '')
+      .replace(new RegExp(`\\b${escaped}\\s+`, 'gi'), '')
+  }
+
+  // Collapse whitespace and trim trailing connectors
+  return out
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+(em|de|com|e|com|a|o)$/i, '')
+    .trim()
+}
+
 /**
  * Generate a descriptive product name using Google Gemini 2.0 Flash.
  * When an image URL is provided, fetches the image and includes it in
@@ -31,18 +84,22 @@ export async function POST(req: NextRequest) {
     }
 
     const prompt =
-      `Cria um nome de produto descritivo e único em português para esta peça de joalharia. ` +
+      `Cria um nome de produto descritivo e único em PORTUGUÊS DE PORTUGAL (pt-PT) para esta peça de joalharia. ` +
       `Nome base: "${name.trim()}". ` +
       (imageUrl
         ? `Olha atentamente para a imagem e descreve no nome os detalhes visuais específicos ` +
-          `(formato, pérolas, zircónias, decoração, acabamento, cor, etc.). `
+          `(formato, pérolas, zircónias, decoração, acabamento). `
         : '') +
-      `REGRA ABSOLUTA: NÃO uses a palavra "aço" nem "Aço" no nome. Nunca. Se a peça for em aço, ` +
-      `descreve-a por outras qualidades (forma, design, decoração, acabamento). ` +
+      `REGRAS ABSOLUTAS:\n` +
+      `1. USA APENAS português europeu (Portugal). NUNCA espanhol nem português brasileiro. ` +
+      `Exemplos corretos: "Prateado" (não "Plateado"), "Dourado" (não "Dorado"), "Prata" (não "Plata"), "Ouro" (não "Oro").\n` +
+      `2. NÃO uses a palavra "aço" nem "Aço".\n` +
+      `3. NÃO menciones cores no nome (proibido: dourado, prateado, prata, ouro, rose gold, preto, branco, azul, etc). ` +
+      `O produto pode ter várias variantes de cor, por isso o nome deve ser neutro quanto à cor.\n` +
       `Devolve APENAS o nome melhorado (máximo 8 palavras), sem aspas, sem pontuação final, ` +
       `sem explicações, sem quebras de linha. ` +
       `Estilo sofisticado e minimalista. Exemplos: ` +
-      `"Pulseira Entrelaçada Minimalista", "Anel Dourado com Pérola Central", ` +
+      `"Pulseira Entrelaçada Minimalista", "Anel com Pérola Central", ` +
       `"Brincos Forma Geométrica".`
 
     // Build Gemini request parts
@@ -134,16 +191,7 @@ export async function POST(req: NextRequest) {
     // Clean response
     if (aiText.includes('\n')) aiText = aiText.split('\n')[0].trim()
     if (aiText.length > 100) aiText = aiText.slice(0, 100)
-    // Strip any stray "aço" / "Aço" the model might have slipped in
-    const cleaned = aiText
-      .replace(/^["'"']|["'"']$/g, '')
-      .replace(/\.$/, '')
-      .replace(/\s+(de|em)?\s*aço\b/gi, '')
-      .replace(/\baço\s+/gi, '')
-      .replace(/\s{2,}/g, ' ')
-      .trim()
-
-    return NextResponse.json({ success: true, name: cleaned || name })
+    return NextResponse.json({ success: true, name: postProcessName(aiText) || name })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Erro' }, { status: 500 })
   }

@@ -4,6 +4,63 @@ import { headers } from 'next/headers'
 
 export const maxDuration = 10
 
+// ── Word fixes & strips applied to AI-generated NAMES (not descriptions) ──
+const PT_BR_ES_FIXES: Array<[RegExp, string]> = [
+  [/\bplateado\b/gi, 'Prateado'],
+  [/\bplateada\b/gi, 'Prateada'],
+  [/\bdorado\b/gi, 'Dourado'],
+  [/\bdorada\b/gi, 'Dourada'],
+  [/\bplata\b/gi, 'Prata'],
+  [/\boro\b/gi, 'Ouro'],
+]
+
+const COLOR_WORDS = [
+  'dourado', 'dourada', 'dourados', 'douradas',
+  'prateado', 'prateada', 'prateados', 'prateadas',
+  'prata', 'ouro',
+  'rose gold', 'rosegold',
+  'preto', 'preta', 'pretos', 'pretas',
+  'branco', 'branca', 'brancos', 'brancas',
+  'azul', 'azuis', 'verde', 'verdes', 'vermelho', 'vermelha',
+  'cobre', 'bronze',
+]
+
+function postProcessName(raw: string): string {
+  let out = raw
+    .replace(/^["'"'`]|["'"'`]$/g, '')
+    .replace(/\.$/, '')
+    .trim()
+
+  for (const [pattern, replacement] of PT_BR_ES_FIXES) {
+    out = out.replace(pattern, replacement)
+  }
+
+  out = out
+    .replace(/\s+(de|em)?\s*aço\b/gi, '')
+    .replace(/\baço\s+/gi, '')
+
+  for (const color of COLOR_WORDS) {
+    const escaped = color.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    out = out
+      .replace(new RegExp(`\\s+(em|de|com|cor)?\\s*${escaped}\\b`, 'gi'), '')
+      .replace(new RegExp(`\\b${escaped}\\s+`, 'gi'), '')
+  }
+
+  return out
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+(em|de|com|e|a|o)$/i, '')
+    .trim()
+}
+
+// Apply only the pt-PT fixes to descriptions (keep colors/materials)
+function fixPortuguese(raw: string): string {
+  let out = raw
+  for (const [pattern, replacement] of PT_BR_ES_FIXES) {
+    out = out.replace(pattern, replacement)
+  }
+  return out
+}
+
 /**
  * Single Gemini call that returns BOTH an improved product name and
  * a 2-paragraph description based on the product image + base name.
@@ -36,15 +93,18 @@ export async function POST(req: NextRequest) {
           `formato, pérolas, zircónias, acabamento, decoração).\n\n`
         : '\n') +
       `Devolve a tua resposta EXACTAMENTE neste formato (sem mais nada):\n\n` +
-      `NOME: <nome melhorado do produto em português, max 8 palavras, sem aspas, sem pontuação final, descritivo e único>\n\n` +
+      `NOME: <nome melhorado do produto, max 8 palavras, sem aspas, sem pontuação final, descritivo e único>\n\n` +
       `DESCRIÇÃO:\n<parágrafo 1: começa com o nome melhorado e descreve a peça>\n\n<parágrafo 2: fala sobre ocasiões de uso e o estilo/sensação que transmite>\n\n` +
       `Regras:\n` +
+      `- Usa SEMPRE português de Portugal (pt-PT). NUNCA espanhol nem português brasileiro. ` +
+      `Exemplos: "Prateado" (não "Plateado"), "Dourado" (não "Dorado"), "Prata" (não "Plata").\n` +
       `- Cada parágrafo da descrição com 2-4 frases.\n` +
-      `- Estilo elegante, minimalista, sofisticado. Português europeu.\n` +
+      `- Estilo elegante, minimalista, sofisticado.\n` +
       `- SEM markdown, SEM títulos, SEM emojis.\n` +
       `- A descrição NÃO deve incluir o nome base, só o melhorado.\n` +
-      `- REGRA ABSOLUTA: NÃO uses a palavra "aço" / "Aço" no NOME. Usa outras qualidades ` +
-      `(forma, design, decoração, acabamento) para descrever a peça. Na descrição podes mencionar materiais.`
+      `- NOME: NÃO uses "aço" nem cores (dourado, prateado, prata, ouro, preto, branco, etc) ` +
+      `porque o produto pode ter várias variantes de cor. Usa forma, design, decoração ou acabamento.\n` +
+      `- DESCRIÇÃO: pode mencionar materiais e cores se forem visíveis na imagem.`
 
     const parts: any[] = [{ text: prompt }]
 
@@ -123,23 +183,14 @@ export async function POST(req: NextRequest) {
 
     const nomeMatch = aiText.match(/NOME\s*:\s*([\s\S]+?)(?=\n\s*DESCRIÇÃO\s*:|\n\s*DESCRICAO\s*:|$)/i)
     if (nomeMatch) {
-      improvedName = nomeMatch[1]
-        .split('\n')[0]
-        .trim()
-        .replace(/^["'"']|["'"']$/g, '')
-        .replace(/\.$/, '')
-        // Strip any stray "aço" that slipped through despite the prompt
-        .replace(/\s+(de|em)?\s*aço\b/gi, '')
-        .replace(/\baço\s+/gi, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim()
+      improvedName = postProcessName(nomeMatch[1].split('\n')[0])
     }
 
     const descMatch = aiText.match(/DESCRI(?:Ç|C)[ÃA]O\s*:\s*([\s\S]+)$/i)
     if (descMatch) {
       descriptionParagraphs = descMatch[1]
         .split(/\n\s*\n/)
-        .map((p) => p.trim().replace(/^["'"']|["'"']$/g, '').trim())
+        .map((p) => fixPortuguese(p.trim().replace(/^["'"']|["'"']$/g, '').trim()))
         .filter(Boolean)
         .slice(0, 3)
     }

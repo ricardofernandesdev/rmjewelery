@@ -28,9 +28,11 @@ export async function POST(req: NextRequest) {
     const productName = name.trim()
 
     const prompt =
-      `Escreve uma descrição de produto em português europeu para esta peça de joalharia.\n\n` +
+      `Escreve uma descrição de produto em PORTUGUÊS DE PORTUGAL (pt-PT) para esta peça de joalharia.\n\n` +
       `Nome do produto: "${productName}".\n\n` +
       `Regras:\n` +
+      `- Usa SEMPRE português europeu. NUNCA espanhol nem português brasileiro. ` +
+      `Exemplos: "Prateado" (não "Plateado"), "Dourado" (não "Dorado"), "Prata" (não "Plata").\n` +
       `- Exactamente 2 parágrafos separados por uma linha em branco.\n` +
       `- 1º parágrafo: começa SEMPRE com "${productName}" e descreve a peça (materiais, formato, detalhes observáveis na imagem) e para quem se destina.\n` +
       `- 2º parágrafo: fala sobre ocasiões de uso e o estilo/sensação que transmite.\n` +
@@ -108,11 +110,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Clean up: remove stray markdown, split into paragraphs
+    // pt-PT fixes for stray Spanish/pt-BR words
+    const ptFixes: Array<[RegExp, string]> = [
+      [/\bplateado\b/gi, 'Prateado'],
+      [/\bplateada\b/gi, 'Prateada'],
+      [/\bdorado\b/gi, 'Dourado'],
+      [/\bdorada\b/gi, 'Dourada'],
+      [/\bplata\b/gi, 'Prata'],
+      [/\boro\b/gi, 'Ouro'],
+    ]
+    const fixPt = (s: string) => ptFixes.reduce((acc, [p, r]) => acc.replace(p, r), s)
+
     const paragraphs = aiText
       .replace(/^["'""]|["'""]$/g, '')
       .replace(/^\*+|\*+$/g, '')
       .split(/\n\s*\n/)
-      .map((p) => p.trim())
+      .map((p) => fixPt(p.trim()))
       .filter(Boolean)
       .slice(0, 3)
 
