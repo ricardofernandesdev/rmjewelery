@@ -95,7 +95,7 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, count
 
         <div
           ref={scrollerRef}
-          className="grid grid-cols-2 gap-4 md:flex md:gap-6 md:overflow-x-auto md:scroll-smooth md:snap-x md:snap-mandatory md:pb-3 md:scrollbar-thin"
+          className="grid grid-cols-2 gap-4 md:flex md:gap-6 md:overflow-x-auto md:scroll-smooth md:snap-x md:snap-mandatory md:pb-3 md:scrollbar-hide"
         >
           {products.map((product) => {
             const imgUrl = getImg(product)
