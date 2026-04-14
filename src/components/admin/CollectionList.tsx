@@ -143,8 +143,24 @@ async function renderList(props: ListViewServerProps, slug: string) {
         } else if (col.key === 'swatch') {
           row._swatchHex = doc.hex || '#cccccc'
         } else if (col.key === 'category') {
-          row.category =
-            typeof doc.category === 'object' && doc.category ? doc.category.name : doc.category || ''
+          if (typeof doc.category === 'object' && doc.category) {
+            row.category = doc.category.name
+          } else if (doc.category) {
+            // Category is just an ID — fetch the document to get the name
+            try {
+              const payload = await getPayloadClient()
+              const cat = await payload.findByID({
+                collection: 'categories',
+                id: doc.category,
+                depth: 0,
+              })
+              row.category = cat?.name || ''
+            } catch {
+              row.category = ''
+            }
+          } else {
+            row.category = ''
+          }
         } else {
           row[col.key] = doc[col.key] || ''
         }
