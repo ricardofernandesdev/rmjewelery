@@ -149,6 +149,11 @@ export const Products: CollectionConfig = {
     {
       name: 'description',
       type: 'richText',
+      admin: {
+        components: {
+          afterInput: ['./src/components/admin/DescriptionGenerateButton#DescriptionGenerateButton'],
+        },
+      },
     },
     {
       name: 'images',
