@@ -30,8 +30,9 @@ export async function POST(req: NextRequest) {
       `Estilo sofisticado e minimalista. Exemplos: ` +
       `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", "Brincos Aço Forma Geométrica".`
 
-    // Text-only is fast — 5s budget
-    const BUDGET_MS = 5000
+    // Text-only budget — 7s gives Pollinations room on slow days while
+    // keeping 3s margin before Vercel's 10s function limit.
+    const BUDGET_MS = 7000
     const withTimeout = <T,>(p: Promise<T>): Promise<T> =>
       Promise.race([
         p,
