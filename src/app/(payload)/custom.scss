@@ -1,9 +1,9 @@
 /* ── Dark mode color override ── */
-/* Replace Payload's #141414 with #525252 in dark mode */
+/* Use #151517 as the main dark surface */
 [data-theme='dark'] {
-  --theme-bg: #525252 !important;
-  --theme-elevation-0: #525252 !important;
-  --theme-input-bg: #525252 !important;
+  --theme-bg: #151517 !important;
+  --theme-elevation-0: #151517 !important;
+  --theme-input-bg: #151517 !important;
 }
 
 /* ── Global Font ── */
@@ -62,27 +62,41 @@ html {
   display: none !important;
 }
 
-/* Nav links — uppercase, bold, spaced */
-.nav__link {
-  font-size: 13px !important;
-  line-height: 20px !important;
-  font-weight: 700 !important;
-  letter-spacing: 1.5px !important;
-  text-transform: uppercase;
-  padding-block: 12px !important;
-  position: relative;
-  border-right: 3px solid transparent;
-  transition: background 0.15s ease, border-color 0.15s ease;
+/* Sidebar background slightly different from main bg for separation */
+.nav,
+.nav-wrapper,
+nav.nav {
+  background: var(--theme-elevation-0) !important;
+  border-right: 1px solid var(--theme-elevation-100);
 }
 
-/* Active nav item — always visible */
+/* Nav links — Title-case, comfortable spacing, no right border, rounded */
+.nav__link {
+  font-size: 14px !important;
+  line-height: 20px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2px !important;
+  text-transform: none !important;
+  padding: 10px 16px !important;
+  margin: 2px 8px !important;
+  border-radius: 6px !important;
+  position: relative;
+  border-right: none !important;
+  color: var(--theme-elevation-600) !important;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Active nav item — slightly lighter background, bright text */
 .nav__link--active {
-  background: var(--theme-elevation-50) !important;
-  border-right-color: var(--theme-text) !important;
+  background: var(--theme-elevation-100) !important;
+  color: var(--theme-text) !important;
+  font-weight: 600 !important;
+  border-right: none !important;
 }
 
 .nav__link:hover {
-  background: var(--theme-elevation-50) !important;
+  background: var(--theme-elevation-100) !important;
+  color: var(--theme-text) !important;
 }
 
 /* Nav link labels — add space for icon */
@@ -92,20 +106,28 @@ html {
   gap: 12px;
 }
 
-/* Icons via CSS mask (supports theme colors) */
+/* Icons via CSS mask — inherit color from parent link (dimmed when inactive,
+   bright on hover/active because the parent .nav__link color changes) */
 .nav__link-label::before {
   content: '';
   display: inline-block;
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
-  background-color: var(--theme-text);
+  background-color: currentColor;
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
   mask-position: center;
+}
+
+/* Add a subtle divider between nav groups (mimics the image's section separators) */
+.nav-group + .nav-group {
+  margin-top: 12px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--theme-elevation-100);
 }
 
 /* Media — filled image/landscape icon */
