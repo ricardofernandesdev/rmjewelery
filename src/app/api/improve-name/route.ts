@@ -35,13 +35,15 @@ export async function POST(req: NextRequest) {
       `Nome base: "${name.trim()}". ` +
       (imageUrl
         ? `Olha atentamente para a imagem e descreve no nome os detalhes visuais específicos ` +
-          `(material, formato, pérolas, zircónias, decoração, acabamento, etc.). `
+          `(formato, pérolas, zircónias, decoração, acabamento, cor, etc.). `
         : '') +
+      `REGRA ABSOLUTA: NÃO uses a palavra "aço" nem "Aço" no nome. Nunca. Se a peça for em aço, ` +
+      `descreve-a por outras qualidades (forma, design, decoração, acabamento). ` +
       `Devolve APENAS o nome melhorado (máximo 8 palavras), sem aspas, sem pontuação final, ` +
       `sem explicações, sem quebras de linha. ` +
       `Estilo sofisticado e minimalista. Exemplos: ` +
-      `"Pulseira Aço Entrelaçada Minimalista", "Anel Dourado com Pérola Central", ` +
-      `"Brincos Aço Forma Geométrica".`
+      `"Pulseira Entrelaçada Minimalista", "Anel Dourado com Pérola Central", ` +
+      `"Brincos Forma Geométrica".`
 
     // Build Gemini request parts
     const parts: any[] = [{ text: prompt }]
@@ -114,7 +116,14 @@ export async function POST(req: NextRequest) {
     // Clean response
     if (aiText.includes('\n')) aiText = aiText.split('\n')[0].trim()
     if (aiText.length > 100) aiText = aiText.slice(0, 100)
-    const cleaned = aiText.replace(/^["'"']|["'"']$/g, '').replace(/\.$/, '').trim()
+    // Strip any stray "aço" / "Aço" the model might have slipped in
+    const cleaned = aiText
+      .replace(/^["'"']|["'"']$/g, '')
+      .replace(/\.$/, '')
+      .replace(/\s+(de|em)?\s*aço\b/gi, '')
+      .replace(/\baço\s+/gi, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim()
 
     return NextResponse.json({ success: true, name: cleaned || name })
   } catch (err: any) {

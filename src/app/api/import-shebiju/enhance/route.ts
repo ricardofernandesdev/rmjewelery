@@ -42,7 +42,9 @@ export async function POST(req: NextRequest) {
       `- Cada parágrafo da descrição com 2-4 frases.\n` +
       `- Estilo elegante, minimalista, sofisticado. Português europeu.\n` +
       `- SEM markdown, SEM títulos, SEM emojis.\n` +
-      `- A descrição NÃO deve incluir o nome base, só o melhorado.`
+      `- A descrição NÃO deve incluir o nome base, só o melhorado.\n` +
+      `- REGRA ABSOLUTA: NÃO uses a palavra "aço" / "Aço" no NOME. Usa outras qualidades ` +
+      `(forma, design, decoração, acabamento) para descrever a peça. Na descrição podes mencionar materiais.`
 
     const parts: any[] = [{ text: prompt }]
 
@@ -111,6 +113,10 @@ export async function POST(req: NextRequest) {
         .trim()
         .replace(/^["'"']|["'"']$/g, '')
         .replace(/\.$/, '')
+        // Strip any stray "aço" that slipped through despite the prompt
+        .replace(/\s+(de|em)?\s*aço\b/gi, '')
+        .replace(/\baço\s+/gi, '')
+        .replace(/\s{2,}/g, ' ')
         .trim()
     }
 
