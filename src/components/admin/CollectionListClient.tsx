@@ -16,7 +16,10 @@ type Config = {
   createLabel: string
   columns: ColumnDef[]
   previewPrefix?: string
+  hasCategoryFilter?: boolean
 }
+
+type Category = { id: number; name: string }
 
 type Props = {
   docs: any[]
@@ -47,25 +50,67 @@ export const CollectionListClient: React.FC<Props> = ({
   const [modal, setModal] = useState<ModalState>(null)
   const [serverResults, setServerResults] = useState<any[] | null>(null)
   const [searching, setSearching] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [categoryFilter, setCategoryFilter] = useState<string>('')
 
-  // Debounced server-side search across the WHOLE collection
+  // Fetch categories when filter is enabled
+  useEffect(() => {
+    if (!config.hasCategoryFilter) return
+    fetch('/api/categories?limit=100&depth=0&sort=name', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.docs) setCategories(data.docs.map((c: any) => ({ id: c.id, name: c.name })))
+      })
+      .catch(() => {})
+  }, [config.hasCategoryFilter])
+
+  // Debounced server-side search + category filter across the WHOLE collection
   useEffect(() => {
     const term = search.trim()
-    if (!term) {
+    if (!term && !categoryFilter) {
       setServerResults(null)
       return
     }
     setSearching(true)
     const handle = setTimeout(async () => {
       try {
-        const fields = ['name', 'slug', 'title', 'email']
-        const where = fields
-          .map((f) => `where[or][${fields.indexOf(f)}][${f}][like]=${encodeURIComponent(term)}`)
-          .join('&')
-        const res = await fetch(
-          `/api/${config.slug}?${where}&limit=100&depth=1`,
-          { credentials: 'include' },
-        )
+        const params: string[] = ['limit=100', 'depth=1']
+
+        // Search term — match against multiple fields OR matching category name
+        if (term) {
+          // Resolve categories matching the search term so we can include them
+          let matchedCategoryIds: number[] = []
+          if (config.hasCategoryFilter) {
+            try {
+              const catRes = await fetch(
+                `/api/categories?where[name][like]=${encodeURIComponent(term)}&limit=50&depth=0`,
+                { credentials: 'include' },
+              )
+              if (catRes.ok) {
+                const catData = await catRes.json()
+                matchedCategoryIds = (catData.docs || []).map((d: any) => d.id)
+              }
+            } catch { /* ignore */ }
+          }
+
+          const fields = ['name', 'slug', 'title', 'email']
+          const orConditions: string[] = fields.map(
+            (f, i) => `where[or][${i}][${f}][like]=${encodeURIComponent(term)}`,
+          )
+          matchedCategoryIds.forEach((id, i) => {
+            orConditions.push(`where[or][${fields.length + i}][category][equals]=${id}`)
+          })
+          params.push(...orConditions)
+        }
+
+        // Category dropdown filter (AND condition on top of OR search)
+        if (categoryFilter) {
+          params.push(`where[category][equals]=${categoryFilter}`)
+        }
+
+        const res = await fetch(`/api/${config.slug}?${params.join('&')}`, {
+          credentials: 'include',
+        })
         if (!res.ok) {
           setServerResults([])
           return
@@ -107,7 +152,7 @@ export const CollectionListClient: React.FC<Props> = ({
       }
     }, 350)
     return () => clearTimeout(handle)
-  }, [search, config.slug, config.columns])
+  }, [search, categoryFilter, config.slug, config.columns, config.hasCategoryFilter])
 
   const filtered = serverResults !== null ? serverResults : docs
 
@@ -208,6 +253,28 @@ export const CollectionListClient: React.FC<Props> = ({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {config.hasCategoryFilter && (
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            style={{
+              marginLeft: '10px',
+              padding: '6px 10px',
+              fontSize: '13px',
+              border: '1px solid var(--theme-elevation-200)',
+              borderRadius: '4px',
+              background: 'var(--theme-input-bg, var(--theme-elevation-50))',
+              color: 'var(--theme-text)',
+              outline: 'none',
+              minWidth: '160px',
+            }}
+          >
+            <option value="">Todas as categorias</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        )}
         {searching && (
           <span
             style={{

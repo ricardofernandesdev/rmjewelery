@@ -17,6 +17,7 @@ type CollectionListConfig = {
   createLabel: string
   columns: ColumnDef[]
   previewPrefix?: string
+  hasCategoryFilter?: boolean
 }
 
 // Categories config
@@ -44,6 +45,7 @@ const productsConfig: CollectionListConfig = {
   slug: 'products',
   createLabel: 'NOVO PRODUTO',
   previewPrefix: '/products',
+  hasCategoryFilter: true,
   columns: [
     { key: 'thumbnail', label: 'IMAGEM' },
     { key: 'name', label: 'NOME' },
