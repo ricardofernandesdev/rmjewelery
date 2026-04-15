@@ -260,13 +260,17 @@ export const Products: CollectionConfig = {
           },
         },
         {
-          name: 'size',
-          label: 'Tamanho',
-          type: 'text',
+          name: 'sizes',
+          label: 'Tamanhos',
+          type: 'relationship',
+          relationTo: 'sizes',
+          hasMany: true,
           admin: {
+            description:
+              'Tamanhos cobertos por esta variante. Permite agrupar vários tamanhos no mesmo preço/disponibilidade.',
             condition: (data) => Boolean(data?.enableSizes),
             components: {
-              Field: './src/components/admin/VariantSizeSelect#VariantSizeSelect',
+              Field: './src/components/admin/VariantSizesSelect#VariantSizesSelect',
             },
           },
         },

@@ -153,13 +153,21 @@ export default async function ProductDetailPage({ params }: PageProps) {
   // o ID para o nome correspondente aqui antes de passar aos componentes.
   const variants = ((product as any).variants || []).map((v: any) => {
     const resolvedColor = colorById.get(String(v.color))
-    const resolvedSize = sizeById.get(String(v.size))
+    // variant.sizes is now hasMany — populated to size docs at depth 2.
+    // Each entry is either a doc { id, name } or a raw id when depth was 0.
+    const variantSizeNames: string[] = []
+    if (Array.isArray(v.sizes)) {
+      for (const s of v.sizes) {
+        if (s && typeof s === 'object' && s.name) variantSizeNames.push(s.name)
+        else {
+          const resolved = sizeById.get(String(s))
+          if (resolved?.value) variantSizeNames.push(resolved.value)
+        }
+      }
+    }
     return {
       color: resolvedColor?.name || '',
-      // variant.size now stores the size id (string). Resolve it to the
-      // size name; fall back to the raw value for legacy rows that still
-      // store the literal label.
-      size: resolvedSize?.value || (v.size && !/^\d+$/.test(String(v.size)) ? v.size : ''),
+      sizes: variantSizeNames,
       price: v.price ?? null,
       availability: v.availability || 'in_stock',
       images: Array.isArray(v.images)

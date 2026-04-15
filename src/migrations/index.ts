@@ -11,6 +11,7 @@ import * as migration_20260411_200000_colors_collection from './20260411_200000_
 import * as migration_20260414_100000_social_links from './20260414_100000_social_links';
 import * as migration_20260415_130000_color_auto_select from './20260415_130000_color_auto_select';
 import * as migration_20260415_140000_sizes_collection from './20260415_140000_sizes_collection';
+import * as migration_20260415_150000_variant_sizes_hasmany from './20260415_150000_variant_sizes_hasmany';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260415_140000_sizes_collection.up,
     down: migration_20260415_140000_sizes_collection.down,
     name: '20260415_140000_sizes_collection',
+  },
+  {
+    up: migration_20260415_150000_variant_sizes_hasmany.up,
+    down: migration_20260415_150000_variant_sizes_hasmany.down,
+    name: '20260415_150000_variant_sizes_hasmany',
   },
 ];

@@ -212,36 +212,24 @@ export const ShebijuImport: React.FC = () => {
           sizesField.setValue(defaultSizeIds)
         }
 
+        // One variant per color, each spanning all auto-select sizes.
         const variants: any[] = []
-        if (defaultColorIds.length > 0 && defaultSizeIds.length > 0) {
-          for (const c of defaultColorIds) {
-            for (const s of defaultSizeIds) {
-              variants.push({
-                color: String(c),
-                size: String(s),
-                price: null,
-                availability: 'in_stock',
-              })
-            }
-          }
-        } else if (defaultColorIds.length > 0) {
+        if (defaultColorIds.length > 0) {
           for (const c of defaultColorIds) {
             variants.push({
               color: String(c),
-              size: '',
+              sizes: defaultSizeIds.length > 0 ? defaultSizeIds : [],
               price: null,
               availability: 'in_stock',
             })
           }
         } else if (defaultSizeIds.length > 0) {
-          for (const s of defaultSizeIds) {
-            variants.push({
-              color: '',
-              size: String(s),
-              price: null,
-              availability: 'in_stock',
-            })
-          }
+          variants.push({
+            color: '',
+            sizes: defaultSizeIds,
+            price: null,
+            availability: 'in_stock',
+          })
         }
         if (variants.length > 0) variantsField.setValue(variants)
       } catch {

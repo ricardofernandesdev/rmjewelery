@@ -13,7 +13,8 @@ type SizeTerm = {
 
 type Variant = {
   color?: string
-  size?: string
+  /** Sizes covered by this variant. One variant can span multiple sizes. */
+  sizes?: string[]
   price?: number | null
   availability?: string
   images?: any[]
@@ -49,7 +50,8 @@ export const VariantSelector: React.FC<Props> = ({
   const findVariant = (color?: string, size?: string): Variant | undefined => {
     return variants.find((v) => {
       const colorMatch = !hasColors || v.color === color
-      const sizeMatch = !hasSizes || v.size === size
+      const sizeMatch =
+        !hasSizes || (size ? Array.isArray(v.sizes) && v.sizes.includes(size) : true)
       return colorMatch && sizeMatch
     })
   }

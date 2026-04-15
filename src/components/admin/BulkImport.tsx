@@ -122,31 +122,24 @@ export const BulkImport: React.FC = () => {
         ...(enhancedDescription ? { description: enhancedDescription } : {}),
       }
 
-      // Pre-select auto-flagged colors/sizes and generate a variant per
-      // (color × size) combination — falling back to color-only or
-      // size-only if just one axis has defaults.
+      // Pre-select auto-flagged colors/sizes. Each variant covers ONE
+      // color but may span every default size (variant.sizes is hasMany)
+      // — that way one Dourado variant serves S/M/L at the same price.
       if (defaultColorIds.length > 0) productData.colors = defaultColorIds
       if (defaultSizeIds.length > 0) productData.sizes = defaultSizeIds
 
-      const variants: Array<{ color?: string; size?: string; availability: string }> = []
-      if (defaultColorIds.length > 0 && defaultSizeIds.length > 0) {
+      const variants: Array<{ color?: string; sizes?: number[]; availability: string }> = []
+      if (defaultColorIds.length > 0) {
         for (const colorId of defaultColorIds) {
-          for (const sizeId of defaultSizeIds) {
-            variants.push({
-              color: String(colorId),
-              size: String(sizeId),
-              availability: 'in_stock',
-            })
-          }
-        }
-      } else if (defaultColorIds.length > 0) {
-        for (const colorId of defaultColorIds) {
-          variants.push({ color: String(colorId), availability: 'in_stock' })
+          variants.push({
+            color: String(colorId),
+            ...(defaultSizeIds.length > 0 ? { sizes: defaultSizeIds } : {}),
+            availability: 'in_stock',
+          })
         }
       } else if (defaultSizeIds.length > 0) {
-        for (const sizeId of defaultSizeIds) {
-          variants.push({ size: String(sizeId), availability: 'in_stock' })
-        }
+        // No colors but sizes — one variant covering all sizes
+        variants.push({ sizes: defaultSizeIds, availability: 'in_stock' })
       }
       if (variants.length > 0) productData.variants = variants
 

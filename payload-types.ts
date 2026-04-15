@@ -293,7 +293,10 @@ export interface Product {
   variants?:
     | {
         color?: string | null;
-        size?: string | null;
+        /**
+         * Tamanhos cobertos por esta variante. Permite agrupar vários tamanhos no mesmo preço/disponibilidade.
+         */
+        sizes?: (number | Size)[] | null;
         /**
          * Deixa vazio para usar o preço base.
          */
@@ -582,7 +585,7 @@ export interface ProductsSelect<T extends boolean = true> {
     | T
     | {
         color?: T;
-        size?: T;
+        sizes?: T;
         price?: T;
         availability?: T;
         images?: T;
