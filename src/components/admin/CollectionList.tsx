@@ -69,6 +69,21 @@ const colorsConfig: CollectionListConfig = {
     { key: 'name', label: 'NOME' },
     { key: 'hex', label: 'HEX' },
     { key: 'slug', label: 'SLUG' },
+    { key: 'autoSelect', label: 'AUTO' },
+  ],
+}
+
+// Sizes config
+const sizesConfig: CollectionListConfig = {
+  title: 'TAMANHOS',
+  subtitle: 'BIBLIOTECA DE TAMANHOS',
+  slug: 'sizes',
+  createLabel: 'NOVO TAMANHO',
+  searchFields: ['name', 'slug'],
+  columns: [
+    { key: 'name', label: 'NOME' },
+    { key: 'slug', label: 'SLUG' },
+    { key: 'autoSelect', label: 'AUTO' },
   ],
 }
 
@@ -89,6 +104,7 @@ const configMap: Record<string, CollectionListConfig> = {
   categories: categoriesConfig,
   products: productsConfig,
   colors: colorsConfig,
+  sizes: sizesConfig,
   users: usersConfig,
 }
 
@@ -102,6 +118,10 @@ export const ProductsList: React.FC<ListViewServerProps> = async (props) => {
 
 export const ColorsList: React.FC<ListViewServerProps> = async (props) => {
   return renderList(props, 'colors')
+}
+
+export const SizesList: React.FC<ListViewServerProps> = async (props) => {
+  return renderList(props, 'sizes')
 }
 
 export const UsersList: React.FC<ListViewServerProps> = async (props) => {
@@ -149,6 +169,8 @@ async function renderList(props: ListViewServerProps, slug: string) {
           row._thumbnailUrl = await resolveMediaUrl(first)
         } else if (col.key === 'swatch') {
           row._swatchHex = doc.hex || '#cccccc'
+        } else if (col.key === 'autoSelect') {
+          row.autoSelect = Boolean(doc.autoSelect)
         } else if (col.key === 'category') {
           if (typeof doc.category === 'object' && doc.category) {
             row.category = doc.category.name

@@ -70,6 +70,7 @@ export interface Config {
     media: Media;
     categories: Category;
     colors: Color;
+    sizes: Size;
     products: Product;
     users: User;
     pages: Page;
@@ -83,6 +84,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     colors: ColorsSelect<false> | ColorsSelect<true>;
+    sizes: SizesSelect<false> | SizesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -230,6 +232,24 @@ export interface Color {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizes".
+ */
+export interface Size {
+  id: number;
+  /**
+   * Nome apresentado (ex.: 17, 18, S, M, L).
+   */
+  name: string;
+  /**
+   * Se ativo, este tamanho é pré-selecionado em novos produtos e os importadores criam automaticamente uma variante para ele.
+   */
+  autoSelect?: boolean | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -264,17 +284,9 @@ export interface Product {
    */
   colors?: (number | Color)[] | null;
   /**
-   * Define os tamanhos disponíveis.
+   * Escolhe os tamanhos deste produto a partir da biblioteca global. Gere a biblioteca em "Tamanhos" no menu lateral.
    */
-  sizeTerms?:
-    | {
-        /**
-         * Ex: 17, 18, 19, S, M, L
-         */
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
+  sizes?: (number | Size)[] | null;
   /**
    * Cria uma variante para cada combinação. Usa os nomes exactos dos termos definidos acima.
    */
@@ -391,6 +403,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'colors';
         value: number | Color;
+      } | null)
+    | ({
+        relationTo: 'sizes';
+        value: number | Size;
       } | null)
     | ({
         relationTo: 'products';
@@ -538,6 +554,17 @@ export interface ColorsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sizes_select".
+ */
+export interface SizesSelect<T extends boolean = true> {
+  name?: T;
+  autoSelect?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
@@ -550,12 +577,7 @@ export interface ProductsSelect<T extends boolean = true> {
   enableColors?: T;
   enableSizes?: T;
   colors?: T;
-  sizeTerms?:
-    | T
-    | {
-        value?: T;
-        id?: T;
-      };
+  sizes?: T;
   variants?:
     | T
     | {

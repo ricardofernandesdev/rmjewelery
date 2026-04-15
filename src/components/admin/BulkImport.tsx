@@ -17,6 +17,7 @@ export const BulkImport: React.FC = () => {
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [defaultColorIds, setDefaultColorIds] = useState<number[]>([])
+  const [defaultSizeIds, setDefaultSizeIds] = useState<number[]>([])
   const [running, setRunning] = useState(false)
   const [results, setResults] = useState<ImportStatus[]>([])
 
@@ -32,6 +33,13 @@ export const BulkImport: React.FC = () => {
     })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (d?.docs) setDefaultColorIds(d.docs.map((c: any) => c.id)) })
+      .catch(() => {})
+
+    fetch('/api/sizes?where[autoSelect][equals]=true&limit=100&depth=0&sort=name', {
+      credentials: 'include',
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.docs) setDefaultSizeIds(d.docs.map((s: any) => s.id)) })
       .catch(() => {})
   }, [open])
 
@@ -110,17 +118,37 @@ export const BulkImport: React.FC = () => {
         availability: 'in_stock',
         category: categoryId,
         enableColors: defaultColorIds.length > 0,
+        enableSizes: defaultSizeIds.length > 0,
         ...(enhancedDescription ? { description: enhancedDescription } : {}),
       }
 
-      // Add only the colors marked as auto-select + a variant per each
-      if (defaultColorIds.length > 0) {
-        productData.colors = defaultColorIds
-        productData.variants = defaultColorIds.map((colorId: number) => ({
-          color: String(colorId),
-          availability: 'in_stock',
-        }))
+      // Pre-select auto-flagged colors/sizes and generate a variant per
+      // (color × size) combination — falling back to color-only or
+      // size-only if just one axis has defaults.
+      if (defaultColorIds.length > 0) productData.colors = defaultColorIds
+      if (defaultSizeIds.length > 0) productData.sizes = defaultSizeIds
+
+      const variants: Array<{ color?: string; size?: string; availability: string }> = []
+      if (defaultColorIds.length > 0 && defaultSizeIds.length > 0) {
+        for (const colorId of defaultColorIds) {
+          for (const sizeId of defaultSizeIds) {
+            variants.push({
+              color: String(colorId),
+              size: String(sizeId),
+              availability: 'in_stock',
+            })
+          }
+        }
+      } else if (defaultColorIds.length > 0) {
+        for (const colorId of defaultColorIds) {
+          variants.push({ color: String(colorId), availability: 'in_stock' })
+        }
+      } else if (defaultSizeIds.length > 0) {
+        for (const sizeId of defaultSizeIds) {
+          variants.push({ size: String(sizeId), availability: 'in_stock' })
+        }
       }
+      if (variants.length > 0) productData.variants = variants
 
       const createRes = await fetch('/api/products', {
         method: 'POST',

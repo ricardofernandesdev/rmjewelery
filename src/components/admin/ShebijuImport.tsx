@@ -84,8 +84,10 @@ export const ShebijuImport: React.FC = () => {
   const categoryField = useField<number>({ path: 'category' })
   const [descPreview, setDescPreview] = useState<string | null>(null)
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
+  const enableSizesField = useField<boolean>({ path: 'enableSizes' })
   const descriptionField = useField<any>({ path: 'description' })
   const colorsField = useField<number[]>({ path: 'colors' })
+  const sizesField = useField<number[]>({ path: 'sizes' })
   const variantsField = useField<any[]>({ path: 'variants' })
 
   useEffect(() => {
@@ -179,29 +181,71 @@ export const ShebijuImport: React.FC = () => {
       categoryField.setValue(categoryId)
       if (mediaIds.length > 0) imagesField.setValue(mediaIds)
 
-      // Pre-select only colors flagged with autoSelect=true and create one
-      // variant per each. Other colors are added manually after import.
+      // Pre-select autoSelect colors + sizes from the global libraries and
+      // generate one variant per (color × size) combination — falling back
+      // to a single axis when only one is configured.
       try {
-        const colorsRes = await fetch(
-          '/api/colors?where[autoSelect][equals]=true&limit=100&depth=0&sort=name',
-          { credentials: 'include' },
-        )
+        const [colorsRes, sizesRes] = await Promise.all([
+          fetch('/api/colors?where[autoSelect][equals]=true&limit=100&depth=0&sort=name', {
+            credentials: 'include',
+          }),
+          fetch('/api/sizes?where[autoSelect][equals]=true&limit=100&depth=0&sort=name', {
+            credentials: 'include',
+          }),
+        ])
         const colorsData = await colorsRes.json()
-        if (colorsData?.docs?.length > 0) {
-          const defaultColorIds = colorsData.docs.map((d: any) => d.id as number)
+        const sizesData = await sizesRes.json()
+
+        const defaultColorIds: number[] = (colorsData?.docs || []).map(
+          (d: any) => d.id as number,
+        )
+        const defaultSizeIds: number[] = (sizesData?.docs || []).map(
+          (d: any) => d.id as number,
+        )
+
+        if (defaultColorIds.length > 0) {
           enableColorsField.setValue(true)
           colorsField.setValue(defaultColorIds)
-          variantsField.setValue(
-            defaultColorIds.map((colorId: number) => ({
-              color: String(colorId),
+        }
+        if (defaultSizeIds.length > 0) {
+          enableSizesField.setValue(true)
+          sizesField.setValue(defaultSizeIds)
+        }
+
+        const variants: any[] = []
+        if (defaultColorIds.length > 0 && defaultSizeIds.length > 0) {
+          for (const c of defaultColorIds) {
+            for (const s of defaultSizeIds) {
+              variants.push({
+                color: String(c),
+                size: String(s),
+                price: null,
+                availability: 'in_stock',
+              })
+            }
+          }
+        } else if (defaultColorIds.length > 0) {
+          for (const c of defaultColorIds) {
+            variants.push({
+              color: String(c),
               size: '',
               price: null,
               availability: 'in_stock',
-            })),
-          )
+            })
+          }
+        } else if (defaultSizeIds.length > 0) {
+          for (const s of defaultSizeIds) {
+            variants.push({
+              color: '',
+              size: String(s),
+              price: null,
+              availability: 'in_stock',
+            })
+          }
         }
+        if (variants.length > 0) variantsField.setValue(variants)
       } catch {
-        // Skip if colors fetch fails
+        // Skip if either fetch fails
       }
       // If Gemini gave us a description, set it; otherwise fall back to the
       // category template (server hook also handles this on save)

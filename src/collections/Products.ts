@@ -222,22 +222,19 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      name: 'sizeTerms',
-      label: 'Passo 2 — Termos de Tamanho',
-      type: 'array',
+      name: 'sizes',
+      label: 'Passo 2 — Tamanhos disponíveis',
+      type: 'relationship',
+      relationTo: 'sizes',
+      hasMany: true,
       admin: {
-        description: 'Define os tamanhos disponíveis.',
+        description:
+          'Escolhe os tamanhos deste produto a partir da biblioteca global. Gere a biblioteca em "Tamanhos" no menu lateral.',
         condition: (data) => Boolean(data?.enableSizes),
-      },
-      fields: [
-        {
-          name: 'value',
-          label: 'Tamanho',
-          type: 'text',
-          required: true,
-          admin: { description: 'Ex: 17, 18, 19, S, M, L' },
+        components: {
+          Field: './src/components/admin/ProductSizesField#ProductSizesField',
         },
-      ],
+      },
     },
     // ══════════════════════════════════════════
     // PASSO 3 — Variantes (combinações)

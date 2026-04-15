@@ -7,6 +7,7 @@ import { Media } from './src/collections/Media'
 import { Categories } from './src/collections/Categories'
 import { Products } from './src/collections/Products'
 import { Colors } from './src/collections/Colors'
+import { Sizes } from './src/collections/Sizes'
 import { Users } from './src/collections/Users'
 import { Pages } from './src/collections/Pages'
 import { SiteSettings } from './src/globals/SiteSettings'
@@ -25,7 +26,7 @@ export default buildConfig({
     push: false,
   }),
   editor: lexicalEditor(),
-  collections: [Media, Categories, Colors, Products, Users, Pages],
+  collections: [Media, Categories, Colors, Sizes, Products, Users, Pages],
   globals: [SiteSettings, HomeSettings, FooterSettings],
   sharp,
   i18n: {

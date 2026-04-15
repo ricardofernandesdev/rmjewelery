@@ -135,19 +135,31 @@ export default async function ProductDetailPage({ params }: PageProps) {
       return entry
     })
 
-  const sizeTerms = ((product as any).sizeTerms || []).map((s: any) => ({
-    value: s.value || '',
-  }))
+  // Tamanhos vêm da relação global (depth 2). Se a depth não os populou,
+  // ignoramos os ids puros — o select já não renderiza nada útil.
+  const rawSizes = ((product as any).sizes || []) as any[]
+  const sizeById = new Map<string, { value: string }>()
+  const sizeTerms = rawSizes
+    .filter((s) => s && typeof s === 'object')
+    .map((s) => {
+      const entry = { value: s.name || '' }
+      sizeById.set(String(s.id), entry)
+      return entry
+    })
 
   // Passo 3 — Variantes
   // variant.color agora guarda o ID da cor (string numérico) em vez do nome,
   // mas o componente VariantSelector continua a comparar pelo nome. Resolvemos
   // o ID para o nome correspondente aqui antes de passar aos componentes.
   const variants = ((product as any).variants || []).map((v: any) => {
-    const resolved = colorById.get(String(v.color))
+    const resolvedColor = colorById.get(String(v.color))
+    const resolvedSize = sizeById.get(String(v.size))
     return {
-      color: resolved?.name || '',
-      size: v.size || '',
+      color: resolvedColor?.name || '',
+      // variant.size now stores the size id (string). Resolve it to the
+      // size name; fall back to the raw value for legacy rows that still
+      // store the literal label.
+      size: resolvedSize?.value || (v.size && !/^\d+$/.test(String(v.size)) ? v.size : ''),
       price: v.price ?? null,
       availability: v.availability || 'in_stock',
       images: Array.isArray(v.images)

@@ -356,6 +356,8 @@ export const CollectionListClient: React.FC<Props> = ({
                       >
                         {doc[col.key]}
                       </a>
+                    ) : col.key === 'autoSelect' ? (
+                      <span className="media-list__alt">{doc[col.key] ? '✓' : '—'}</span>
                     ) : (
                       <span className="media-list__alt">{doc[col.key] || '—'}</span>
                     )}
