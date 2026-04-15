@@ -165,8 +165,21 @@ export const BulkImport: React.FC = () => {
     setRunning(false)
   }
 
+  const total = results.length
   const doneCount = results.filter((r) => r.status === 'done').length
   const errorCount = results.filter((r) => r.status === 'error').length
+  const finishedCount = doneCount + errorCount
+  const overallPct = total > 0 ? Math.round((finishedCount / total) * 100) : 0
+  const imageProgress = (r: ImportStatus) => {
+    if (r.status === 'scraping') return 10
+    if (r.status === 'uploading') {
+      const tot = r.imagesTotal || 1
+      return 15 + Math.round(((r.imagesDone || 0) / tot) * 70)
+    }
+    if (r.status === 'creating') return 92
+    if (r.status === 'done') return 100
+    return 0
+  }
 
   if (!open) {
     return (
@@ -193,142 +206,287 @@ export const BulkImport: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        marginBottom: '24px',
-        padding: '20px',
-        border: '1px solid var(--theme-elevation-200)',
-        borderRadius: '8px',
-        background: 'var(--theme-elevation-0)',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <label style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--theme-text)' }}>
-          Importar Vários Produtos
-        </label>
-        <button type="button" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-elevation-500)', fontSize: '18px' }}>
-          ✕
-        </button>
-      </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="media-list__btn"
+        style={{ fontSize: '11px', letterSpacing: '1px' }}
+      >
+        IMPORTAR VÁRIOS
+      </button>
 
-      <p style={{ fontSize: '12px', color: 'var(--theme-elevation-400)', marginBottom: '12px' }}>
-        Cola os URLs da Shebiju (um por linha). Cada produto é importado e salvo automaticamente.
-      </p>
-
-      <textarea
-        value={urls}
-        onChange={(e) => setUrls(e.target.value)}
-        placeholder={'https://www.shebiju.pt/pt/produto-1\nhttps://www.shebiju.pt/pt/produto-2\nhttps://www.shebiju.pt/pt/produto-3'}
-        disabled={running}
-        rows={5}
-        style={{ ...inputStyle, resize: 'vertical', marginBottom: '10px', fontFamily: 'monospace' }}
-      />
-
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-        <select
-          value={categoryId || ''}
-          onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
-          disabled={running}
-          style={{ ...inputStyle, width: 'auto', minWidth: '180px' }}
-        >
-          <option value="">Categoria...</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-        <button
-          type="button"
-          onClick={handleBulkImport}
-          disabled={running || !categoryId || !urls.trim()}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(2px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 20,
+        }}
+        onClick={(e) => { if (!running && e.target === e.currentTarget) setOpen(false) }}
+      >
+        <div
           style={{
-            padding: '10px 24px',
-            fontSize: '13px',
-            fontWeight: 600,
-            letterSpacing: '0.5px',
-            textTransform: 'uppercase',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: running ? 'wait' : 'pointer',
-            background: running ? 'var(--theme-elevation-200)' : 'var(--theme-text)',
-            color: running ? 'var(--theme-elevation-500)' : 'var(--theme-bg)',
-            whiteSpace: 'nowrap',
+            background: 'var(--theme-bg, #151517)',
+            color: 'var(--theme-text)',
+            border: '1px solid var(--theme-elevation-200)',
+            borderRadius: 8,
+            width: '100%',
+            maxWidth: 760,
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+            padding: 22,
           }}
         >
-          {running ? 'A importar...' : 'Importar Todos'}
-        </button>
-      </div>
-
-      {/* Progress */}
-      {results.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {!running && results.length > 0 && (
-            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--theme-text)', marginBottom: '4px' }}>
-              {doneCount} importado(s){errorCount > 0 ? `, ${errorCount} com erro` : ''}
-            </p>
-          )}
-          {results.map((r, i) => (
-            <div
-              key={i}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: 0, fontSize: 16, textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Importar vários produtos
+            </h2>
+            <button
+              type="button"
+              onClick={() => !running && setOpen(false)}
+              disabled={running}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                background: r.status === 'done'
-                  ? 'var(--theme-success-100, rgba(34,197,94,0.1))'
-                  : r.status === 'error'
-                    ? 'var(--theme-error-100, rgba(239,68,68,0.1))'
-                    : 'var(--theme-elevation-50)',
+                background: 'none',
+                border: 'none',
+                cursor: running ? 'not-allowed' : 'pointer',
+                color: 'var(--theme-elevation-500)',
+                fontSize: 20,
+                opacity: running ? 0.3 : 1,
               }}
             >
-              {/* Status indicator */}
-              {r.status === 'pending' && <span style={{ color: 'var(--theme-elevation-400)' }}>○</span>}
-              {(r.status === 'scraping' || r.status === 'uploading' || r.status === 'creating') && (
-                <span style={{ width: 14, height: 14, border: '2px solid var(--theme-elevation-200)', borderTopColor: 'var(--theme-text)', borderRadius: '50%', animation: 'spin 0.6s linear infinite', display: 'inline-block', flexShrink: 0 }} />
-              )}
-              {r.status === 'done' && <span style={{ color: 'var(--theme-success-500, #22c55e)' }}>✓</span>}
-              {r.status === 'error' && <span style={{ color: 'var(--theme-error-500, #ef4444)' }}>✗</span>}
+              ✕
+            </button>
+          </div>
 
-              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {r.name || r.url.replace('https://www.shebiju.pt/pt/', '')}
-              </span>
+          {/* Setup (hidden once import is running or results are shown) */}
+          {results.length === 0 && (
+            <>
+              <p style={{ fontSize: 12, color: 'var(--theme-elevation-400)', margin: 0 }}>
+                Cola os URLs da Shebiju (um por linha). Cada produto é importado e salvo automaticamente.
+              </p>
+              <textarea
+                value={urls}
+                onChange={(e) => setUrls(e.target.value)}
+                placeholder={'https://www.shebiju.pt/pt/produto-1\nhttps://www.shebiju.pt/pt/produto-2'}
+                rows={6}
+                style={{ ...inputStyle, resize: 'vertical', fontFamily: 'monospace' }}
+              />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <select
+                  value={categoryId || ''}
+                  onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : null)}
+                  style={{ ...inputStyle, width: 'auto', minWidth: 200 }}
+                >
+                  <option value="">Categoria...</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleBulkImport}
+                  disabled={!categoryId || !urls.trim()}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: 'pointer',
+                    background: 'var(--theme-text)',
+                    color: 'var(--theme-bg)',
+                    flex: 1,
+                  }}
+                >
+                  Importar Todos
+                </button>
+              </div>
+            </>
+          )}
 
-              <span style={{ color: 'var(--theme-elevation-400)', flexShrink: 0 }}>
-                {r.status === 'scraping' && 'A extrair...'}
-                {r.status === 'uploading' && `Imagem ${r.imagesDone || 0}/${r.imagesTotal || '?'}`}
-                {r.status === 'creating' && 'A guardar...'}
-                {r.status === 'done' && 'OK'}
-                {r.status === 'error' && r.error}
-              </span>
+          {/* Overall progress bar */}
+          {results.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 12 }}>
+                <span style={{ fontWeight: 600, letterSpacing: 0.5 }}>
+                  {running ? 'A importar…' : 'Concluído'}  ·  {finishedCount} / {total}
+                  {errorCount > 0 && (
+                    <span style={{ color: 'var(--theme-error-500, #ef4444)' }}>
+                      {'  '}({errorCount} erro{errorCount === 1 ? '' : 's'})
+                    </span>
+                  )}
+                </span>
+                <span style={{ color: 'var(--theme-elevation-500)' }}>{overallPct}%</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: 'var(--theme-elevation-100)', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    width: `${overallPct}%`,
+                    height: '100%',
+                    background: errorCount > 0 && !running
+                      ? 'var(--theme-warning-500, #f59e0b)'
+                      : 'var(--theme-success-500, #22c55e)',
+                    transition: 'width 0.3s ease',
+                  }}
+                />
+              </div>
             </div>
-          ))}
+          )}
+
+          {/* Per-product list */}
+          {results.length > 0 && (
+            <div
+              style={{
+                flex: 1,
+                minHeight: 240,
+                maxHeight: '55vh',
+                overflowY: 'auto',
+                border: '1px solid var(--theme-elevation-200)',
+                borderRadius: 6,
+                background: 'var(--theme-elevation-0)',
+              }}
+            >
+              {results.map((r, i) => {
+                const rowPct = imageProgress(r)
+                const indexLabel = `${String(i + 1).padStart(String(total).length, '0')}/${total}`
+                const running = r.status !== 'pending' && r.status !== 'done' && r.status !== 'error'
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      position: 'relative',
+                      padding: '10px 14px',
+                      borderBottom: '1px solid var(--theme-elevation-100)',
+                      fontSize: 12,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span
+                        style={{
+                          fontFamily: 'monospace',
+                          fontSize: 11,
+                          color: 'var(--theme-elevation-500)',
+                          minWidth: String(total).length * 2 + 2 + 'ch',
+                          flexShrink: 0,
+                        }}
+                      >
+                        #{indexLabel}
+                      </span>
+                      {r.status === 'pending' && (
+                        <span style={{ color: 'var(--theme-elevation-400)' }}>○</span>
+                      )}
+                      {running && (
+                        <span
+                          style={{
+                            width: 12,
+                            height: 12,
+                            border: '2px solid var(--theme-elevation-200)',
+                            borderTopColor: 'var(--theme-text)',
+                            borderRadius: '50%',
+                            animation: 'spin 0.6s linear infinite',
+                            display: 'inline-block',
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
+                      {r.status === 'done' && <span style={{ color: 'var(--theme-success-500, #22c55e)' }}>✓</span>}
+                      {r.status === 'error' && <span style={{ color: 'var(--theme-error-500, #ef4444)' }}>✗</span>}
+                      <span
+                        style={{
+                          flex: 1,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {r.name || r.url.replace('https://www.shebiju.pt/pt/', '')}
+                      </span>
+                      <span style={{ color: 'var(--theme-elevation-400)', flexShrink: 0 }}>
+                        {r.status === 'scraping' && 'A extrair…'}
+                        {r.status === 'uploading' && `Img ${r.imagesDone || 0}/${r.imagesTotal || '?'}`}
+                        {r.status === 'creating' && 'A guardar…'}
+                        {r.status === 'done' && 'OK'}
+                        {r.status === 'error' && (r.error || 'Erro')}
+                      </span>
+                    </div>
+                    {running && (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          height: 3,
+                          borderRadius: 2,
+                          background: 'var(--theme-elevation-100)',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: `${rowPct}%`,
+                            height: '100%',
+                            background: 'var(--theme-text)',
+                            opacity: 0.6,
+                            transition: 'width 0.3s ease',
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Footer actions */}
+          {results.length > 0 && !running && (
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => { setResults([]); setUrls('') }}
+                style={{
+                  padding: '10px 18px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  color: 'var(--theme-text)',
+                }}
+              >
+                Nova importação
+              </button>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                style={{
+                  padding: '10px 18px',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  background: 'var(--theme-text)',
+                  color: 'var(--theme-bg)',
+                }}
+              >
+                Ver produtos
+              </button>
+            </div>
+          )}
+
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
-      )}
-
-      {!running && doneCount > 0 && (
-        <button
-          type="button"
-          onClick={() => window.location.reload()}
-          style={{
-            marginTop: '12px',
-            padding: '10px 20px',
-            fontSize: '13px',
-            fontWeight: 600,
-            border: '1px solid var(--theme-elevation-200)',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            background: 'transparent',
-            color: 'var(--theme-text)',
-            width: '100%',
-          }}
-        >
-          Atualizar Lista
-        </button>
-      )}
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+      </div>
+    </>
   )
 }
