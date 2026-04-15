@@ -16,7 +16,7 @@ export const BulkImport: React.FC = () => {
   const [urls, setUrls] = useState('')
   const [categoryId, setCategoryId] = useState<number | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
-  const [allColorIds, setAllColorIds] = useState<number[]>([])
+  const [defaultColorIds, setDefaultColorIds] = useState<number[]>([])
   const [running, setRunning] = useState(false)
   const [results, setResults] = useState<ImportStatus[]>([])
 
@@ -27,9 +27,11 @@ export const BulkImport: React.FC = () => {
       .then((d) => { if (d?.docs) setCategories(d.docs.map((c: any) => ({ id: c.id, name: c.name }))) })
       .catch(() => {})
 
-    fetch('/api/colors?limit=100&depth=0&sort=name', { credentials: 'include' })
+    fetch('/api/colors?where[autoSelect][equals]=true&limit=100&depth=0&sort=name', {
+      credentials: 'include',
+    })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.docs) setAllColorIds(d.docs.map((c: any) => c.id)) })
+      .then((d) => { if (d?.docs) setDefaultColorIds(d.docs.map((c: any) => c.id)) })
       .catch(() => {})
   }, [open])
 
@@ -107,14 +109,14 @@ export const BulkImport: React.FC = () => {
         price: scrapeData.price || 0,
         availability: 'in_stock',
         category: categoryId,
-        enableColors: allColorIds.length > 0,
+        enableColors: defaultColorIds.length > 0,
         ...(enhancedDescription ? { description: enhancedDescription } : {}),
       }
 
-      // Add colors + variants
-      if (allColorIds.length > 0) {
-        productData.colors = allColorIds
-        productData.variants = allColorIds.map((colorId: number) => ({
+      // Add only the colors marked as auto-select + a variant per each
+      if (defaultColorIds.length > 0) {
+        productData.colors = defaultColorIds
+        productData.variants = defaultColorIds.map((colorId: number) => ({
           color: String(colorId),
           availability: 'in_stock',
         }))

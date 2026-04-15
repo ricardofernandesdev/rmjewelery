@@ -220,6 +220,10 @@ export interface Color {
    */
   name: string;
   hex: string;
+  /**
+   * Se ativo, esta cor é pré-selecionada em novos produtos e os importadores criam automaticamente uma variante para ela.
+   */
+  autoSelect?: boolean | null;
   slug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -527,6 +531,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface ColorsSelect<T extends boolean = true> {
   name?: T;
   hex?: T;
+  autoSelect?: T;
   slug?: T;
   updatedAt?: T;
   createdAt?: T;

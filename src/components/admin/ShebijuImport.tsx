@@ -179,16 +179,20 @@ export const ShebijuImport: React.FC = () => {
       categoryField.setValue(categoryId)
       if (mediaIds.length > 0) imagesField.setValue(mediaIds)
 
-      // Select ALL colors from the library and create one variant per color
+      // Pre-select only colors flagged with autoSelect=true and create one
+      // variant per each. Other colors are added manually after import.
       try {
-        const colorsRes = await fetch('/api/colors?limit=100&depth=0&sort=name', { credentials: 'include' })
+        const colorsRes = await fetch(
+          '/api/colors?where[autoSelect][equals]=true&limit=100&depth=0&sort=name',
+          { credentials: 'include' },
+        )
         const colorsData = await colorsRes.json()
         if (colorsData?.docs?.length > 0) {
-          const allColorIds = colorsData.docs.map((d: any) => d.id as number)
+          const defaultColorIds = colorsData.docs.map((d: any) => d.id as number)
           enableColorsField.setValue(true)
-          colorsField.setValue(allColorIds)
+          colorsField.setValue(defaultColorIds)
           variantsField.setValue(
-            allColorIds.map((colorId: number) => ({
+            defaultColorIds.map((colorId: number) => ({
               color: String(colorId),
               size: '',
               price: null,

@@ -59,6 +59,16 @@ export const Colors: CollectionConfig = {
       },
     },
     {
+      name: 'autoSelect',
+      label: 'Seleção automática',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description:
+          'Se ativo, esta cor é pré-selecionada em novos produtos e os importadores criam automaticamente uma variante para ela.',
+      },
+    },
+    {
       name: 'slug',
       label: 'Slug',
       type: 'text',
