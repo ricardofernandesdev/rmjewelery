@@ -66,6 +66,10 @@ export default buildConfig({
           Component: './src/components/admin/MediaBulkUpload#MediaBulkUpload',
           path: '/bulk-upload',
         },
+        usage: {
+          Component: './src/components/admin/UsagePanel#UsagePanel',
+          path: '/usage',
+        },
       },
     },
   },
