@@ -85,29 +85,11 @@ export const BulkImport: React.FC = () => {
 
       if (mediaIds.length === 0) throw new Error('Nenhuma imagem carregada')
 
-      // 3. Enhance name + description with Gemini (single request, ≤10s)
-      let finalName = productName
-      let enhancedDescription: any = null
-      try {
-        const enhanceRes = await fetch('/api/import-shebiju/enhance', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: productName,
-            imageUrl: scrapeData.imageUrls[0],
-          }),
-        })
-        const enhanceData = await enhanceRes.json()
-        if (enhanceRes.ok) {
-          if (enhanceData.name) finalName = enhanceData.name
-          if (enhanceData.description) enhancedDescription = enhanceData.description
-        }
-      } catch {
-        // Keep original name; server hook will generate template description
-      }
+      // No AI enhancement — keep the raw Shebiju name. Server-side hook
+      // still fills the description with the category template on save.
+      const finalName = productName
 
-      // 4. Create product via Payload REST API
+      // 3. Create product via Payload REST API
       updateResult(index, { status: 'creating', name: finalName })
 
       const productData: any = {
@@ -119,7 +101,6 @@ export const BulkImport: React.FC = () => {
         category: categoryId,
         enableColors: defaultColorIds.length > 0,
         enableSizes: defaultSizeIds.length > 0,
-        ...(enhancedDescription ? { description: enhancedDescription } : {}),
       }
 
       // Pre-select auto-flagged colors/sizes. Each variant covers ONE
@@ -175,11 +156,9 @@ export const BulkImport: React.FC = () => {
 
     for (let i = 0; i < urlList.length; i++) {
       await importProduct(urlList[i], i)
-      // Gemini free tier is 5 RPM — wait 13s before next product so the
-      // enhance step doesn't hit the per-minute rate limit. No delay
-      // after the last one.
+      // Small delay to be kind to Shebiju (avoid triggering their WAF).
       if (i < urlList.length - 1) {
-        await new Promise((r) => setTimeout(r, 13000))
+        await new Promise((r) => setTimeout(r, 1500))
       }
     }
 

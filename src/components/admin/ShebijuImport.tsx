@@ -85,7 +85,6 @@ export const ShebijuImport: React.FC = () => {
   const [descPreview, setDescPreview] = useState<string | null>(null)
   const enableColorsField = useField<boolean>({ path: 'enableColors' })
   const enableSizesField = useField<boolean>({ path: 'enableSizes' })
-  const descriptionField = useField<any>({ path: 'description' })
   const colorsField = useField<number[]>({ path: 'colors' })
   const sizesField = useField<number[]>({ path: 'sizes' })
   const variantsField = useField<any[]>({ path: 'variants' })
@@ -150,30 +149,9 @@ export const ShebijuImport: React.FC = () => {
         }
       }
 
-      // ── Step 3: Enhance name + description via Gemini (single request) ──
-      let finalName = result.name || result.ref || ''
-      let enhancedDescription: any = null
-      try {
-        setStep('3/3 — A gerar nome e descrição com IA...')
-        const enhanceRes = await fetch('/api/import-shebiju/enhance', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: finalName,
-            imageUrl: result.imageUrls[0],
-          }),
-        })
-        const enhanceData = await enhanceRes.json()
-        if (enhanceRes.ok) {
-          if (enhanceData.name) finalName = enhanceData.name
-          if (enhanceData.description) enhancedDescription = enhanceData.description
-        }
-      } catch {
-        // Keep original name / let server hook generate fallback description
-      }
-
-      // ── Fill form fields ──
+      // No AI enhancement — use the raw Shebiju name. The server-side
+      // hook still fills the description with the category template.
+      const finalName = result.name || result.ref || ''
       const productName = finalName
       nameField.setValue(productName)
       slugField.setValue(result.ref || '')
@@ -235,13 +213,7 @@ export const ShebijuImport: React.FC = () => {
       } catch {
         // Skip if either fetch fails
       }
-      // If Gemini gave us a description, set it; otherwise fall back to the
-      // category template (server hook also handles this on save)
-      if (enhancedDescription) {
-        descriptionField.setValue(enhancedDescription)
-      }
-
-      // Show description preview (from AI if available, else template)
+      // Show description preview from the category template
       const selectedCat = categories.find((c) => c.id === categoryId)
       const catKey = detectCat(productName, selectedCat?.name || '')
       if (catKey && descTemplates[catKey]) {
