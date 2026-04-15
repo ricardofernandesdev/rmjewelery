@@ -13,7 +13,6 @@ const DiamondLoaderInner: React.FC = () => {
   const searchParams = useSearchParams()
   const [visible, setVisible] = useState(false)
   const hideTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const showTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Intercept internal link clicks
   useEffect(() => {
@@ -44,20 +43,20 @@ const DiamondLoaderInner: React.FC = () => {
         return
       }
 
-      // Delay showing slightly so instant navigations don't flash
-      if (showTimerRef.current) clearTimeout(showTimerRef.current)
-      showTimerRef.current = setTimeout(() => setVisible(true), 150)
+      // Show immediately — prefetched routes complete faster than any delay,
+      // so a setTimeout here would be cancelled by the pathname-change effect
+      // below before it fired and the loader would never appear.
+      setVisible(true)
     }
 
     document.addEventListener('click', handleClick)
     return () => document.removeEventListener('click', handleClick)
   }, [])
 
-  // Hide on navigation complete
+  // Hide on navigation complete (minimum display time to avoid flicker)
   useEffect(() => {
-    if (showTimerRef.current) clearTimeout(showTimerRef.current)
     if (visible) {
-      hideTimerRef.current = setTimeout(() => setVisible(false), 200)
+      hideTimerRef.current = setTimeout(() => setVisible(false), 250)
     }
     return () => {
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
