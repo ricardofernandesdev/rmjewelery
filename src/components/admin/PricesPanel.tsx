@@ -58,7 +58,7 @@ export const PricesPanel: React.FC = () => {
 
   // Fetch categories once
   useEffect(() => {
-    fetch('/api/payload/categories?limit=100&depth=0', { credentials: 'include' })
+    fetch('/api/categories?limit=100&depth=0', { credentials: 'include' })
       .then((r) => r.json())
       .then((d: { docs?: Category[] }) => setCategories(d.docs || []))
       .catch(() => {})
