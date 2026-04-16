@@ -34,11 +34,19 @@
     "tailwindcss": "4.2.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.4.11",
     "@types/node": "22.19.15",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "sass": "1.98.0",
     "typescript": "5.9.3",
     "vitest": "4.1.0"
-  }
+  },
+  "browserslist": [
+    "chrome >= 92",
+    "firefox >= 90",
+    "safari >= 15.4",
+    "edge >= 92",
+    "not dead"
+  ]
 }
