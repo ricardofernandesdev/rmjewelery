@@ -25,14 +25,33 @@ export async function getAllProducts(limit = 50) {
   })
 }
 
+export type ProductSort = 'sortOrder' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'
+export type ProductAvailability = 'all' | 'in_stock' | 'out_of_stock'
+
+const SORT_MAP: Record<ProductSort, string> = {
+  sortOrder: 'sortOrder',
+  price_asc: 'price',
+  price_desc: '-price',
+  name_asc: 'name',
+  name_desc: '-name',
+}
+
 export async function getProductsPaginated({
   page = 1,
-  limit = 24,
+  limit = 20,
   categorySlug,
+  availability = 'all',
+  minPrice,
+  maxPrice,
+  sort = 'sortOrder',
 }: {
   page?: number
   limit?: number
   categorySlug?: string
+  availability?: ProductAvailability
+  minPrice?: number
+  maxPrice?: number
+  sort?: ProductSort
 } = {}) {
   const payload = await getPayload()
 
@@ -55,14 +74,51 @@ export async function getProductsPaginated({
     categoryId = category.id
   }
 
+  const where: Record<string, unknown> = {}
+  if (categoryId) where.category = { equals: categoryId }
+  if (availability !== 'all') where.availability = { equals: availability }
+  if (typeof minPrice === 'number' || typeof maxPrice === 'number') {
+    where.price = {
+      ...(typeof minPrice === 'number' ? { greater_than_equal: minPrice } : {}),
+      ...(typeof maxPrice === 'number' ? { less_than_equal: maxPrice } : {}),
+    }
+  }
+
   return payload.find({
     collection: 'products',
-    where: categoryId ? { category: { equals: categoryId } } : undefined,
+    where: Object.keys(where).length ? (where as never) : undefined,
     limit,
     page,
-    sort: 'sortOrder',
+    sort: SORT_MAP[sort],
     depth: 1,
   })
+}
+
+export async function getCategoryPriceBounds(categorySlug: string): Promise<{ min: number; max: number }> {
+  const payload = await getPayload()
+  const category = await getCategoryBySlug(categorySlug)
+  if (!category) return { min: 0, max: 0 }
+
+  const [cheapest, priciest] = await Promise.all([
+    payload.find({
+      collection: 'products',
+      where: { category: { equals: category.id } },
+      limit: 1,
+      sort: 'price',
+      depth: 0,
+    }),
+    payload.find({
+      collection: 'products',
+      where: { category: { equals: category.id } },
+      limit: 1,
+      sort: '-price',
+      depth: 0,
+    }),
+  ])
+
+  const min = (cheapest.docs[0] as { price?: number } | undefined)?.price ?? 0
+  const max = (priciest.docs[0] as { price?: number } | undefined)?.price ?? 0
+  return { min, max }
 }
 
 export async function getProductBySlug(slug: string) {

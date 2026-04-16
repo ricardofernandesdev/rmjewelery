@@ -1,100 +1,143 @@
 'use client'
-import React, { useState, useMemo } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { ProductCard } from './ProductCard'
-import { Pagination } from '../ui/Pagination'
 import type { Product } from '../../../payload-types'
 
-type SortOption = 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'
+type SortOption = 'sortOrder' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc'
 type AvailFilter = 'all' | 'in_stock' | 'out_of_stock'
 type GridCols = 4 | 5
 
 type Props = {
-  products: Product[]
+  initialProducts: Product[]
+  initialTotalDocs: number
+  initialHasMore: boolean
   categoryName: string
   categorySlug: string
-  currentPage: number
-  totalPages: number
+  pageSize: number
+  priceMin: number
+  priceMax: number
+}
+
+type FetchResult = {
+  docs: Product[]
   totalDocs: number
-  perPage: number
-  perPageOptions: number[]
+  hasNextPage: boolean
 }
 
 export const CategoryPageClient: React.FC<Props> = ({
-  products,
+  initialProducts,
+  initialTotalDocs,
+  initialHasMore,
   categoryName,
   categorySlug,
-  currentPage,
-  totalPages,
-  totalDocs,
-  perPage,
-  perPageOptions,
+  pageSize,
+  priceMin,
+  priceMax,
 }) => {
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [totalDocs, setTotalDocs] = useState(initialTotalDocs)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+
   const [availability, setAvailability] = useState<AvailFilter>('all')
   const [availOpen, setAvailOpen] = useState(false)
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0])
+  const [priceRange, setPriceRange] = useState<[number, number]>([priceMin, priceMax])
+  const [priceDraft, setPriceDraft] = useState<[number, number]>([priceMin, priceMax])
   const [priceOpen, setPriceOpen] = useState(false)
-  const [priceInited, setPriceInited] = useState(false)
-  const [sort, setSort] = useState<SortOption>('name_asc')
+  const [sort, setSort] = useState<SortOption>('sortOrder')
   const [sortOpen, setSortOpen] = useState(false)
   const [gridCols, setGridCols] = useState<GridCols>(5)
 
-  // Compute min/max price from products
-  const { minPrice, maxPrice } = useMemo(() => {
-    const prices = products.map((p) => (p as any).price || 0).filter((p: number) => p > 0)
-    if (prices.length === 0) return { minPrice: 0, maxPrice: 0 }
-    return { minPrice: Math.min(...prices), maxPrice: Math.max(...prices) }
-  }, [products])
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const requestIdRef = useRef(0)
 
-  // Init price range on first open
-  const handlePriceOpen = () => {
-    if (!priceInited) {
-      setPriceRange([minPrice, maxPrice])
-      setPriceInited(true)
-    }
-    setPriceOpen(!priceOpen)
-    setAvailOpen(false)
-    setSortOpen(false)
-  }
-
-  // Filter and sort
-  const filtered = useMemo(() => {
-    let result = [...products]
-
-    // Availability filter
-    if (availability !== 'all') {
-      result = result.filter((p) => (p as any).availability === availability)
-    }
-
-    // Price filter
-    if (priceInited) {
-      result = result.filter((p) => {
-        const price = (p as any).price || 0
-        return price >= priceRange[0] && price <= priceRange[1]
+  const buildQuery = useCallback(
+    (nextPage: number) => {
+      const qs = new URLSearchParams({
+        slug: categorySlug,
+        page: String(nextPage),
+        limit: String(pageSize),
+        sort,
+        availability,
       })
+      if (priceRange[0] > priceMin) qs.set('minPrice', String(priceRange[0]))
+      if (priceRange[1] < priceMax) qs.set('maxPrice', String(priceRange[1]))
+      return qs.toString()
+    },
+    [categorySlug, pageSize, sort, availability, priceRange, priceMin, priceMax],
+  )
+
+  // Refetch from page 1 whenever filters or sort change
+  useEffect(() => {
+    const filtersDirty =
+      availability !== 'all' ||
+      sort !== 'sortOrder' ||
+      priceRange[0] > priceMin ||
+      priceRange[1] < priceMax
+    if (!filtersDirty) {
+      // Reset to initial server-rendered state
+      setProducts(initialProducts)
+      setTotalDocs(initialTotalDocs)
+      setHasMore(initialHasMore)
+      setPage(1)
+      return
     }
+    const reqId = ++requestIdRef.current
+    setLoading(true)
+    fetch(`/api/products/by-category?${buildQuery(1)}`)
+      .then((r) => r.json() as Promise<FetchResult>)
+      .then((data) => {
+        if (requestIdRef.current !== reqId) return
+        setProducts(data.docs)
+        setTotalDocs(data.totalDocs)
+        setHasMore(data.hasNextPage)
+        setPage(1)
+      })
+      .catch(() => {
+        if (requestIdRef.current !== reqId) return
+        setProducts([])
+        setHasMore(false)
+      })
+      .finally(() => {
+        if (requestIdRef.current === reqId) setLoading(false)
+      })
+  }, [availability, sort, priceRange, priceMin, priceMax, buildQuery, initialProducts, initialTotalDocs, initialHasMore])
 
-    // Sort
-    result.sort((a, b) => {
-      const priceA = (a as any).price || 0
-      const priceB = (b as any).price || 0
-      switch (sort) {
-        case 'price_asc':
-          return priceA - priceB
-        case 'price_desc':
-          return priceB - priceA
-        case 'name_asc':
-          return a.name.localeCompare(b.name, 'pt')
-        case 'name_desc':
-          return b.name.localeCompare(a.name, 'pt')
-        default:
-          return 0
-      }
-    })
+  const loadMore = useCallback(() => {
+    if (loading || !hasMore) return
+    const nextPage = page + 1
+    const reqId = ++requestIdRef.current
+    setLoading(true)
+    fetch(`/api/products/by-category?${buildQuery(nextPage)}`)
+      .then((r) => r.json() as Promise<FetchResult>)
+      .then((data) => {
+        if (requestIdRef.current !== reqId) return
+        setProducts((prev) => [...prev, ...data.docs])
+        setHasMore(data.hasNextPage)
+        setPage(nextPage)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (requestIdRef.current === reqId) setLoading(false)
+      })
+  }, [loading, hasMore, page, buildQuery])
 
-    return result
-  }, [products, availability, priceRange, priceInited, sort])
+  useEffect(() => {
+    const node = sentinelRef.current
+    if (!node) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore()
+      },
+      { rootMargin: '400px' },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [loadMore])
 
   const sortLabels: Record<SortOption, string> = {
+    sortOrder: 'Recomendado',
     price_asc: 'Preço: menor → maior',
     price_desc: 'Preço: maior → menor',
     name_asc: 'Nome: A → Z',
@@ -110,6 +153,18 @@ export const CategoryPageClient: React.FC<Props> = ({
   const gridClass = gridCols === 5
     ? 'grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
     : 'grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4'
+
+  const priceFilterActive = priceRange[0] > priceMin || priceRange[1] < priceMax
+
+  const applyPrice = () => {
+    setPriceRange(priceDraft)
+    setPriceOpen(false)
+  }
+
+  const clearPrice = () => {
+    setPriceDraft([priceMin, priceMax])
+    setPriceRange([priceMin, priceMax])
+  }
 
   return (
     <>
@@ -151,27 +206,32 @@ export const CategoryPageClient: React.FC<Props> = ({
           <div className="relative">
             <button
               type="button"
-              onClick={handlePriceOpen}
+              onClick={() => {
+                setPriceOpen(!priceOpen)
+                setAvailOpen(false)
+                setSortOpen(false)
+                if (!priceOpen) setPriceDraft(priceRange)
+              }}
               className="hover:text-brand-dark transition-colors flex items-center gap-1"
             >
               Preço
-              {priceInited && (priceRange[0] > minPrice || priceRange[1] < maxPrice) && (
+              {priceFilterActive && (
                 <span className="text-[10px] bg-brand-dark text-white px-1.5 rounded-full ml-1">1</span>
               )}
               <span className="text-[10px]">▾</span>
             </button>
             {priceOpen && (
-              <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 shadow-lg rounded-md p-4 z-20 min-w-[240px]">
+              <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 shadow-lg rounded-md p-4 z-20 min-w-[260px]">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex-1">
                     <label className="text-[10px] text-brand-gray uppercase tracking-wider block mb-1">Min</label>
                     <input
                       type="number"
-                      min={minPrice}
-                      max={priceRange[1]}
+                      min={priceMin}
+                      max={priceDraft[1]}
                       step={0.5}
-                      value={priceRange[0]}
-                      onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                      value={priceDraft[0]}
+                      onChange={(e) => setPriceDraft([Number(e.target.value), priceDraft[1]])}
                       className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
                     />
                   </div>
@@ -180,25 +240,34 @@ export const CategoryPageClient: React.FC<Props> = ({
                     <label className="text-[10px] text-brand-gray uppercase tracking-wider block mb-1">Max</label>
                     <input
                       type="number"
-                      min={priceRange[0]}
-                      max={maxPrice}
+                      min={priceDraft[0]}
+                      max={priceMax}
                       step={0.5}
-                      value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                      value={priceDraft[1]}
+                      onChange={(e) => setPriceDraft([priceDraft[0], Number(e.target.value)])}
                       className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
                     />
                   </div>
                 </div>
-                <div className="text-[10px] text-brand-gray">
-                  {minPrice.toFixed(2)}€ — {maxPrice.toFixed(2)}€
+                <div className="text-[10px] text-brand-gray mb-3">
+                  {priceMin.toFixed(2)}€ — {priceMax.toFixed(2)}€
                 </div>
-                <button
-                  type="button"
-                  onClick={() => { setPriceRange([minPrice, maxPrice]) }}
-                  className="text-[10px] text-brand-dark underline mt-2"
-                >
-                  Limpar filtro
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={applyPrice}
+                    className="text-xs bg-brand-dark text-white px-3 py-1.5 rounded hover:opacity-90"
+                  >
+                    Aplicar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearPrice}
+                    className="text-[10px] text-brand-dark underline"
+                  >
+                    Limpar filtro
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -206,24 +275,6 @@ export const CategoryPageClient: React.FC<Props> = ({
 
         <div className="flex items-center gap-4 text-sm text-brand-gray">
           <span>{totalDocs} {totalDocs === 1 ? 'item' : 'itens'}</span>
-
-          {/* Per-page selector */}
-          <label className="flex items-center gap-2">
-            <span className="hidden sm:inline">Por página</span>
-            <select
-              value={perPage}
-              onChange={(e) => {
-                const params = new URLSearchParams()
-                params.set('perPage', e.target.value)
-                window.location.href = `/categories/${categorySlug}?${params.toString()}`
-              }}
-              className="border border-gray-200 rounded px-2 py-1 text-sm bg-white"
-            >
-              {perPageOptions.map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </label>
 
           {/* Sort dropdown */}
           <div className="relative">
@@ -294,29 +345,24 @@ export const CategoryPageClient: React.FC<Props> = ({
       </div>
 
       {/* Product grid */}
-      {filtered.length === 0 ? (
+      {products.length === 0 && !loading ? (
         <p className="text-center text-brand-gray py-12">
           Nenhum produto encontrado em {categoryName}.
         </p>
       ) : (
         <div className={gridClass}>
-          {filtered.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        buildHref={(p) => {
-          const params = new URLSearchParams()
-          if (perPage !== 24) params.set('perPage', String(perPage))
-          if (p > 1) params.set('page', String(p))
-          const qs = params.toString()
-          return qs ? `/categories/${categorySlug}?${qs}` : `/categories/${categorySlug}`
-        }}
-      />
+      {/* Sentinel + status */}
+      <div ref={sentinelRef} className="h-10" />
+      <div className="text-center py-8 text-sm text-brand-gray">
+        {loading && 'A carregar...'}
+        {!loading && !hasMore && products.length > 0 && 'Não há mais produtos.'}
+      </div>
     </>
   )
 }
