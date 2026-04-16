@@ -48,9 +48,9 @@ import { NavHeader as NavHeader_8ae8526325403a278fe580bbd03af552 } from '../../.
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { Dashboard as Dashboard_b8ff39906668321a4a9072c941825bd6 } from '../../../../src/components/admin/Dashboard'
 import { AccountView as AccountView_d3145cac2e80caae4707d3170b6d2017 } from '../../../../src/components/admin/AccountView'
-import { MediaBulkUpload as MediaBulkUpload_45bbb25cca5032fd0dfcc157cfb533d5 } from '../../../../src/components/admin/MediaBulkUpload'
-import { UsagePanel as UsagePanel_fc0e5200d50e16c99386c46ed889dea9 } from '../../../../src/components/admin/UsagePanel'
-import { PricesPanel as PricesPanel_a8d2102122fbc62b0a8da3d705da855c } from '../../../../src/components/admin/PricesPanel'
+import { default as default_7b0cc51010bed36d49c927c8acc082ec } from '../../../../src/components/admin/MediaBulkUploadView'
+import { default as default_51320716a4b42b9e55fe5feac6acd0ee } from '../../../../src/components/admin/UsagePanelView'
+import { default as default_b6a4ba7b97c2cf798efc6b9f565e3ab7 } from '../../../../src/components/admin/PricesPanelView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -104,8 +104,8 @@ export const importMap = {
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "./src/components/admin/Dashboard#Dashboard": Dashboard_b8ff39906668321a4a9072c941825bd6,
   "./src/components/admin/AccountView#AccountView": AccountView_d3145cac2e80caae4707d3170b6d2017,
-  "./src/components/admin/MediaBulkUpload#MediaBulkUpload": MediaBulkUpload_45bbb25cca5032fd0dfcc157cfb533d5,
-  "./src/components/admin/UsagePanel#UsagePanel": UsagePanel_fc0e5200d50e16c99386c46ed889dea9,
-  "./src/components/admin/PricesPanel#PricesPanel": PricesPanel_a8d2102122fbc62b0a8da3d705da855c,
+  "./src/components/admin/MediaBulkUploadView#default": default_7b0cc51010bed36d49c927c8acc082ec,
+  "./src/components/admin/UsagePanelView#default": default_51320716a4b42b9e55fe5feac6acd0ee,
+  "./src/components/admin/PricesPanelView#default": default_b6a4ba7b97c2cf798efc6b9f565e3ab7,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

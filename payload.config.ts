@@ -64,15 +64,15 @@ export default buildConfig({
           Component: './src/components/admin/AccountView#AccountView',
         },
         'bulk-upload': {
-          Component: './src/components/admin/MediaBulkUpload#MediaBulkUpload',
+          Component: './src/components/admin/MediaBulkUploadView#default',
           path: '/bulk-upload',
         },
         usage: {
-          Component: './src/components/admin/UsagePanel#UsagePanel',
+          Component: './src/components/admin/UsagePanelView#default',
           path: '/usage',
         },
         prices: {
-          Component: './src/components/admin/PricesPanel#PricesPanel',
+          Component: './src/components/admin/PricesPanelView#default',
           path: '/prices',
         },
       },
