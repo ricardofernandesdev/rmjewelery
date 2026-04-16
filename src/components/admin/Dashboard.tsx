@@ -123,6 +123,12 @@ const collectionItems: CardItem[] = [
   },
 ]
 
+const usageIcon = (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4zm4 9h2v8h-2v-8z" />
+  </svg>
+)
+
 const toolItems: CardItem[] = [
   {
     slug: 'prices',
@@ -131,6 +137,14 @@ const toolItems: CardItem[] = [
     action: 'GERIR PREÇOS',
     href: '/admin/prices',
     icon: pricesIcon,
+  },
+  {
+    slug: 'usage',
+    label: 'Uso de recursos',
+    description: 'Storage em R2, contadores da base de dados e atalhos para os dashboards oficiais.',
+    action: 'VER USAGE',
+    href: '/admin/usage',
+    icon: usageIcon,
   },
 ]
 
@@ -158,18 +172,6 @@ const globalItems: CardItem[] = [
     action: 'EDITAR RODAPÉ',
     href: '/admin/globals/footer-settings',
     icon: footerIcon,
-  },
-  {
-    slug: 'usage',
-    label: 'Uso de recursos',
-    description: 'Storage em R2, contadores da base de dados e atalhos para os dashboards oficiais.',
-    action: 'VER USAGE',
-    href: '/admin/usage',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4zm4 9h2v8h-2v-8z" />
-      </svg>
-    ),
   },
 ]
 
