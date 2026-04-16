@@ -128,6 +128,14 @@ const usageIcon = (
     <path d="M3 13h2v8H3v-8zm4-6h2v14H7V7zm4 3h2v11h-2V10zm4-6h2v17h-2V4zm4 9h2v8h-2v-8z" />
   </svg>
 )
+const attributesIcon = (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h12v2H3v-2zm15-2.5L21 16l-3 1.5V14.5z" />
+    <circle cx="6" cy="6" r="1.2" />
+    <circle cx="6" cy="12" r="1.2" />
+    <circle cx="6" cy="18" r="1.2" />
+  </svg>
+)
 
 const toolItems: CardItem[] = [
   {
@@ -137,6 +145,14 @@ const toolItems: CardItem[] = [
     action: 'GERIR PREÇOS',
     href: '/admin/prices',
     icon: pricesIcon,
+  },
+  {
+    slug: 'attributes',
+    label: 'Atributos',
+    description: 'Gere cores, tamanhos e disponibilidade de variantes em massa para todos os produtos.',
+    action: 'GERIR ATRIBUTOS',
+    href: '/admin/attributes',
+    icon: attributesIcon,
   },
   {
     slug: 'usage',

@@ -51,6 +51,7 @@ import { AccountView as AccountView_d3145cac2e80caae4707d3170b6d2017 } from '../
 import { default as default_7b0cc51010bed36d49c927c8acc082ec } from '../../../../src/components/admin/MediaBulkUploadView'
 import { default as default_51320716a4b42b9e55fe5feac6acd0ee } from '../../../../src/components/admin/UsagePanelView'
 import { default as default_b6a4ba7b97c2cf798efc6b9f565e3ab7 } from '../../../../src/components/admin/PricesPanelView'
+import { default as default_8d1b6625c475f2ddf0d9a7d53c6c3776 } from '../../../../src/components/admin/AttributesPanelView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -107,5 +108,6 @@ export const importMap = {
   "./src/components/admin/MediaBulkUploadView#default": default_7b0cc51010bed36d49c927c8acc082ec,
   "./src/components/admin/UsagePanelView#default": default_51320716a4b42b9e55fe5feac6acd0ee,
   "./src/components/admin/PricesPanelView#default": default_b6a4ba7b97c2cf798efc6b9f565e3ab7,
+  "./src/components/admin/AttributesPanelView#default": default_8d1b6625c475f2ddf0d9a7d53c6c3776,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

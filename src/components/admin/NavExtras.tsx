@@ -4,6 +4,7 @@ type Item = { id: string; href: string; label: string }
 
 const items: Item[] = [
   { id: 'nav-prices', href: '/admin/prices', label: 'Preços' },
+  { id: 'nav-attributes', href: '/admin/attributes', label: 'Atributos' },
   { id: 'nav-usage', href: '/admin/usage', label: 'Uso de recursos' },
 ]
 

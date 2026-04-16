@@ -75,6 +75,10 @@ export default buildConfig({
           Component: './src/components/admin/PricesPanelView#default',
           path: '/prices',
         },
+        attributes: {
+          Component: './src/components/admin/AttributesPanelView#default',
+          path: '/attributes',
+        },
       },
     },
   },
