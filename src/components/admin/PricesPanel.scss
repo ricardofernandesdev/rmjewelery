@@ -96,6 +96,39 @@
         background: var(--theme-text);
       }
     }
+
+    &--icon {
+      padding: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--theme-elevation-700);
+
+      &:hover {
+        color: var(--theme-text);
+      }
+    }
+  }
+
+  &__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__thumb {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: var(--theme-elevation-50);
+    border: 1px solid var(--theme-elevation-100);
+
+    &--empty {
+      background: var(--theme-elevation-50);
+      border: 1px dashed var(--theme-elevation-150);
+    }
   }
 
   &__empty {

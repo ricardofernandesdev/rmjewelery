@@ -40,6 +40,14 @@ export async function GET(req: Request) {
       slug: string
       price?: number
       category?: { id: number | string; name: string } | number | string
+      images?: Array<
+        | {
+            url?: string
+            sizes?: { thumbnail?: { url?: string }; card?: { url?: string } }
+          }
+        | number
+        | string
+      >
       variants?: Array<{
         id?: string
         color?: string
@@ -50,6 +58,15 @@ export async function GET(req: Request) {
     const cat = product.category
     const categoryName =
       cat && typeof cat === 'object' && 'name' in cat ? cat.name : null
+
+    const firstImage = product.images?.[0]
+    const imageUrl =
+      firstImage && typeof firstImage === 'object'
+        ? firstImage.sizes?.thumbnail?.url ||
+          firstImage.sizes?.card?.url ||
+          firstImage.url ||
+          null
+        : null
 
     const variants = (product.variants ?? []).map((v) => ({
       id: v.id,
@@ -66,6 +83,7 @@ export async function GET(req: Request) {
       slug: product.slug,
       price: typeof product.price === 'number' ? product.price : 0,
       categoryName,
+      imageUrl,
       variants,
     }
   })

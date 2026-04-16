@@ -15,6 +15,7 @@ type ProductRow = {
   slug: string
   price: number
   categoryName: string | null
+  imageUrl: string | null
   variants: VariantRow[]
 }
 
@@ -315,6 +316,7 @@ export const PricesPanel: React.FC = () => {
           <thead>
             <tr>
               <th />
+              <th>Imagem</th>
               <th>Nome</th>
               <th>Categoria</th>
               <th>Preço base (€)</th>
@@ -346,6 +348,14 @@ export const PricesPanel: React.FC = () => {
                       )}
                     </td>
                     <td>
+                      {p.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.imageUrl} alt={p.name} className="prices-panel__thumb" />
+                      ) : (
+                        <div className="prices-panel__thumb prices-panel__thumb--empty" />
+                      )}
+                    </td>
+                    <td>
                       <a href={`/admin/collections/products/${p.id}`} className="prices-panel__name">
                         {p.name}
                       </a>
@@ -366,14 +376,30 @@ export const PricesPanel: React.FC = () => {
                       {hasVariants ? `${p.variants.length} variante${p.variants.length === 1 ? '' : 's'}` : '—'}
                     </td>
                     <td>
-                      <button
-                        type="button"
-                        className="prices-panel__btn"
-                        onClick={() => saveRow(p)}
-                        disabled={!state.dirty || state.saving}
-                      >
-                        {state.saving ? '...' : state.saved ? '✓' : 'Guardar'}
-                      </button>
+                      <div className="prices-panel__actions">
+                        <button
+                          type="button"
+                          className="prices-panel__btn"
+                          onClick={() => saveRow(p)}
+                          disabled={!state.dirty || state.saving}
+                        >
+                          {state.saving ? '...' : state.saved ? '✓' : 'Guardar'}
+                        </button>
+                        <a
+                          href={`/products/${p.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="prices-panel__btn prices-panel__btn--icon"
+                          title="Abrir produto numa nova tab"
+                          aria-label="Abrir produto numa nova tab"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                        </a>
+                      </div>
                       {state.error && <div className="prices-panel__error">{state.error}</div>}
                     </td>
                   </tr>
@@ -381,7 +407,7 @@ export const PricesPanel: React.FC = () => {
                     p.variants.map((v) => (
                       <tr key={`${p.id}-${v.id}`} className="prices-panel__variant-row">
                         <td />
-                        <td colSpan={2} className="prices-panel__variant-label">
+                        <td colSpan={3} className="prices-panel__variant-label">
                           ↳ {variantSummary(v)}
                         </td>
                         <td>
