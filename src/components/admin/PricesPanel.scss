@@ -1,0 +1,229 @@
+.prices-panel {
+  padding: 32px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  &__header {
+    margin-bottom: 24px;
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--theme-text);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--theme-elevation-500);
+    margin: 4px 0 0 0;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--theme-elevation-100);
+  }
+
+  &__search,
+  &__select {
+    padding: 8px 12px;
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 4px;
+    background: var(--theme-input-bg);
+    color: var(--theme-text);
+    font-size: 13px;
+  }
+
+  &__search {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  &__select {
+    min-width: 180px;
+  }
+
+  &__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--theme-elevation-700);
+    cursor: pointer;
+  }
+
+  &__count {
+    font-size: 12px;
+    color: var(--theme-elevation-500);
+    margin-left: auto;
+  }
+
+  &__btn {
+    padding: 8px 16px;
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 4px;
+    background: var(--theme-input-bg);
+    color: var(--theme-text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-100);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &--primary {
+      background: var(--theme-text);
+      color: var(--theme-bg);
+      border-color: var(--theme-text);
+
+      &:hover:not(:disabled) {
+        opacity: 0.85;
+        background: var(--theme-text);
+      }
+    }
+  }
+
+  &__empty {
+    text-align: center;
+    padding: 48px;
+    color: var(--theme-elevation-500);
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--theme-elevation-150);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--theme-elevation-600);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--theme-elevation-100);
+      vertical-align: middle;
+    }
+  }
+
+  &__row--dirty td {
+    background: rgba(255, 200, 0, 0.05);
+  }
+
+  &__variant-row td {
+    background: var(--theme-elevation-50);
+  }
+
+  &__variant-label {
+    color: var(--theme-elevation-600);
+    font-size: 12px;
+    padding-left: 32px !important;
+  }
+
+  &__name {
+    color: var(--theme-text);
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__slug {
+    font-size: 11px;
+    color: var(--theme-elevation-500);
+    margin-top: 2px;
+  }
+
+  &__input {
+    width: 100px;
+    padding: 6px 8px;
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 4px;
+    background: var(--theme-input-bg);
+    color: var(--theme-text);
+    font-size: 13px;
+    text-align: right;
+
+    &:focus {
+      outline: none;
+      border-color: var(--theme-text);
+    }
+  }
+
+  &__expand {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--theme-elevation-200);
+    background: var(--theme-input-bg);
+    color: var(--theme-text);
+    font-size: 14px;
+    line-height: 1;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background: var(--theme-elevation-100);
+    }
+
+    &--ghost {
+      border-color: transparent;
+      background: transparent;
+      cursor: default;
+      color: var(--theme-elevation-300);
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+
+  &__variants-cell {
+    color: var(--theme-elevation-600);
+    font-size: 12px;
+  }
+
+  &__error {
+    color: var(--theme-error-500, #c0392b);
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  &__page {
+    font-size: 12px;
+    color: var(--theme-elevation-600);
+  }
+}

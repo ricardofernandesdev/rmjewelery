@@ -55,6 +55,17 @@ const footerIcon = (
   </svg>
 )
 
+const sizesIcon = (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z" />
+  </svg>
+)
+const pricesIcon = (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z" />
+  </svg>
+)
+
 const collectionItems: CardItem[] = [
   {
     slug: 'media',
@@ -84,6 +95,15 @@ const collectionItems: CardItem[] = [
     icon: colorsIcon,
   },
   {
+    slug: 'sizes',
+    label: 'Tamanhos',
+    description: 'Biblioteca global de tamanhos partilhados entre produtos.',
+    action: 'GERIR TAMANHOS',
+    href: '/admin/collections/sizes',
+    createHref: '/admin/collections/sizes/create',
+    icon: sizesIcon,
+  },
+  {
     slug: 'products',
     label: 'Produtos',
     description: 'Catálogo completo da loja, com variantes, preços e imagens.',
@@ -100,6 +120,17 @@ const collectionItems: CardItem[] = [
     href: '/admin/collections/pages',
     createHref: '/admin/collections/pages/create',
     icon: pagesIcon,
+  },
+]
+
+const toolItems: CardItem[] = [
+  {
+    slug: 'prices',
+    label: 'Preços',
+    description: 'Edita o preço base e os preços por variante de todos os produtos numa só vista.',
+    action: 'GERIR PREÇOS',
+    href: '/admin/prices',
+    icon: pricesIcon,
   },
 ]
 
@@ -169,6 +200,16 @@ export const Dashboard: React.FC<AdminViewServerProps> = async () => {
       </div>
       <div className="custom-dashboard__grid">
         {collectionItems.map((item) => (
+          <Card key={item.slug} item={item} />
+        ))}
+      </div>
+
+      <div className="custom-dashboard__header" style={{ marginTop: 48 }}>
+        <h1 className="custom-dashboard__title">FERRAMENTAS</h1>
+        <p className="custom-dashboard__subtitle">EDIÇÃO EM MASSA</p>
+      </div>
+      <div className="custom-dashboard__grid">
+        {toolItems.map((item) => (
           <Card key={item.slug} item={item} />
         ))}
       </div>

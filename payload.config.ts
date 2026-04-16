@@ -55,6 +55,7 @@ export default buildConfig({
       },
       actions: ['./src/components/admin/HeaderActions#HeaderActions'],
       beforeNavLinks: ['./src/components/admin/NavHeader#NavHeader'],
+      afterNavLinks: ['./src/components/admin/NavExtras#NavExtras'],
       views: {
         dashboard: {
           Component: './src/components/admin/Dashboard#Dashboard',
@@ -69,6 +70,10 @@ export default buildConfig({
         usage: {
           Component: './src/components/admin/UsagePanel#UsagePanel',
           path: '/usage',
+        },
+        prices: {
+          Component: './src/components/admin/PricesPanel#PricesPanel',
+          path: '/prices',
         },
       },
     },

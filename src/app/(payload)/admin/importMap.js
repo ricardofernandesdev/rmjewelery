@@ -2,6 +2,7 @@ import { CategoryPreviewButton as CategoryPreviewButton_7ccf2e022b187f9c23be2b6e
 import { CategoriesList as CategoriesList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
 import { ColorPickerField as ColorPickerField_85d2ec7f8f1f8605bd8abc216b3dfa7e } from '../../../../src/components/admin/ColorPickerField'
 import { ColorsList as ColorsList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
+import { SizesList as SizesList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
 import { ShebijuImport as ShebijuImport_dc2b0886f194a1885ea868b98a922cef } from '../../../../src/components/admin/ShebijuImport'
 import { NameImproveButton as NameImproveButton_02141188eaa37ac062dcef9b0663449c } from '../../../../src/components/admin/NameImproveButton'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -29,8 +30,9 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { DescriptionGenerateButton as DescriptionGenerateButton_1592f54167070892d9943c0961591454 } from '../../../../src/components/admin/DescriptionGenerateButton'
 import { ProductColorsField as ProductColorsField_4f2e7b7b404e6b2a29673a255d7a4535 } from '../../../../src/components/admin/ProductColorsField'
+import { ProductSizesField as ProductSizesField_3192c35f0696ffe4a9a03c621d7c79cc } from '../../../../src/components/admin/ProductSizesField'
 import { VariantColorSelect as VariantColorSelect_7f99f7fe2eb6f4270e155a92c06c87d8 } from '../../../../src/components/admin/VariantColorSelect'
-import { VariantSizeSelect as VariantSizeSelect_2a218e1a6205846e93016d0a32ac526d } from '../../../../src/components/admin/VariantSizeSelect'
+import { VariantSizesSelect as VariantSizesSelect_35947783d575cc5f2990375b24810986 } from '../../../../src/components/admin/VariantSizesSelect'
 import { VariantImagesPicker as VariantImagesPicker_85424c0d83fac763f48c23d5aab3a11d } from '../../../../src/components/admin/VariantImagesPicker'
 import { ProductPreviewButton as ProductPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821 } from '../../../../src/components/admin/PreviewButton'
 import { ProductsList as ProductsList_d146a93ced1c7ad8e789610d5785ad89 } from '../../../../src/components/admin/CollectionList'
@@ -41,10 +43,14 @@ import { UserAvatar as UserAvatar_f1d4d8fb01db27654a2089c3e70fea12 } from '../..
 import { Icon as Icon_910fbd41db4599531c5dd733cbf6422a } from '../../../../src/components/admin/Icon'
 import { Logo as Logo_2162a1138ad740950650c8c1da77367e } from '../../../../src/components/admin/Logo'
 import { HeaderActions as HeaderActions_7fbd46595d525188777a10fb31d4ce93 } from '../../../../src/components/admin/HeaderActions'
+import { NavExtras as NavExtras_a52890d818d7c17d8fa1b9f221643c07 } from '../../../../src/components/admin/NavExtras'
 import { NavHeader as NavHeader_8ae8526325403a278fe580bbd03af552 } from '../../../../src/components/admin/NavHeader'
+import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { Dashboard as Dashboard_b8ff39906668321a4a9072c941825bd6 } from '../../../../src/components/admin/Dashboard'
 import { AccountView as AccountView_d3145cac2e80caae4707d3170b6d2017 } from '../../../../src/components/admin/AccountView'
 import { MediaBulkUpload as MediaBulkUpload_45bbb25cca5032fd0dfcc157cfb533d5 } from '../../../../src/components/admin/MediaBulkUpload'
+import { UsagePanel as UsagePanel_fc0e5200d50e16c99386c46ed889dea9 } from '../../../../src/components/admin/UsagePanel'
+import { PricesPanel as PricesPanel_a8d2102122fbc62b0a8da3d705da855c } from '../../../../src/components/admin/PricesPanel'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -52,6 +58,7 @@ export const importMap = {
   "./src/components/admin/CollectionList#CategoriesList": CategoriesList_d146a93ced1c7ad8e789610d5785ad89,
   "./src/components/admin/ColorPickerField#ColorPickerField": ColorPickerField_85d2ec7f8f1f8605bd8abc216b3dfa7e,
   "./src/components/admin/CollectionList#ColorsList": ColorsList_d146a93ced1c7ad8e789610d5785ad89,
+  "./src/components/admin/CollectionList#SizesList": SizesList_d146a93ced1c7ad8e789610d5785ad89,
   "./src/components/admin/ShebijuImport#ShebijuImport": ShebijuImport_dc2b0886f194a1885ea868b98a922cef,
   "./src/components/admin/NameImproveButton#NameImproveButton": NameImproveButton_02141188eaa37ac062dcef9b0663449c,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -79,8 +86,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "./src/components/admin/DescriptionGenerateButton#DescriptionGenerateButton": DescriptionGenerateButton_1592f54167070892d9943c0961591454,
   "./src/components/admin/ProductColorsField#ProductColorsField": ProductColorsField_4f2e7b7b404e6b2a29673a255d7a4535,
+  "./src/components/admin/ProductSizesField#ProductSizesField": ProductSizesField_3192c35f0696ffe4a9a03c621d7c79cc,
   "./src/components/admin/VariantColorSelect#VariantColorSelect": VariantColorSelect_7f99f7fe2eb6f4270e155a92c06c87d8,
-  "./src/components/admin/VariantSizeSelect#VariantSizeSelect": VariantSizeSelect_2a218e1a6205846e93016d0a32ac526d,
+  "./src/components/admin/VariantSizesSelect#VariantSizesSelect": VariantSizesSelect_35947783d575cc5f2990375b24810986,
   "./src/components/admin/VariantImagesPicker#VariantImagesPicker": VariantImagesPicker_85424c0d83fac763f48c23d5aab3a11d,
   "./src/components/admin/PreviewButton#ProductPreviewButton": ProductPreviewButton_7ccf2e022b187f9c23be2b6eeba0a821,
   "./src/components/admin/CollectionList#ProductsList": ProductsList_d146a93ced1c7ad8e789610d5785ad89,
@@ -91,9 +99,13 @@ export const importMap = {
   "./src/components/admin/Icon#Icon": Icon_910fbd41db4599531c5dd733cbf6422a,
   "./src/components/admin/Logo#Logo": Logo_2162a1138ad740950650c8c1da77367e,
   "./src/components/admin/HeaderActions#HeaderActions": HeaderActions_7fbd46595d525188777a10fb31d4ce93,
+  "./src/components/admin/NavExtras#NavExtras": NavExtras_a52890d818d7c17d8fa1b9f221643c07,
   "./src/components/admin/NavHeader#NavHeader": NavHeader_8ae8526325403a278fe580bbd03af552,
+  "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "./src/components/admin/Dashboard#Dashboard": Dashboard_b8ff39906668321a4a9072c941825bd6,
   "./src/components/admin/AccountView#AccountView": AccountView_d3145cac2e80caae4707d3170b6d2017,
   "./src/components/admin/MediaBulkUpload#MediaBulkUpload": MediaBulkUpload_45bbb25cca5032fd0dfcc157cfb533d5,
+  "./src/components/admin/UsagePanel#UsagePanel": UsagePanel_fc0e5200d50e16c99386c46ed889dea9,
+  "./src/components/admin/PricesPanel#PricesPanel": PricesPanel_a8d2102122fbc62b0a8da3d705da855c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
