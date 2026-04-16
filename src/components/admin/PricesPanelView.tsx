@@ -16,6 +16,7 @@ export default function PricesPanelView(props: AdminViewServerProps) {
       req={initPageResult.req}
       searchParams={searchParams}
       user={initPageResult.req.user || undefined}
+      viewActions={payload.config.admin?.components?.actions}
       visibleEntities={initPageResult.visibleEntities}
     >
       <PricesPanel />
