@@ -8,7 +8,7 @@ type Props = {
 export const SiteStatusGate: React.FC<Props> = ({ mode, message }) => {
   const isMaintenance = mode === 'maintenance'
   return (
-    <div className="font-body min-h-screen flex flex-col items-center justify-center bg-white px-6 text-center">
+    <main className="font-body min-h-screen flex flex-col items-center justify-center bg-white px-6 text-center">
       <div className="max-w-xl">
         <p className="text-xs font-semibold tracking-[0.3em] text-brand-gray uppercase mb-4">
           RM JEWELRY
@@ -23,6 +23,6 @@ export const SiteStatusGate: React.FC<Props> = ({ mode, message }) => {
           </p>
         )}
       </div>
-    </div>
+    </main>
   )
 }
