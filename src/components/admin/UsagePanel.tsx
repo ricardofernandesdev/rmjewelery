@@ -82,7 +82,7 @@ export const UsagePanel: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ maxWidth: 1400, padding: '32px 40px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600, letterSpacing: 0.5 }}>
           Uso de recursos
