@@ -9,10 +9,12 @@ import {
 } from '@/lib/queries'
 import { Container } from '@/components/ui/Container'
 import { CategoryPageClient } from '@/components/product/CategoryPageClient'
+import { JsonLd } from '@/components/seo/JsonLd'
 
 export const dynamic = 'force-dynamic'
 
 const PAGE_SIZE = 20
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://rmjewelrycollection.com').replace(/\/$/, '')
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -32,8 +34,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { slug } = await params
     const category = await getCategoryBySlug(slug)
     if (!category) return {}
+
+    const description =
+      category.description ||
+      `${category.name} — coleção de joalharia em aço inoxidável da R&M Jewelry.`
+    const url = `${SITE_URL}/categories/${slug}`
+    const img =
+      category.image && typeof category.image === 'object'
+        ? ((category.image as { url?: string }).url ?? null)
+        : null
+
     return {
-      title: `${category.name} | R&M Jewelry`,
+      title: category.name,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        type: 'website',
+        title: category.name,
+        description,
+        url,
+        ...(img ? { images: [{ url: img, alt: category.name }] } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: category.name,
+        description,
+        ...(img ? { images: [img] } : {}),
+      },
     }
   } catch {
     return {}
@@ -63,8 +90,23 @@ export default async function CategoryPage({ params }: PageProps) {
   const posX = (category as { bannerPositionX?: string }).bannerPositionX || 'center'
   const posY = (category as { bannerPositionY?: string }).bannerPositionY || 'center'
 
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: category.name,
+        item: `${SITE_URL}/categories/${slug}`,
+      },
+    ],
+  }
+
   return (
     <>
+      <JsonLd data={breadcrumbLd} />
       {/* ── Hero banner ── */}
       <section className="relative w-full h-[300px] md:h-[400px] bg-brand-dark overflow-hidden -mt-[140px] pt-[140px]">
         {catImageUrl && (

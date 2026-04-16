@@ -10,7 +10,26 @@ import { ShareWhatsApp } from '@/components/product/ShareWhatsApp'
 import { ProductDetailClient } from '@/components/product/ProductDetailClient'
 import { WishlistButton } from '@/components/product/WishlistButton'
 import { ProductPageExtras } from '@/components/product/ProductPageExtras'
+import { JsonLd } from '@/components/seo/JsonLd'
 import type { Media, Category } from '../../../../../payload-types'
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://rmjewelrycollection.com').replace(/\/$/, '')
+
+// Strip Lexical rich text into a plain string (first ~160 chars) for meta description.
+function lexicalToPlain(node: unknown, max = 160): string {
+  if (!node || typeof node !== 'object') return ''
+  const out: string[] = []
+  const walk = (n: unknown): void => {
+    if (!n || typeof n !== 'object') return
+    const obj = n as { text?: string; children?: unknown[] }
+    if (typeof obj.text === 'string') out.push(obj.text)
+    if (Array.isArray(obj.children)) for (const c of obj.children) walk(c)
+  }
+  walk((node as { root?: unknown }).root ?? node)
+  const text = out.join(' ').replace(/\s+/g, ' ').trim()
+  if (text.length <= max) return text
+  return text.slice(0, max - 1).trimEnd() + '…'
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -31,24 +50,43 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   try {
-  const { slug } = await params
-  const product = await getProductBySlug(slug)
-  if (!product) return {}
+    const { slug } = await params
+    const product = await getProductBySlug(slug)
+    if (!product) return {}
 
-  const firstImage =
-    Array.isArray(product.images) && product.images.length > 0
-      ? product.images[0]
-      : null
-  const ogImage =
-    firstImage && typeof firstImage === 'object'
-      ? (firstImage as Media).sizes?.detail?.url || (firstImage as Media).url
-      : undefined
+    const firstImage =
+      Array.isArray(product.images) && product.images.length > 0
+        ? product.images[0]
+        : null
+    const ogImage =
+      firstImage && typeof firstImage === 'object'
+        ? (firstImage as Media).sizes?.detail?.url || (firstImage as Media).url
+        : undefined
 
-  return {
-    title: `${product.name} | R&M Jewelry`,
-    description: `${product.name} - R&M Jewelry`,
-    openGraph: ogImage ? { images: [{ url: ogImage }] } : undefined,
-  }
+    const description =
+      lexicalToPlain(product.description) ||
+      `${product.name} — peça de joalharia em aço inoxidável da R&M Jewelry.`
+
+    const url = `${SITE_URL}/products/${product.slug}`
+
+    return {
+      title: product.name,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        type: 'website',
+        title: product.name,
+        description,
+        url,
+        ...(ogImage ? { images: [{ url: ogImage, alt: product.name }] } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: product.name,
+        description,
+        ...(ogImage ? { images: [ogImage] } : {}),
+      },
+    }
   } catch {
     return {}
   }
@@ -180,8 +218,61 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const availabilityLabel =
     (product as any).availability === 'out_of_stock' ? 'Esgotado' : 'Em stock'
 
+  // ── JSON-LD: Product + BreadcrumbList ──
+  const productUrl = `${SITE_URL}/products/${product.slug}`
+  const productImageUrls = images
+    .map((img) => img.sizes?.detail?.url || img.url)
+    .filter(Boolean) as string[]
+
+  const productLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    sku: product.slug || String(product.id),
+    url: productUrl,
+    brand: { '@type': 'Brand', name: 'R&M Jewelry' },
+  }
+  if (productImageUrls.length) productLd.image = productImageUrls
+  const plainDesc = lexicalToPlain(product.description, 5000)
+  if (plainDesc) productLd.description = plainDesc
+  if (category?.name) productLd.category = category.name
+  if (price > 0) {
+    productLd.offers = {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'EUR',
+      price: price.toFixed(2),
+      availability:
+        (product as any).availability === 'out_of_stock'
+          ? 'https://schema.org/OutOfStock'
+          : 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    }
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Início', item: SITE_URL },
+      ...(category
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: category.name,
+              item: `${SITE_URL}/categories/${category.slug}`,
+            },
+            { '@type': 'ListItem', position: 3, name: product.name, item: productUrl },
+          ]
+        : [{ '@type': 'ListItem', position: 2, name: product.name, item: productUrl }]),
+    ],
+  }
+
   return (
     <>
+      <JsonLd data={productLd} />
+      <JsonLd data={breadcrumbLd} />
       <Container className="py-8">
         <ProductDetailClient
           mainImages={images}
