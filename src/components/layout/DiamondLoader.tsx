@@ -39,7 +39,6 @@ const DiamondLoaderInner: React.FC = () => {
       setVisible(true)
     }
 
-    // Capture phase fires before <Link>'s own handler calls preventDefault()
     document.addEventListener('click', handleClick, true)
     return () => document.removeEventListener('click', handleClick, true)
   }, [])
@@ -63,66 +62,73 @@ const DiamondLoaderInner: React.FC = () => {
       onClick={(e) => e.preventDefault()}
       onMouseDown={(e) => e.preventDefault()}
     >
-      <div className="diamond-wrap">
-        <svg width="120" height="120" viewBox="0 0 100 100" className="diamond-svg">
+      <div className="diamond-stage">
+        <svg width="140" height="140" viewBox="0 0 100 110" className="diamond-svg">
           <defs>
-            <linearGradient id="dl-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0a0a0a" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#0a0a0a" stopOpacity="1" />
-              <stop offset="100%" stopColor="#0a0a0a" stopOpacity="0.15" />
+            {/* Crown — upper facets, lit from upper-left */}
+            <linearGradient id="dl-crown-l" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f5f5f5" />
+              <stop offset="100%" stopColor="#9a9a9a" />
+            </linearGradient>
+            <linearGradient id="dl-crown-r" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#9a9a9a" />
+              <stop offset="100%" stopColor="#4d4d4d" />
+            </linearGradient>
+
+            {/* Pavilion — lower facets, deeper shadows */}
+            <linearGradient id="dl-pav-l" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#7a7a7a" />
+              <stop offset="100%" stopColor="#2a2a2a" />
+            </linearGradient>
+            <linearGradient id="dl-pav-r" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#5a5a5a" />
+              <stop offset="100%" stopColor="#0f0f0f" />
+            </linearGradient>
+
+            {/* Table — top flat */}
+            <linearGradient id="dl-table" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#cfcfcf" />
             </linearGradient>
           </defs>
 
-          {/* Faint static facets — give the diamond depth while the outline spins */}
-          <g
-            fill="none"
-            stroke="#0a0a0a"
-            strokeOpacity="0.18"
-            strokeWidth="1.4"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          >
-            <line x1="20" y1="40" x2="80" y2="40" />
-            <line x1="35" y1="25" x2="50" y2="40" />
-            <line x1="65" y1="25" x2="50" y2="40" />
-            <line x1="35" y1="40" x2="50" y2="90" />
-            <line x1="65" y1="40" x2="50" y2="90" />
-          </g>
+          {/* Pavilion (bottom triangles, drawn first so crown sits on top) */}
+          <polygon points="3,45 50,45 50,105" fill="url(#dl-pav-l)" />
+          <polygon points="50,45 97,45 50,105" fill="url(#dl-pav-r)" />
 
-          {/* Spinning outline — strokeDasharray creates the chasing arc */}
-          <polygon
-            className="diamond-outline"
-            points="50,10 20,40 50,90 80,40"
-            fill="none"
-            stroke="url(#dl-stroke)"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
+          {/* Crown (top trapezoidal halves) */}
+          <polygon points="10,18 50,18 50,45 3,45" fill="url(#dl-crown-l)" />
+          <polygon points="50,18 90,18 97,45 50,45" fill="url(#dl-crown-r)" />
+
+          {/* Table highlight (top flat) */}
+          <polygon points="10,18 90,18 50,18" fill="url(#dl-table)" opacity="0.9" />
+
+          {/* Facet outlines for crispness */}
+          <g fill="none" stroke="#0a0a0a" strokeWidth="1.2" strokeLinejoin="round">
+            <polygon points="10,18 90,18 97,45 50,105 3,45" />
+            <line x1="50" y1="18" x2="50" y2="105" />
+            <line x1="3" y1="45" x2="97" y2="45" />
+          </g>
         </svg>
       </div>
 
       <style jsx>{`
-        .diamond-wrap {
-          filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.18));
+        .diamond-stage {
+          perspective: 900px;
+          perspective-origin: 50% 50%;
         }
         .diamond-svg {
-          animation: dl-spin 1.6s linear infinite;
-          transform-origin: center;
+          transform-style: preserve-3d;
+          transform-origin: 50% 50%;
+          animation: dl-spin-y 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
         }
-        .diamond-outline {
-          stroke-dasharray: 60 220;
-          stroke-dashoffset: 0;
-          animation: dl-trace 1.6s linear infinite;
-        }
-        @keyframes dl-spin {
-          to {
-            transform: rotate(360deg);
+        @keyframes dl-spin-y {
+          0% {
+            transform: rotateY(0deg);
           }
-        }
-        @keyframes dl-trace {
-          to {
-            stroke-dashoffset: -280;
+          100% {
+            transform: rotateY(360deg);
           }
         }
       `}</style>
