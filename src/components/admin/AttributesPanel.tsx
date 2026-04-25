@@ -375,7 +375,7 @@ export const AttributesPanel: React.FC = () => {
       <div className="attr-panel__toolbar">
         <input
           type="text"
-          placeholder="Pesquisar por nome..."
+          placeholder="Pesquisar por nome ou slug..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="attr-panel__search"

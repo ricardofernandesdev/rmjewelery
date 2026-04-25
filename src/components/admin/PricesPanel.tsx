@@ -273,7 +273,7 @@ export const PricesPanel: React.FC = () => {
       <div className="prices-panel__toolbar">
         <input
           type="text"
-          placeholder="Pesquisar por nome..."
+          placeholder="Pesquisar por nome ou slug..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="prices-panel__search"

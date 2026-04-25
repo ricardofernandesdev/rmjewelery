@@ -25,7 +25,9 @@ export async function GET(req: Request) {
 
   const where: Record<string, unknown> = {}
   if (categoryId) where.category = { equals: Number(categoryId) || categoryId }
-  if (search) where.name = { like: search }
+  if (search) {
+    where.or = [{ name: { like: search } }, { slug: { like: search } }]
+  }
 
   const [products, allColorsRes, allSizesRes] = await Promise.all([
     payload.find({

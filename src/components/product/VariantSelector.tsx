@@ -64,10 +64,15 @@ export const VariantSelector: React.FC<Props> = ({
   const currentPrice = currentVariant?.price ?? basePrice
   const isOutOfStock = currentVariant?.availability === 'out_of_stock'
 
-  // Check if a size is available for current color
+  // Check if a size is available for current color.
+  // When there are variants AND colors, the size only exists if a variant
+  // covers the (color, size) pair. When there are no variants, the
+  // top-level sizes are all considered available.
   const isSizeAvailable = (size: string) => {
+    if (variants.length === 0 || !hasColors) return true
     const v = findVariant(selectedColor, size)
-    return !v || v.availability !== 'out_of_stock'
+    if (!v) return false
+    return v.availability !== 'out_of_stock'
   }
 
   // Get images from variant
@@ -89,13 +94,17 @@ export const VariantSelector: React.FC<Props> = ({
 
   const handleColorChange = (colorName: string) => {
     setSelectedColor(colorName)
-    // Auto-select first available size for this color
+    // Auto-select first available size for this color. When there are
+    // variants, the size must be covered by a matching (color, size)
+    // variant. When there are no variants, fall back to the first size.
     if (hasSizes) {
       const firstAvail = sizeTerms.find((s) => {
+        if (variants.length === 0) return true
         const v = findVariant(colorName, s.value)
-        return !v || v.availability !== 'out_of_stock'
+        if (!v) return false
+        return v.availability !== 'out_of_stock'
       })
-      const sz = firstAvail?.value || selectedSize
+      const sz = firstAvail?.value || ''
       setSelectedSize(sz)
       notify(colorName, sz)
     } else {
