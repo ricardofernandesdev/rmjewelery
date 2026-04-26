@@ -3,6 +3,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Container } from '@/components/ui/Container'
+import { formatPrice } from '@/lib/formatPrice'
 
 type Product = {
   id: string | number
@@ -117,11 +118,9 @@ export const FeaturedProductsGallery: React.FC<Props> = ({ eyebrow, title, count
                   )}
                 </div>
                 <h3 className="font-heading text-lg text-brand-dark">{product.name}</h3>
-                {typeof product.price === 'number' && product.price > 0 && (
-                  <p className="text-sm font-medium text-brand-dark mt-1">
-                    {product.price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
-                  </p>
-                )}
+                <p className="text-sm font-medium text-brand-dark mt-1">
+                  {formatPrice(product.price)}
+                </p>
               </Link>
             )
           })}

@@ -11,6 +11,7 @@ import { ProductDetailClient } from '@/components/product/ProductDetailClient'
 import { WishlistButton } from '@/components/product/WishlistButton'
 import { ProductPageExtras } from '@/components/product/ProductPageExtras'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { formatPrice } from '@/lib/formatPrice'
 import type { Media, Category } from '../../../../../payload-types'
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://rmjewelrycollection.com').replace(/\/$/, '')
@@ -305,10 +306,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="font-heading text-2xl md:text-3xl font-semibold text-brand-dark">
               {product.name}
             </h1>
-            {price > 0 && colorTerms.length === 0 && sizeTerms.length === 0 && variants.length === 0 && (
-              <p className="text-lg text-brand-gray mt-1">
-                {price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
-              </p>
+            {colorTerms.length === 0 && sizeTerms.length === 0 && variants.length === 0 && (
+              <p className="text-lg text-brand-gray mt-1">{formatPrice(price)}</p>
             )}
           </div>
 

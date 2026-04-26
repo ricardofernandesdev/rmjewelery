@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useMemo } from 'react'
+import { formatPrice } from '@/lib/formatPrice'
 
 type ColorTerm = {
   name: string
@@ -175,7 +176,7 @@ export const VariantSelector: React.FC<Props> = ({
 
       {/* Price */}
       <p className="text-xl font-semibold text-brand-dark">
-        {currentPrice.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
+        {formatPrice(currentPrice)}
       </p>
 
       {isOutOfStock && (

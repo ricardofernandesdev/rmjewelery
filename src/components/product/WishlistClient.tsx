@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { removeFromWishlist } from './WishlistButton'
+import { formatPrice } from '@/lib/formatPrice'
 
 type WishlistItem = {
   id: string | number
@@ -98,11 +99,9 @@ export const WishlistClient: React.FC = () => {
                 <span className="text-[10px] font-bold tracking-wider text-brand-dark">RM</span>
               </div>
               <h3 className="text-sm text-brand-dark leading-snug mb-1">{item.name}</h3>
-              {typeof item.price === 'number' && (
-                <p className="text-sm font-medium text-brand-dark">
-                  {item.price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
-                </p>
-              )}
+              <p className="text-sm font-medium text-brand-dark">
+                {formatPrice(item.price)}
+              </p>
             </Link>
           </div>
         ))}

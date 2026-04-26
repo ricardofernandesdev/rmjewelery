@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatPrice } from '@/lib/formatPrice'
 
 type ViewedProduct = {
   id: string | number
@@ -105,11 +106,9 @@ export const RecentlyViewed: React.FC<Props> = ({ currentProduct }) => {
               <span className="text-[10px] font-bold tracking-wider text-brand-dark">RM</span>
             </div>
             <h3 className="text-sm text-brand-dark leading-snug mb-1">{product.name}</h3>
-            {typeof product.price === 'number' && (
-              <p className="text-sm font-medium text-brand-dark">
-                {product.price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
-              </p>
-            )}
+            <p className="text-sm font-medium text-brand-dark">
+              {formatPrice(product.price)}
+            </p>
           </Link>
         ))}
       </div>

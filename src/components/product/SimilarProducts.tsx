@@ -2,6 +2,7 @@
 import React, { useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatPrice } from '@/lib/formatPrice'
 
 type SimpleProduct = {
   id: string | number
@@ -82,11 +83,9 @@ export const SimilarProducts: React.FC<Props> = ({ products }) => {
               <span className="text-[10px] font-bold tracking-wider text-brand-dark">RM</span>
             </div>
             <h3 className="text-sm text-brand-dark leading-snug mb-1">{product.name}</h3>
-            {typeof product.price === 'number' && (
-              <p className="text-sm font-medium text-brand-dark">
-                {product.price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}
-              </p>
-            )}
+            <p className="text-sm font-medium text-brand-dark">
+              {formatPrice(product.price)}
+            </p>
           </Link>
         ))}
       </div>

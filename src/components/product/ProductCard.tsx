@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Product, Media } from '../../../payload-types'
 import { WishlistButton } from './WishlistButton'
+import { formatPrice } from '@/lib/formatPrice'
 
 type ProductCardProps = {
   product: Product
@@ -16,10 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
     coverImage && typeof coverImage === 'object' ? (coverImage as Media) : null
 
   const price = (product as any).price
-  const formattedPrice =
-    typeof price === 'number'
-      ? price.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })
-      : null
+  const formattedPrice = formatPrice(price)
 
   const wishlistItem = {
     id: product.id,
@@ -66,9 +64,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <h3 className="text-sm text-brand-dark leading-snug mb-1">
         {product.name}
       </h3>
-      {formattedPrice && (
-        <p className="text-sm font-medium text-brand-dark">{formattedPrice}</p>
-      )}
+      <p className="text-sm font-medium text-brand-dark">{formattedPrice}</p>
     </Link>
   )
 }
