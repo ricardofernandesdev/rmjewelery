@@ -52,7 +52,7 @@ export const PricesPanel: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [expanded, setExpanded] = useState<Set<string | number>>(new Set())
   const [rowState, setRowState] = useState<Record<string | number, RowState>>({})
-  const [hideZero, setHideZero] = useState(false)
+  const [priceFilter, setPriceFilter] = useState<'all' | 'nonzero' | 'zero'>('all')
 
   const requestIdRef = useRef(0)
 
@@ -80,25 +80,20 @@ export const PricesPanel: React.FC = () => {
       })
       if (categoryId) qs.set('category', categoryId)
       if (search) qs.set('search', search)
+      if (priceFilter !== 'all') qs.set('priceFilter', priceFilter)
 
       fetch(`/api/admin/prices?${qs.toString()}`, { credentials: 'include' })
         .then((r) => r.json() as Promise<FetchResult>)
         .then((data) => {
           if (requestIdRef.current !== reqId) return
-          let docs = data.docs
-          if (hideZero) {
-            docs = docs.filter(
-              (p) => p.price > 0 || p.variants.some((v) => typeof v.price === 'number' && v.price > 0),
-            )
-          }
-          setProducts(docs)
+          setProducts(data.docs)
           setPage(data.page)
           setTotalPages(data.totalPages)
           setTotalDocs(data.totalDocs)
 
           // seed rowState with current values
           const next: Record<string | number, RowState> = {}
-          for (const p of docs) {
+          for (const p of data.docs) {
             next[p.id] = {
               basePrice: String(p.price ?? 0),
               variantPrices: Object.fromEntries(
@@ -121,7 +116,7 @@ export const PricesPanel: React.FC = () => {
           if (requestIdRef.current === reqId) setLoading(false)
         })
     },
-    [categoryId, search, hideZero],
+    [categoryId, search, priceFilter],
   )
 
   useEffect(() => {
@@ -290,10 +285,15 @@ export const PricesPanel: React.FC = () => {
             </option>
           ))}
         </select>
-        <label className="prices-panel__checkbox">
-          <input type="checkbox" checked={hideZero} onChange={(e) => setHideZero(e.target.checked)} />
-          Esconder produtos com preço 0
-        </label>
+        <select
+          value={priceFilter}
+          onChange={(e) => setPriceFilter(e.target.value as 'all' | 'nonzero' | 'zero')}
+          className="prices-panel__select"
+        >
+          <option value="all">Todos os preços</option>
+          <option value="nonzero">Apenas com preço definido</option>
+          <option value="zero">Apenas sem preço (=0)</option>
+        </select>
         <span className="prices-panel__count">
           {totalDocs} produto{totalDocs === 1 ? '' : 's'}
         </span>

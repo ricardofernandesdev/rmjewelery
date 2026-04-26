@@ -20,11 +20,15 @@ export async function GET(req: Request) {
   const categoryId = url.searchParams.get('category') || ''
   const search = (url.searchParams.get('search') || '').trim()
 
+  const priceFilter = url.searchParams.get('priceFilter') || 'all'
+
   const where: Record<string, unknown> = {}
   if (categoryId) where.category = { equals: Number(categoryId) || categoryId }
   if (search) {
     where.or = [{ name: { like: search } }, { slug: { like: search } }]
   }
+  if (priceFilter === 'zero') where.price = { equals: 0 }
+  else if (priceFilter === 'nonzero') where.price = { greater_than: 0 }
 
   const result = await payload.find({
     collection: 'products',
